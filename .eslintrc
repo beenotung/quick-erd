@@ -1,0 +1,43 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "spaced-comment": ["error", "always", { "markers": ["/"] }],
+    "curly": ["error", "multi-line"],
+    "guard-for-in": "error",
+    "no-console": [
+      "error",
+      {
+        "allow": ["warn", "debug", "error"]
+      }
+    ],
+    "no-var": "error",
+    "prefer-const": "error",
+    "no-duplicate-imports": "off",
+    "@typescript-eslint/no-duplicate-imports": ["error"],
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-namespace": "off",
+    "no-useless-escape": "off",
+    "no-invalid-this": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_" }
+    ],
+    "prefer-spread": "off",
+    "prefer-rest-params": "off",
+    "@typescript-eslint/no-this-alias": "off",
+    "@typescript-eslint/ban-types": "off",
+    "space-before-function-paren": [
+      "error",
+      { "anonymous": "never", "named": "never" }
+    ],
+    "newline-per-chained-call": ["error", { "ignoreChainWithDepth": 2 }]
+  }
+}
