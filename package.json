@@ -13,7 +13,9 @@
   "types": "dist/cjs/index.d.ts",
   "module": "dist/esm/index.js",
   "sideEffects": false,
+  "type": "module",
   "scripts": {
+    "dev": "snowpack dev",
     "prepare": "run-p prepare:*",
     "prepare:husky": "husky install",
     "prepare:tslib": "rimraf node_modules/@beenotung/tslib/index.*",
@@ -46,6 +48,7 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@snowpack/plugin-sass": "^1.4.0",
     "@types/chai": "^4.2.21",
     "@types/mocha": "^9.0.0",
     "@types/node": "*",
@@ -62,7 +65,9 @@
     "open-cli": "^7.0.0",
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
+    "sass": "^1.37.0",
     "sinon": "^11.1.2",
+    "snowpack": "^3.8.2",
     "ts-mocha": "^8.0.0",
     "ts-node": "^10.1.0",
     "ts-node-dev": "^1.1.8",
