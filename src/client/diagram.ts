@@ -196,6 +196,8 @@ class TableController {
   tbody: HTMLTableSectionElement
   fieldMap = new Map<string, HTMLTableRowElement>()
 
+  titleHeight: number
+
   constructor(
     public diagram: DiagramController,
     public div: HTMLDivElement,
@@ -209,6 +211,8 @@ class TableController {
 </div>
 `
     this.tbody = this.div.querySelector('tbody') as HTMLTableSectionElement
+    const title = this.div.querySelector('.table-title') as HTMLDivElement
+    this.titleHeight = title.getBoundingClientRect().height
   }
 
   getFieldElement(field: string) {
@@ -319,7 +323,7 @@ class TableController {
     const from: LineReference = { field, table: this }
     const to: LineReference = { field: reference.field, table: toTable }
 
-    const controller = new LineController(svg, from, to)
+    const controller = new LineController(svg, from, to, this.titleHeight)
     this.lineMap.set(field, controller)
     controller.render(diagramRect)
   }
@@ -331,6 +335,9 @@ class TableController {
 
   remove() {
     this.div.remove()
+    this.lineMap.forEach(line => line.remove())
+    this.lineMap.clear()
+    this.fieldMap.clear()
     localStorage.removeItem(`${this.data.name}-x`)
     localStorage.removeItem(`${this.data.name}-y`)
   }
@@ -347,15 +354,22 @@ class LineController {
     public svg: SVGElement,
     public from: LineReference,
     public to: LineReference,
+    public barRadius: number,
   ) {
     svg.appendChild(this.path)
     this.path.setAttributeNS(null, 'stroke', 'black')
     this.path.setAttributeNS(null, 'stroke-width', '1.5')
     this.path.setAttributeNS(null, 'fill', 'none')
 
-    const render = this.render.bind(this)
-    from.table.onMoveListenerSet.add(render)
-    to.table.onMoveListenerSet.add(render)
+    this.render = this.render.bind(this)
+    from.table.onMoveListenerSet.add(this.render)
+    to.table.onMoveListenerSet.add(this.render)
+  }
+
+  remove() {
+    this.svg.remove()
+    this.from.table.onMoveListenerSet.delete(this.remove)
+    this.to.table.onMoveListenerSet.delete(this.remove)
   }
 
   render(diagramRect: ClientRect) {
@@ -391,10 +405,36 @@ class LineController {
     const { from, to } = config_list.sort((a, b) => a.distance - b.distance)[0]
 
     const f_x = from - diagramRect.left
-    const t_x = to - diagramRect.left
     const f_y = fromRect.top + fromRect.height / 2 - diagramRect.top
+
+    const t_x = to - diagramRect.left
     const t_y = toRect.top + toRect.height / 2 - diagramRect.top
 
-    this.path.setAttributeNS(null, 'd', `M${f_x} ${f_y} L ${t_x} ${t_y}`)
+    const f_m_y = f_y
+    let f_m_x: number
+
+    if (from === fromRect.left) {
+      // start from left
+      f_m_x = f_x - this.barRadius
+    } else {
+      // start from right
+      f_m_x = f_x + this.barRadius
+    }
+
+    const t_m_y = t_y
+    let t_m_x: number
+    if (to === toRect.left) {
+      // end from left
+      t_m_x = t_x - this.barRadius
+    } else {
+      // end from right
+      t_m_x = t_x + this.barRadius
+    }
+
+    this.path.setAttributeNS(
+      null,
+      'd',
+      `M${f_x} ${f_y} C ${f_m_x} ${f_m_y} ${t_m_x} ${t_m_y} ${t_x} ${t_y}`,
+    )
   }
 }
