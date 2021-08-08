@@ -429,6 +429,7 @@ class LineController {
     const t_y = toRect.top + toRect.height / 2 - diagramRect.top
 
     let f_b_x: number // from bar
+    let f_b2_x: number // from bar
     let f_m_x: number // from margin
 
     const barRatio = 1 / 2
@@ -437,67 +438,82 @@ class LineController {
     if (from === fromRect.left) {
       // start from left
       f_b_x = f_x - this.barRadius * barRatio
+      f_b2_x = f_x - (this.barRadius * barRatio) / 3
       f_m_x = f_x - this.barRadius * marginRatio
     } else {
       // start from right
       f_b_x = f_x + this.barRadius * barRatio
+      f_b2_x = f_x + (this.barRadius * barRatio) / 3
       f_m_x = f_x + this.barRadius * marginRatio
     }
 
     let t_b_x: number // to bar
+    let t_b2_x: number // to bar
     let t_m_x: number // to margin
     if (to === toRect.left) {
       // end from left
       t_b_x = t_x - this.barRadius * barRatio
+      t_b2_x = t_x - (this.barRadius * barRatio) / 3
       t_m_x = t_x - this.barRadius * marginRatio
     } else {
       // end from right
       t_b_x = t_x + this.barRadius * barRatio
+      t_b2_x = t_x + (this.barRadius * barRatio) / 3
       t_m_x = t_x + this.barRadius * marginRatio
     }
 
-    this.line.setAttributeNS(
-      null,
-      'd',
-      `M ${f_x} ${f_y} L ${f_b_x} ${f_y} C ${f_m_x} ${f_y} ${t_m_x} ${t_y} ${t_b_x} ${t_y} L ${t_x} ${t_y}`,
-    )
-
     const first = this.relation[0]
+    const last = this.relation[this.relation.length - 1]
+    const skipHead = this.relation.startsWith('>0') || first === '0'
+    const skipTail = this.relation.endsWith('0<') || last === '0'
+    {
+      const headPath = skipHead
+        ? `M ${f_x} ${f_y} L ${f_b2_x} ${f_y} M ${f_b_x} ${f_y}`
+        : `M ${f_x} ${f_y} L ${f_b_x} ${f_y}`
+      const linePath = `C ${f_m_x} ${f_y} ${t_m_x} ${t_y} ${t_b_x} ${t_y}`
+      const tailPath = skipTail
+        ? `M ${t_b2_x} ${t_y} L ${t_x} ${t_y}`
+        : `L ${t_x} ${t_y}`
+      this.line.setAttributeNS(null, 'd', `${headPath} ${linePath} ${tailPath}`)
+    }
+
     renderRelationBar({
       path: this.head,
       from_x: f_x,
       from_y: f_y,
       border_x: f_b_x,
       barRadius: this.barRadius,
-      type:
-        first === '>'
-          ? 'many'
-          : first === '0'
-          ? 'zero'
-          : first === '-'
-          ? 'one'
-          : 'default',
+      type: this.relation.startsWith('>0')
+        ? 'zero-or-many'
+        : first === '>'
+        ? 'many'
+        : first === '0'
+        ? 'zero'
+        : first === '-'
+        ? 'one'
+        : 'default',
     })
 
-    const last = this.relation[this.relation.length - 1]
     renderRelationBar({
       path: this.tail,
       from_x: t_x,
       from_y: t_y,
       border_x: t_b_x,
       barRadius: this.barRadius,
-      type:
-        last === '<'
-          ? 'many'
-          : last === '0'
-          ? 'zero'
-          : last === '-'
-          ? 'one'
-          : 'default',
+      type: this.relation.endsWith('0<')
+        ? 'zero-or-many'
+        : last === '<'
+        ? 'many'
+        : last === '0'
+        ? 'zero'
+        : last === '-'
+        ? 'one'
+        : 'default',
     })
   }
 }
 
+type RelationBarType = 'many' | 'one' | 'zero' | 'zero-or-many' | 'default'
 function renderRelationBar({
   path,
   from_x: f_x,
@@ -511,7 +527,7 @@ function renderRelationBar({
   from_y: number
   border_x: number
   barRadius: number
-  type: 'many' | 'one' | 'zero' | 'default'
+  type: RelationBarType
 }) {
   // arrow
   const a_x = b_x - (b_x - f_x) / 3
@@ -529,19 +545,30 @@ function renderRelationBar({
     case 'one':
       path.setAttributeNS(null, 'd', `M ${a_x} ${a_t} V ${a_b}`)
       break
-    case 'zero':
-      {
-        const r = (a_t - a_b) / 3
-        const x = b_x
-        path.setAttributeNS(
-          null,
-          'd',
-          `M ${x} ${f_y} A ${r} ${r} 0 1 0 ${x} ${
-            f_y - 0.001 * sign(f_x - a_x)
-          }`,
-        )
-      }
+    case 'zero': {
+      const r = (a_t - a_b) / 3
+      const x = b_x
+      path.setAttributeNS(
+        null,
+        'd',
+        `M ${x} ${f_y} A ${r} ${r} 0 1 0 ${x} ${f_y - 0.001 * sign(f_x - a_x)}`,
+      )
       break
+    }
+    case 'zero-or-many': {
+      const r = (a_t - a_b) / 5
+      const x = b_x
+      path.setAttributeNS(
+        null,
+        'd',
+        `M ${x} ${f_y} A ${r} ${r} 0 1 0 ${x} ${f_y - 0.001 * sign(f_x - a_x)}
+         M ${a_x} ${f_y} L ${f_x} ${a_t}
+         M ${a_x} ${f_y} L ${f_x} ${a_b}
+         M ${a_x} ${f_y} L ${f_x} ${f_y}
+        `,
+      )
+      break
+    }
     default:
       path.setAttributeNS(null, 'd', ``)
   }
