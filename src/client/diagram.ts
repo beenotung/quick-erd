@@ -1,4 +1,5 @@
 import { ParseResult, Table } from './ast'
+const { random, floor } = Math
 
 export class DiagramController {
   message = this.div.querySelector('.message') as HTMLDivElement
@@ -27,8 +28,6 @@ export class DiagramController {
     let isMouseDown = false
     let startX = 0
     let startY = 0
-    let translateX = 0
-    let translateY = 0
     tableDiv.addEventListener('mousedown', ev => {
       console.debug('mousedown', ev)
       this.maxZIndex++
@@ -38,11 +37,11 @@ export class DiagramController {
       startY = ev.clientY
       this.onMouseMove = ev => {
         if (!isMouseDown) return
-        translateX += ev.clientX - startX
-        translateY += ev.clientY - startY
+        controller.translateX += ev.clientX - startX
+        controller.translateY += ev.clientY - startY
         startX = ev.clientX
         startY = ev.clientY
-        tableDiv.style.transform = `translate(${translateX}px,${translateY}px)`
+        controller.renderTransform()
         console.debug('mousemove', ev)
       }
     })
@@ -83,9 +82,100 @@ export class DiagramController {
       }
     })
   }
+
+  autoPlace() {
+    console.debug('auto place begin')
+    const tableRectMap = new Map<TableController, ClientRect>()
+    this.tableMap.forEach(table => {
+      const rect = table.div.getBoundingClientRect()
+      tableRectMap.set(table, rect)
+    })
+    const diagramRect = this.div.getBoundingClientRect()
+
+    for (let isMoved = true; isMoved; ) {
+      isMoved = false
+
+      tableRectMap.forEach((rect, table) => {
+        tableRectMap.forEach((otherRect, otherTable) => {
+          if (table === otherTable) return
+          if (!isRectCollide(rect, otherRect)) return
+          const exploreRect = { ...rect }
+          let offsetX = 0
+          let offsetY = 0
+          for (;;) {
+            offsetX += floor(random() * 3) - 1
+            offsetY += floor(random() * 3) - 1
+
+            exploreRect.left = rect.left + offsetX
+            exploreRect.right = rect.right + offsetX
+            exploreRect.top = rect.top + offsetY
+            exploreRect.bottom = rect.bottom + offsetY
+
+            if (exploreRect.left < diagramRect.left) {
+              offsetX = 0
+              continue
+            }
+            if (exploreRect.right > diagramRect.right) {
+              offsetX = diagramRect.width - rect.width
+              continue
+            }
+            if (exploreRect.top < diagramRect.top) {
+              offsetY = 0
+              continue
+            }
+            if (exploreRect.bottom > diagramRect.bottom) {
+              offsetY = diagramRect.height - rect.height
+              continue
+            }
+
+            if (!isRectCollide(exploreRect, otherRect)) {
+              table.translateX += offsetX
+              table.translateY += offsetY
+              table.renderTransform()
+              tableRectMap.set(table, table.div.getBoundingClientRect())
+              isMoved = true
+              return
+            }
+          }
+        })
+      })
+    }
+    console.debug('auto place end')
+  }
+}
+
+function isRectCollide(self: ClientRect, other: ClientRect): boolean {
+  const list = [
+    [self, other],
+    [other, self],
+  ]
+  for (const [self, other] of list) {
+    if (
+      isPointInside(self, other.left, other.top) ||
+      isPointInside(self, other.right, other.top) ||
+      isPointInside(self, other.right, other.bottom) ||
+      isPointInside(self, other.left, other.bottom) ||
+      isRectInside(self, other)
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
+function isPointInside(rect: ClientRect, x: number, y: number): boolean {
+  return rect.left <= x && x <= rect.right && rect.top <= y && y <= rect.bottom
+}
+function isRectInside(outer: ClientRect, inner: ClientRect): boolean {
+  return (
+    (outer.left <= inner.left && inner.right <= outer.right) ||
+    (outer.top <= inner.top && inner.bottom <= outer.bottom)
+  )
 }
 
 export class TableController {
+  translateX = 0
+  translateY = 0
   constructor(
     public diagram: DiagramController,
     public div: HTMLDivElement,
@@ -111,5 +201,9 @@ export class TableController {
 </table>
 </div>
 `
+  }
+
+  renderTransform() {
+    this.div.style.transform = `translate(${this.translateX}px,${this.translateY}px)`
   }
 }

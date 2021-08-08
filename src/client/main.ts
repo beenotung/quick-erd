@@ -77,3 +77,7 @@ user_id int fk >- user.id
 `.trim()
   parseInput()
 }
+
+document.querySelector('#auto-place')?.addEventListener('click', () => {
+  diagramController.autoPlace()
+})
