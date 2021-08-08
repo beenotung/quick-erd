@@ -6,20 +6,14 @@ export function parse(input: string): ParseResult {
 
 export type ParseResult = {
   table_list: Table[]
-  relation_list: Relation[]
 }
 
 class Parser implements ParseResult {
   table_list: Table[] = []
-  relation_list: Relation[] = []
   line_list: string[] = []
   parse(input: string) {
     this.line_list = input.split('\n').map(line => line.trim())
     this.table_list = parseAll(() => this.parseTable())
-    return {
-      table_list: this.table_list,
-      relation_list: this.relation_list,
-    }
   }
   peekLine(): string {
     if (this.line_list.length === 0) {
