@@ -1,13 +1,14 @@
 {
   "name": "quick-erd",
-  "version": "1.0.0",
-  "description": "TODO: add desc",
-  "keywords": [],
-  "author": {
-    "name": "Beeno Tung",
-    "email": "aabbcc1241@yahoo.com.hk",
-    "url": "https://beeno-tung.surge.sh"
-  },
+  "version": "0.0.0",
+  "description": "quick and easy text-based ERD",
+  "keywords": [
+    "erd",
+    "diagram",
+    "offline",
+    "local-first"
+  ],
+  "author": "Beeno Tung <aabbcc1241@yahoo.com.hk> (https://beeno-tung.surge.sh)",
   "license": "BSD-2-Clause",
   "main": "dist/cjs/index.js",
   "types": "dist/cjs/index.d.ts",
@@ -28,8 +29,7 @@
     "tsc": "run-p tsc:*",
     "tsc:cjs": "tsc -p tsconfig.cjs.json",
     "tsc:esm": "tsc -p tsconfig.esm.json",
-    "test": "run-s format tsc test:ts mocha",
-    "test:ts": "ts-node test/index.ts",
+    "test": "run-s format tsc mocha",
     "mocha": "ts-mocha \"{src,test}/**/*.spec.ts\"",
     "coverage": "nyc npm run mocha -- --reporter=progress",
     "report:update": "nyc --reporter=lcov npm run mocha -- --reporter=progress",
