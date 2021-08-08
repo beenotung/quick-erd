@@ -13,7 +13,10 @@ class Parser implements ParseResult {
   line_list: string[] = []
   parse(input: string) {
     this.line_list = input.split('\n').map(line => line.trim())
-    this.table_list = parseAll(() => this.parseTable())
+    this.table_list = []
+    while (this.hasTable()) {
+      this.table_list.push(this.parseTable())
+    }
   }
   peekLine(): string {
     if (this.line_list.length === 0) {
@@ -21,12 +24,21 @@ class Parser implements ParseResult {
     }
     return this.line_list[0]
   }
+  hasTable() {
+    while (this.line_list[0] === '') this.line_list.shift()
+    return this.line_list[0] && this.line_list[1]?.startsWith('-')
+  }
   parseTable(): Table {
     const name = this.parseName()
-    this.skipLine()
+    this.parseEmptyLine()
     this.skipLine('-')
-    const field_list = parseAll(() => this.parseField())
-    this.skipLine()
+    const field_list = parseAll(() => {
+      // skip empty lines
+      if (this.hasTable()) {
+        throw new Error('end of table')
+      }
+      return this.parseField()
+    })
     return { name, field_list }
   }
   parseField(): Field {
@@ -65,6 +77,13 @@ class Parser implements ParseResult {
     if (this.line_list[0]?.startsWith(line)) {
       this.line_list.shift()
     }
+  }
+  parseEmptyLine() {
+    const line = this.line_list[0]?.trim()
+    if (line !== '') {
+      throw new NonEmptyLineError(line)
+    }
+    this.line_list.shift()
   }
   parseOptionalName(): string | undefined {
     try {
@@ -108,7 +127,7 @@ class Parser implements ParseResult {
     return { type, table, field }
   }
 }
-
+class NonEmptyLineError extends Error {}
 class LineError extends Error {
   constructor(public line: string, message?: string) {
     super(message)
