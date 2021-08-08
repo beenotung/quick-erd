@@ -18,7 +18,7 @@ export class DiagramController {
   }
 
   remove(table: TableController) {
-    table.div.remove()
+    table.remove()
     this.tableMap.delete(table.name)
   }
 
@@ -51,6 +51,7 @@ export class DiagramController {
     const controller = new TableController(this, tableDiv, table.name)
     this.tableMap.set(table.name, controller)
     controller.render(table)
+    controller.renderTransform()
   }
 
   render({ table_list, relation_list }: ParseResult) {
@@ -169,8 +170,8 @@ function isRectInside(outer: ClientRect, inner: ClientRect): boolean {
 }
 
 export class TableController {
-  translateX = 0
-  translateY = 0
+  translateX = +(localStorage.getItem(this.name + '-x') || '0')
+  translateY = +(localStorage.getItem(this.name + '-y') || '0')
   constructor(
     public diagram: DiagramController,
     public div: HTMLDivElement,
@@ -183,14 +184,25 @@ export class TableController {
 <table>
   <tbody>
   ${field_list
-    .map(
-      ({ name, type }) => /* html */ `
+    .map(({ name, type, is_null, is_primary_key, references }) => {
+      const tags: string[] = []
+      if (is_primary_key) {
+        tags.push('PK')
+      }
+      if (references) {
+        tags.push('FK')
+      }
+      const tag = tags.join(', ')
+      const null_text = is_null ? 'NULL' : ''
+      return /* html */ `
     <tr class='table-field'>
+      <td class='table-field-tag'>${tag}</td>
       <td class='table-field-name'>${name}</td>
       <td class='table-field-type'>${type}</td>
+      <td class='table-field-null'>${null_text}</td>
     </tr>
-`,
-    )
+`
+    })
     .join('')}
   </tbody>
 </table>
@@ -199,6 +211,16 @@ export class TableController {
   }
 
   renderTransform() {
-    this.div.style.transform = `translate(${this.translateX}px,${this.translateY}px)`
+    const x = this.translateX.toString()
+    const y = this.translateY.toString()
+    this.div.style.transform = `translate(${x}px,${y}px)`
+    localStorage.setItem(`${this.name}-x`, x)
+    localStorage.setItem(`${this.name}-y`, y)
+  }
+
+  remove() {
+    this.div.remove()
+    localStorage.removeItem(`${this.name}-x`)
+    localStorage.removeItem(`${this.name}-y`)
   }
 }

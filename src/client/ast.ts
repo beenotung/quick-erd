@@ -37,9 +37,35 @@ class Parser implements ParseResult {
   }
   parseField(): Field {
     const name = this.parseName()
-    const type = this.parseOptionalName() || defaultFieldType
+    let type = defaultFieldType
+    let is_null = false
+    let is_primary_key = false
+    let references: ForeignKeyReference | undefined
+    for (;;) {
+      const name = this.parseOptionalName()
+      if (!name) break
+      switch (name.toUpperCase()) {
+        case 'NULL':
+          is_null = true
+          continue
+        case 'PK':
+          is_primary_key = true
+          continue
+        case 'FK':
+          references = this.parseForeignKeyReference()
+          continue
+        default:
+          type = name
+      }
+    }
     this.skipLine()
-    return { name, type }
+    return {
+      name,
+      type,
+      is_null,
+      is_primary_key,
+      references,
+    }
   }
   skipLine(line = '') {
     if (this.line_list[0]?.startsWith(line)) {
@@ -64,11 +90,41 @@ class Parser implements ParseResult {
     this.line_list[0] = line
     return name
   }
+  parseRelationType(): RelationType {
+    let line = this.peekLine()
+    const match = line.match(/.* /)
+    if (!match) {
+      throw new ParseRelationTypeError(line)
+    }
+    const type = match[0].trim() as RelationType
+    line = line.replace(match[0], '').trim()
+    this.line_list[0] = line
+    return type
+  }
+  parseForeignKeyReference(): ForeignKeyReference {
+    const type = this.parseRelationType()
+    const table = this.parseName()
+    let line = this.peekLine()
+    if (!line.startsWith('.')) {
+      throw new ParseForeignKeyReferenceError(line)
+    }
+    line = line.substr(1)
+    this.line_list[0] = line
+    const field = this.parseName()
+    return { type, table, field }
+  }
 }
 
-class ParseNameError extends Error {
+class LineError extends Error {
+  constructor(public line: string, message?: string) {
+    super(message)
+  }
+}
+class ParseNameError extends LineError {}
+class ParseRelationTypeError extends LineError {}
+class ParseForeignKeyReferenceError extends LineError {
   constructor(public line: string) {
-    super()
+    super(line, `expect '.', got '${line[0]}'`)
   }
 }
 
@@ -91,6 +147,14 @@ export type Table = {
 export type Field = {
   name: string
   type: string
+  is_primary_key: boolean
+  is_null: boolean
+  references: ForeignKeyReference | undefined
+}
+export type ForeignKeyReference = {
+  type: RelationType
+  table: string
+  field: string
 }
 
 export type Relation = {

@@ -41,6 +41,7 @@ document.querySelector('#load-example')?.addEventListener('click', () => {
     return
   }
   const dialog = document.createElement('dialog')
+  dialog.style.zIndex = (diagramController.maxZIndex * 100).toString()
   dialog.setAttribute('open', '')
   document.body.appendChild(dialog)
   dialog.innerHTML = /* html */ `
@@ -61,19 +62,20 @@ function loadExample() {
   input.value = `
 user
 -
-id int pk
+id pk
 username text
 
 post
 -
-id int pk
-user_id int fk >- user.id
+id pk
+user_id fk >- user.id
 
 reply
 -
-id int pk
-post_id int fk >- post.id
-user_id int fk >- user.id
+id pk
+post_id fk >- post.id
+user_id fk >- user.id
+reply_id null fk >- reply.id
 `.trim()
   parseInput()
 }
