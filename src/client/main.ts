@@ -59,17 +59,17 @@ function loadExample() {
 # comment starts with hash
 
 user
--
+----
 id pk
 username text
 
 post
--
+----
 id pk
 user_id fk >- user.id
 
 reply
--
+-----
 id pk
 post_id fk >- post.id
 user_id fk >- user.id
