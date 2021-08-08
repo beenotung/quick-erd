@@ -104,8 +104,10 @@ export class DiagramController {
     })
     const diagramRect = this.div.getBoundingClientRect()
 
+    const timeout = Date.now() + 5000
     for (let isMoved = true; isMoved; ) {
       isMoved = false
+      if (Date.now() > timeout) break
 
       tableRectMap.forEach((rect, table) => {
         tableRectMap.forEach((otherRect, otherTable) => {
