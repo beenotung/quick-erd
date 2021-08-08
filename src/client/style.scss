@@ -78,6 +78,12 @@ main {
   flex-grow: 1;
   overflow: auto;
   position: relative;
+  svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
 }
 
 dialog[open] {
@@ -100,6 +106,7 @@ dialog[open] {
   display: inline-block;
   user-select: none;
   position: absolute;
+  z-index: 1;
   table {
     border-collapse: collapse;
   }
@@ -115,7 +122,7 @@ dialog[open] {
 .table-field-type {
   text-align: end;
 }
-.table-field td {
+[data-table-field] td {
   padding: 0.25em;
 }
 .table-field-tag {

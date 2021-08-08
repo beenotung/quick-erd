@@ -1,4 +1,4 @@
-import { ParseResult, Table } from './ast'
+import { ForeignKeyReference, ParseResult, Table } from './ast'
 const { random, floor } = Math
 
 export class DiagramController {
@@ -19,10 +19,13 @@ export class DiagramController {
 
   remove(table: TableController) {
     table.remove()
-    this.tableMap.delete(table.name)
+    this.tableMap.delete(table.data.name)
+  }
+  getDiagramRect() {
+    return this.div.getBoundingClientRect()
   }
 
-  add(table: Table) {
+  add(table: Table, diagramRect: ClientRect) {
     const tableDiv = document.createElement('div')
     tableDiv.dataset.table = table.name
     let isMouseDown = false
@@ -40,26 +43,27 @@ export class DiagramController {
         controller.translateY += ev.clientY - startY
         startX = ev.clientX
         startY = ev.clientY
-        controller.renderTransform()
+        controller.renderTransform(this.getDiagramRect())
       }
     })
-    tableDiv.addEventListener('mouseup', ev => {
+    tableDiv.addEventListener('mouseup', () => {
       isMouseDown = false
     })
     this.div.appendChild(tableDiv)
 
-    const controller = new TableController(this, tableDiv, table.name)
+    const controller = new TableController(this, tableDiv, table)
     this.tableMap.set(table.name, controller)
     controller.render(table)
-    controller.renderTransform()
+    controller.renderTransform(diagramRect)
   }
 
-  render({ table_list, relation_list }: ParseResult) {
+  render({ table_list }: ParseResult) {
+    // show or hide placeholder message
     if (table_list.length === 0) {
       this.message.style.display = 'initial'
-      return
+    } else {
+      this.message.style.display = 'none'
     }
-    this.message.style.display = 'none'
 
     const newTableMap = new Map(table_list.map(table => [table.name, table]))
 
@@ -70,14 +74,21 @@ export class DiagramController {
       }
     })
 
+    const diagramRect = this.getDiagramRect()
+
     // add new tables or update existing tables
     newTableMap.forEach((table, name) => {
       const controller = this.tableMap.get(name)
       if (controller) {
         controller.render(table)
       } else {
-        this.add(table)
+        this.add(table, diagramRect)
       }
+    })
+
+    // draw line
+    this.tableMap.forEach(table => {
+      table.renderLine(diagramRect)
     })
   }
 
@@ -128,7 +139,7 @@ export class DiagramController {
             if (!isRectCollide(exploreRect, otherRect)) {
               table.translateX += offsetX
               table.translateY += offsetY
-              table.renderTransform()
+              table.renderTransform(diagramRect)
               tableRectMap.set(table, table.div.getBoundingClientRect())
               isMoved = true
               return
@@ -169,16 +180,30 @@ function isRectInside(outer: ClientRect, inner: ClientRect): boolean {
   )
 }
 
-export class TableController {
-  translateX = +(localStorage.getItem(this.name + '-x') || '0')
-  translateY = +(localStorage.getItem(this.name + '-y') || '0')
+class TableController {
+  translateX = +(localStorage.getItem(this.data.name + '-x') || '0')
+  translateY = +(localStorage.getItem(this.data.name + '-y') || '0')
+  // self field -> line
+  lineMap = new Map<string, LineController>()
+  reverseLineSet = new Set<LineController>()
+
+  onMoveListenerSet = new Set<(diagramRect: ClientRect) => void>()
+
   constructor(
     public diagram: DiagramController,
     public div: HTMLDivElement,
-    public name: string,
+    public data: Table,
   ) {}
 
-  render({ name, field_list }: Table) {
+  getFieldElement(field: string) {
+    return this.div.querySelector<HTMLDivElement>(
+      `[data-table-field='${field}']`,
+    )
+  }
+
+  render(data: Table) {
+    this.data = data
+    const { name, field_list } = data
     this.div.innerHTML = /* html */ `
 <div class='table-title'>${name}</div>
 <table>
@@ -195,7 +220,7 @@ export class TableController {
       const tag = tags.join(', ')
       const null_text = is_null ? 'NULL' : ''
       return /* html */ `
-    <tr class='table-field'>
+    <tr data-table-field='${name}'>
       <td class='table-field-tag'>${tag}</td>
       <td class='table-field-name'>${name}</td>
       <td class='table-field-type'>${type}</td>
@@ -210,17 +235,111 @@ export class TableController {
 `
   }
 
-  renderTransform() {
+  renderTransform(diagramRect: ClientRect) {
     const x = this.translateX.toString()
     const y = this.translateY.toString()
     this.div.style.transform = `translate(${x}px,${y}px)`
-    localStorage.setItem(`${this.name}-x`, x)
-    localStorage.setItem(`${this.name}-y`, y)
+    localStorage.setItem(`${this.data.name}-x`, x)
+    localStorage.setItem(`${this.data.name}-y`, y)
+    this.onMoveListenerSet.forEach(fn => fn(diagramRect))
+  }
+
+  renderLine(diagramRect: ClientRect) {
+    const newLineMap = new Map<string, ForeignKeyReference>()
+
+    this.data.field_list.forEach(field => {
+      if (field.references) {
+        newLineMap.set(field.name, field.references)
+      }
+    })
+
+    // remove old lines
+    this.lineMap.forEach((line, name) => {
+      if (!newLineMap.has(name)) {
+        this.removeLine(name, line)
+      }
+    })
+
+    // add new line or update existing line
+    newLineMap.forEach((reference, name) => {
+      const lineController = this.lineMap.get(name)
+      if (lineController) {
+        lineController.render(diagramRect)
+      } else {
+        this.addLine(name, reference, diagramRect)
+      }
+    })
+  }
+
+  addLine(
+    field: string,
+    reference: ForeignKeyReference,
+    diagramRect: ClientRect,
+  ) {
+    const fromDiv = this.getFieldElement(field)
+    if (!fromDiv) return
+
+    const toTable = this.diagram.tableMap.get(reference.table)
+    if (!toTable) return
+    const toDiv = toTable.getFieldElement(reference.field)
+    if (!toDiv) return
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    this.diagram.div.appendChild(svg)
+
+    const from: LineReference = { div: fromDiv, table: this }
+    const to: LineReference = { div: toDiv, table: toTable }
+
+    const controller = new LineController(svg, from, to)
+    this.lineMap.set(field, controller)
+    controller.render(diagramRect)
+  }
+
+  removeLine(field: string, line: LineController) {
+    line.svg.remove()
+    this.lineMap.delete(field)
   }
 
   remove() {
     this.div.remove()
-    localStorage.removeItem(`${this.name}-x`)
-    localStorage.removeItem(`${this.name}-y`)
+    localStorage.removeItem(`${this.data.name}-x`)
+    localStorage.removeItem(`${this.data.name}-y`)
+  }
+}
+
+type LineReference = {
+  div: HTMLDivElement
+  table: TableController
+}
+class LineController {
+  path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+
+  constructor(
+    public svg: SVGElement,
+    public from: LineReference,
+    public to: LineReference,
+  ) {
+    svg.appendChild(this.path)
+    this.path.setAttributeNS(null, 'stroke', 'black')
+    this.path.setAttributeNS(null, 'stroke-width', '1.5')
+    this.path.setAttributeNS(null, 'fill', 'none')
+
+    const render = this.render.bind(this)
+    from.table.onMoveListenerSet.add(render)
+    to.table.onMoveListenerSet.add(render)
+  }
+
+  render(diagramRect: ClientRect) {
+    const fromRect = this.from.div.getBoundingClientRect()
+    const f = {
+      x: fromRect.x - diagramRect.left,
+      y: fromRect.y - diagramRect.top,
+    }
+    const toRect = this.to.div.getBoundingClientRect()
+    const t = {
+      x: toRect.x - diagramRect.left,
+      y: toRect.y - diagramRect.top,
+    }
+    this.path.setAttributeNS(null, 'd', `M${f.x} ${f.y} L ${t.x} ${t.y}`)
   }
 }
