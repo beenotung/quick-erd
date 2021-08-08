@@ -9,14 +9,23 @@
   </head>
   <body>
     <header>
-      <button>export</button>
-      <button>import</button>
+      <button id="export">export</button>
+      <button id="import">import</button>
+      <button id="load-example">load example</button>
     </header>
     <main>
       <div id="editor">
-        <textarea></textarea>
+        <textarea placeholder="input table draft here"></textarea>
       </div>
-      <div id="diagram">diagram</div>
+      <div id="diagram">
+        <div class="message">
+          Placeholder for
+          <a
+            href="https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model"
+            >ERD</a
+          >
+        </div>
+      </div>
     </main>
     <script type="module" src="main.js"></script>
   </body>

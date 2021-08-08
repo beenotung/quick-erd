@@ -11,18 +11,19 @@ header {
   padding: var(--padding);
   background-color: steelblue;
   height: 2em;
-  button {
-    /* # height: 1em + 0.25em * 2 = 1.5em */
-    text-transform: capitalize;
-    font-size: 1em;
-    margin: 0;
-    padding: 0.25em;
-    line-height: 1em;
-    // # to normalize square button in chrome
-    // border: 0.1em solid transparent;
-    // background-color: white;
-    // border-radius: 0.25em;
-  }
+}
+
+button {
+  /* # height: 1em + 0.25em * 2 = 1.5em */
+  text-transform: capitalize;
+  font-size: 1em;
+  margin: 0;
+  padding: 0.25em;
+  line-height: 1em;
+  // # to normalize square button in chrome
+  // border: 0.1em solid transparent;
+  // background-color: white;
+  // border-radius: 0.25em;
 }
 
 main {
@@ -72,8 +73,45 @@ main {
 }
 #diagram {
   padding: var(--padding);
-  background-color: white;
+  background-color: whitesmoke;
   // width: 70%;
   flex-grow: 1;
   overflow: auto;
+  position: relative;
+}
+
+dialog[open] {
+  position: absolute;
+  top: 25%;
+}
+
+.danger {
+  background-color: red;
+  color: white;
+}
+.cancel {
+  background-color: black;
+  color: white;
+}
+
+[data-table] {
+  outline: 1px solid black;
+  background-color: white;
+  display: inline-block;
+  user-select: none;
+  position: absolute;
+}
+.table-title {
+  background-color: cornflowerblue;
+  color: white;
+  padding: 0.5em;
+}
+.table-field-name {
+  text-align: start;
+}
+.table-field-type {
+  text-align: end;
+}
+.table-field td {
+  padding: 0.25em;
 }
