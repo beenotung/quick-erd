@@ -10,3 +10,4 @@ dist/
 .husky/_
 .nyc_output
 coverage/
+build/
