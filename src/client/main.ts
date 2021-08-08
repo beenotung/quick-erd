@@ -56,6 +56,8 @@ document.querySelector('#load-example')?.addEventListener('click', () => {
 
 function loadExample() {
   input.value = `
+# comment starts with hash
+
 user
 -
 id pk
