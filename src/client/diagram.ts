@@ -1,4 +1,4 @@
-import { ForeignKeyReference, ParseResult, Table } from './ast'
+import { ForeignKeyReference, ParseResult, RelationType, Table } from './ast'
 const { random, floor, abs } = Math
 
 export class DiagramController {
@@ -299,6 +299,7 @@ class TableController {
     newLineMap.forEach((reference, name) => {
       const lineController = this.lineMap.get(name)
       if (lineController) {
+        lineController.relation = reference.type
         lineController.render(diagramRect)
       } else {
         this.addLine(name, reference, diagramRect)
@@ -325,7 +326,13 @@ class TableController {
     const from: LineReference = { field, table: this }
     const to: LineReference = { field: reference.field, table: toTable }
 
-    const controller = new LineController(svg, from, to, this.titleHeight)
+    const controller = new LineController(
+      svg,
+      from,
+      to,
+      this.titleHeight,
+      reference.type,
+    )
     this.lineMap.set(field, controller)
     controller.render(diagramRect)
   }
@@ -359,6 +366,7 @@ class LineController {
     public from: LineReference,
     public to: LineReference,
     public barRadius: number,
+    public relation: RelationType,
   ) {
     this.render = this.render.bind(this)
     from.table.onMoveListenerSet.add(this.render)
@@ -454,22 +462,71 @@ class LineController {
       `M ${f_x} ${f_y} L ${f_b_x} ${f_y} C ${f_m_x} ${f_y} ${t_m_x} ${t_y} ${t_b_x} ${t_y} L ${t_x} ${t_y}`,
     )
 
-    // head arrow
-    const h_x = f_b_x - (f_b_x - f_x) / 3
-    const h_t = f_y - this.barRadius / 4
-    const h_b = f_y + this.barRadius / 4
+    const first = this.relation[0]
+    renderRelationBar({
+      path: this.head,
+      from_x: f_x,
+      from_y: f_y,
+      border_x: f_b_x,
+      barRadius: this.barRadius,
+      type: first === '>' ? 'many' : first === '0' ? 'zero' : 'one',
+    })
 
-    // end arrow
-    const e_x = t_b_x - (t_b_x - t_x) / 3
-    const e_t = t_y - this.barRadius / 4
-    const e_b = t_y + this.barRadius / 4
+    const last = this.relation[this.relation.length - 1]
+    renderRelationBar({
+      path: this.tail,
+      from_x: t_x,
+      from_y: t_y,
+      border_x: t_b_x,
+      barRadius: this.barRadius,
+      type: last === '<' ? 'many' : last === '0' ? 'zero' : 'one',
+    })
+  }
+}
 
-    this.head.setAttributeNS(
-      null,
-      'd',
-      `M ${h_x} ${f_y} L ${f_x} ${h_t} M ${h_x} ${f_y} L ${f_x} ${h_b}`,
-    )
+function renderRelationBar({
+  path,
+  from_x: f_x,
+  from_y: f_y,
+  border_x: b_x,
+  barRadius,
+  type,
+}: {
+  path: SVGPathElement
+  from_x: number
+  from_y: number
+  border_x: number
+  barRadius: number
+  type: 'many' | 'one' | 'zero'
+}) {
+  // arrow
+  const a_x = b_x - (b_x - f_x) / 3
+  const a_t = f_y - barRadius / 4
+  const a_b = f_y + barRadius / 4
 
-    this.tail.setAttributeNS(null, 'd', `M ${e_x} ${e_t} V ${e_b}`)
+  switch (type) {
+    case 'many':
+      path.setAttributeNS(
+        null,
+        'd',
+        `M ${a_x} ${f_y} L ${f_x} ${a_t} M ${a_x} ${f_y} L ${f_x} ${a_b}`,
+      )
+      break
+    case 'one':
+      path.setAttributeNS(null, 'd', `M ${a_x} ${a_t} V ${a_b}`)
+      break
+    case 'zero':
+      {
+        const r = (a_t - a_b) / 3
+        const x = b_x - ((b_x - f_x) / 4) * 3
+        path.setAttributeNS(
+          null,
+          'd',
+          `M ${x} ${f_y} A ${r} ${r} 0 1 0 ${x} ${f_y + 0.001}`,
+        )
+      }
+      break
+    default:
+      path.setAttributeNS(null, 'd', ``)
   }
 }
