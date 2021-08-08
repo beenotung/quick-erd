@@ -350,7 +350,9 @@ type LineReference = {
   field: string
 }
 class LineController {
-  path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+  line = this.makePath()
+  head = this.makePath()
+  tail = this.makePath()
 
   constructor(
     public svg: SVGElement,
@@ -358,14 +360,18 @@ class LineController {
     public to: LineReference,
     public barRadius: number,
   ) {
-    svg.appendChild(this.path)
-    this.path.setAttributeNS(null, 'stroke', 'black')
-    this.path.setAttributeNS(null, 'stroke-width', '1.5')
-    this.path.setAttributeNS(null, 'fill', 'none')
-
     this.render = this.render.bind(this)
     from.table.onMoveListenerSet.add(this.render)
     to.table.onMoveListenerSet.add(this.render)
+  }
+
+  makePath() {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    path.setAttributeNS(null, 'stroke', 'black')
+    path.setAttributeNS(null, 'stroke-width', '1.5')
+    path.setAttributeNS(null, 'fill', 'none')
+    this.svg.appendChild(path)
+    return path
   }
 
   remove() {
@@ -406,37 +412,64 @@ class LineController {
 
     const { from, to } = config_list.sort((a, b) => a.distance - b.distance)[0]
 
+    // from edge
     const f_x = from - diagramRect.left
     const f_y = fromRect.top + fromRect.height / 2 - diagramRect.top
 
+    // to edge
     const t_x = to - diagramRect.left
     const t_y = toRect.top + toRect.height / 2 - diagramRect.top
 
-    const f_m_y = f_y
-    let f_m_x: number
+    let f_b_x: number // from bar
+    let f_m_x: number // from margin
+
+    const barRatio = 1 / 2
+    const marginRatio = barRatio * 2
 
     if (from === fromRect.left) {
       // start from left
-      f_m_x = f_x - this.barRadius
+      f_b_x = f_x - this.barRadius * barRatio
+      f_m_x = f_x - this.barRadius * marginRatio
     } else {
       // start from right
-      f_m_x = f_x + this.barRadius
+      f_b_x = f_x + this.barRadius * barRatio
+      f_m_x = f_x + this.barRadius * marginRatio
     }
 
-    const t_m_y = t_y
-    let t_m_x: number
+    let t_b_x: number // to bar
+    let t_m_x: number // to margin
     if (to === toRect.left) {
       // end from left
-      t_m_x = t_x - this.barRadius
+      t_b_x = t_x - this.barRadius * barRatio
+      t_m_x = t_x - this.barRadius * marginRatio
     } else {
       // end from right
-      t_m_x = t_x + this.barRadius
+      t_b_x = t_x + this.barRadius * barRatio
+      t_m_x = t_x + this.barRadius * marginRatio
     }
 
-    this.path.setAttributeNS(
+    this.line.setAttributeNS(
       null,
       'd',
-      `M${f_x} ${f_y} C ${f_m_x} ${f_m_y} ${t_m_x} ${t_m_y} ${t_x} ${t_y}`,
+      `M ${f_x} ${f_y} L ${f_b_x} ${f_y} C ${f_m_x} ${f_y} ${t_m_x} ${t_y} ${t_b_x} ${t_y} L ${t_x} ${t_y}`,
     )
+
+    // head arrow
+    const h_x = f_b_x - (f_b_x - f_x) / 3
+    const h_t = f_y - this.barRadius / 4
+    const h_b = f_y + this.barRadius / 4
+
+    // end arrow
+    const e_x = t_b_x - (t_b_x - t_x) / 3
+    const e_t = t_y - this.barRadius / 4
+    const e_b = t_y + this.barRadius / 4
+
+    this.head.setAttributeNS(
+      null,
+      'd',
+      `M ${h_x} ${f_y} L ${f_x} ${h_t} M ${h_x} ${f_y} L ${f_x} ${h_b}`,
+    )
+
+    this.tail.setAttributeNS(null, 'd', `M ${e_x} ${e_t} V ${e_b}`)
   }
 }
