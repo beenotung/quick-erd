@@ -1,9 +1,5 @@
-import { parse, Table } from './ast'
-import {
-  TableController,
-  TableControllerElement,
-  DiagramController,
-} from './diagram'
+import { parse } from './ast'
+import { DiagramController } from './diagram'
 const input = document.querySelector('#editor textarea') as HTMLTextAreaElement
 const diagram = document.querySelector('#diagram') as HTMLDivElement
 
@@ -41,7 +37,7 @@ document.querySelector('#load-example')?.addEventListener('click', () => {
     return
   }
   const dialog = document.createElement('dialog')
-  dialog.style.zIndex = (diagramController.maxZIndex * 100).toString()
+  dialog.style.zIndex = diagramController.getSafeZIndex().toString()
   dialog.setAttribute('open', '')
   document.body.appendChild(dialog)
   dialog.innerHTML = /* html */ `

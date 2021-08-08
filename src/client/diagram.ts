@@ -1,10 +1,14 @@
 import { ForeignKeyReference, ParseResult, Table } from './ast'
-const { random, floor } = Math
+const { random, floor, abs } = Math
 
 export class DiagramController {
   message = this.div.querySelector('.message') as HTMLDivElement
   tableMap = new Map<string, TableController>()
   maxZIndex = 0
+
+  getSafeZIndex() {
+    return (this.maxZIndex + 1) * 100
+  }
 
   onMouseMove?: (ev: MouseEvent) => void
 
@@ -189,11 +193,23 @@ class TableController {
 
   onMoveListenerSet = new Set<(diagramRect: ClientRect) => void>()
 
+  tbody: HTMLTableSectionElement
+  fieldMap = new Map<string, HTMLTableRowElement>()
+
   constructor(
     public diagram: DiagramController,
     public div: HTMLDivElement,
     public data: Table,
-  ) {}
+  ) {
+    this.div.innerHTML = /* html */ `
+<div class='table-title'>${data.name}</div>
+<table>
+  <tbody></tbody>
+</table>
+</div>
+`
+    this.tbody = this.div.querySelector('tbody') as HTMLTableSectionElement
+  }
 
   getFieldElement(field: string) {
     return this.div.querySelector<HTMLDivElement>(
@@ -203,36 +219,49 @@ class TableController {
 
   render(data: Table) {
     this.data = data
-    const { name, field_list } = data
-    this.div.innerHTML = /* html */ `
-<div class='table-title'>${name}</div>
-<table>
-  <tbody>
-  ${field_list
-    .map(({ name, type, is_null, is_primary_key, references }) => {
-      const tags: string[] = []
-      if (is_primary_key) {
-        tags.push('PK')
+
+    const newFieldSet = new Set<string>()
+    data.field_list.forEach(field => newFieldSet.add(field.name))
+
+    // remove old fields
+    this.fieldMap.forEach((field, name) => {
+      if (!newFieldSet.has(name)) {
+        field.remove()
+        this.fieldMap.delete(name)
       }
-      if (references) {
-        tags.push('FK')
-      }
-      const tag = tags.join(', ')
-      const null_text = is_null ? 'NULL' : ''
-      return /* html */ `
-    <tr data-table-field='${name}'>
-      <td class='table-field-tag'>${tag}</td>
-      <td class='table-field-name'>${name}</td>
-      <td class='table-field-type'>${type}</td>
-      <td class='table-field-null'>${null_text}</td>
-    </tr>
-`
     })
-    .join('')}
-  </tbody>
-</table>
-</div>
+
+    // add new fields or update existing fields
+    data.field_list.forEach(
+      ({ name, type, is_null, is_primary_key, references }) => {
+        const tags: string[] = []
+        if (is_primary_key) {
+          tags.push('PK')
+        }
+        if (references) {
+          tags.push('FK')
+        }
+        const tag = tags.join(', ')
+        const null_text = is_null ? 'NULL' : ''
+
+        let tr = this.div.querySelector(
+          `[data-table-field='${name}']`,
+        ) as HTMLTableRowElement
+        if (!tr) {
+          tr = document.createElement('tr')
+          tr.dataset.tableField = name
+          this.fieldMap.set(name, tr)
+        }
+
+        tr.innerHTML = /* html */ `
+  <td class='table-field-tag'>${tag}</td>
+  <td class='table-field-name'>${name}</td>
+  <td class='table-field-type'>${type}</td>
+  <td class='table-field-null'>${null_text}</td>
 `
+        this.tbody.appendChild(tr)
+      },
+    )
   }
 
   renderTransform(diagramRect: ClientRect) {
@@ -287,8 +316,8 @@ class TableController {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     this.diagram.div.appendChild(svg)
 
-    const from: LineReference = { div: fromDiv, table: this }
-    const to: LineReference = { div: toDiv, table: toTable }
+    const from: LineReference = { field, table: this }
+    const to: LineReference = { field: reference.field, table: toTable }
 
     const controller = new LineController(svg, from, to)
     this.lineMap.set(field, controller)
@@ -308,8 +337,8 @@ class TableController {
 }
 
 type LineReference = {
-  div: HTMLDivElement
   table: TableController
+  field: string
 }
 class LineController {
   path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
@@ -330,16 +359,42 @@ class LineController {
   }
 
   render(diagramRect: ClientRect) {
-    const fromRect = this.from.div.getBoundingClientRect()
-    const f = {
-      x: fromRect.x - diagramRect.left,
-      y: fromRect.y - diagramRect.top,
+    const fromDiv = this.from.table.getFieldElement(this.from.field)
+    if (!fromDiv) return
+    const toDiv = this.to.table.getFieldElement(this.to.field)
+    if (!toDiv) return
+
+    const fromRect = fromDiv.getBoundingClientRect()
+    const toRect = toDiv.getBoundingClientRect()
+
+    type Config = {
+      from: number
+      to: number
+      distance: number
     }
-    const toRect = this.to.div.getBoundingClientRect()
-    const t = {
-      x: toRect.x - diagramRect.left,
-      y: toRect.y - diagramRect.top,
+
+    function toConfig(from: number, to: number): Config {
+      return {
+        from,
+        to,
+        distance: abs(from - to),
+      }
     }
-    this.path.setAttributeNS(null, 'd', `M${f.x} ${f.y} L ${t.x} ${t.y}`)
+
+    const config_list: Config[] = [
+      toConfig(fromRect.left, toRect.left),
+      toConfig(fromRect.right, toRect.right),
+      toConfig(fromRect.left, toRect.right),
+      toConfig(fromRect.right, toRect.left),
+    ]
+
+    const { from, to } = config_list.sort((a, b) => a.distance - b.distance)[0]
+
+    const f_x = from - diagramRect.left
+    const t_x = to - diagramRect.left
+    const f_y = fromRect.top + fromRect.height / 2 - diagramRect.top
+    const t_y = toRect.top + toRect.height / 2 - diagramRect.top
+
+    this.path.setAttributeNS(null, 'd', `M${f_x} ${f_y} L ${t_x} ${t_y}`)
   }
 }
