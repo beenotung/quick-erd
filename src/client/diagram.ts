@@ -29,7 +29,6 @@ export class DiagramController {
     let startX = 0
     let startY = 0
     tableDiv.addEventListener('mousedown', ev => {
-      console.debug('mousedown', ev)
       this.maxZIndex++
       tableDiv.style.zIndex = this.maxZIndex.toString()
       isMouseDown = true
@@ -42,11 +41,9 @@ export class DiagramController {
         startX = ev.clientX
         startY = ev.clientY
         controller.renderTransform()
-        console.debug('mousemove', ev)
       }
     })
     tableDiv.addEventListener('mouseup', ev => {
-      console.debug('mouseup', ev)
       isMouseDown = false
     })
     this.div.appendChild(tableDiv)
@@ -84,7 +81,6 @@ export class DiagramController {
   }
 
   autoPlace() {
-    console.debug('auto place begin')
     const tableRectMap = new Map<TableController, ClientRect>()
     this.tableMap.forEach(table => {
       const rect = table.div.getBoundingClientRect()
@@ -140,7 +136,6 @@ export class DiagramController {
         })
       })
     }
-    console.debug('auto place end')
   }
 }
 
