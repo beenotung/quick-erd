@@ -1,5 +1,5 @@
 import { ForeignKeyReference, ParseResult, RelationType, Table } from './ast'
-const { random, floor, abs } = Math
+const { random, floor, abs, sign } = Math
 
 export class DiagramController {
   message = this.div.querySelector('.message') as HTMLDivElement
@@ -469,7 +469,14 @@ class LineController {
       from_y: f_y,
       border_x: f_b_x,
       barRadius: this.barRadius,
-      type: first === '>' ? 'many' : first === '0' ? 'zero' : 'one',
+      type:
+        first === '>'
+          ? 'many'
+          : first === '0'
+          ? 'zero'
+          : first === '-'
+          ? 'one'
+          : 'default',
     })
 
     const last = this.relation[this.relation.length - 1]
@@ -479,7 +486,14 @@ class LineController {
       from_y: t_y,
       border_x: t_b_x,
       barRadius: this.barRadius,
-      type: last === '<' ? 'many' : last === '0' ? 'zero' : 'one',
+      type:
+        last === '<'
+          ? 'many'
+          : last === '0'
+          ? 'zero'
+          : last === '-'
+          ? 'one'
+          : 'default',
     })
   }
 }
@@ -497,7 +511,7 @@ function renderRelationBar({
   from_y: number
   border_x: number
   barRadius: number
-  type: 'many' | 'one' | 'zero'
+  type: 'many' | 'one' | 'zero' | 'default'
 }) {
   // arrow
   const a_x = b_x - (b_x - f_x) / 3
@@ -518,11 +532,13 @@ function renderRelationBar({
     case 'zero':
       {
         const r = (a_t - a_b) / 3
-        const x = b_x - ((b_x - f_x) / 4) * 3
+        const x = b_x
         path.setAttributeNS(
           null,
           'd',
-          `M ${x} ${f_y} A ${r} ${r} 0 1 0 ${x} ${f_y + 0.001}`,
+          `M ${x} ${f_y} A ${r} ${r} 0 1 0 ${x} ${
+            f_y - 0.001 * sign(f_x - a_x)
+          }`,
         )
       }
       break
