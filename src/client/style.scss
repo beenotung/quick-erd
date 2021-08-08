@@ -1,6 +1,7 @@
 body {
   font-family: "Courier New", Courier, monospace;
   margin: 0;
+  overflow: hidden;
 }
 :root {
   --padding: 0.5em;
@@ -32,21 +33,39 @@ main {
 }
 
 #editor {
-  width: 30%;
+  width: max-content;
   // flex-shrink: 1;
-  resize: horizontal;
   overflow: hidden;
   background-color: cornflowerblue;
   textarea {
     overflow: auto;
     background-color: transparent;
-    resize: none;
+    resize: horizontal;
     font-family: "Courier New", Courier, monospace;
     padding: var(--padding);
     border: 0;
     width: calc(100% - var(--padding) * 2);
-    height: calc(100% - var(--padding) * 2);
+    --scroll-bar: 1em;
+    &::-webkit-scrollbar {
+      height: var(--scroll-bar);
+      width: var(--scroll-bar);
+    }
+    &::-webkit-scrollbar-track-piece {
+      background-color: lightgray;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: gray;
+      border-radius: 1em;
+    }
+    &::-webkit-scrollbar-button {
+      background-color: lightskyblue;
+    }
+    &::-webkit-scrollbar-corner {
+      background-color: crimson;
+    }
+    height: calc(100% - var(--padding) * 2 - var(--scroll-bar));
     margin: 0;
+    margin-bottom: var(--scroll-bar);
     white-space: pre;
     // outline: none; // to normalize chrome behavior when :focus-visible
   }
