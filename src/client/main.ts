@@ -81,7 +81,7 @@ reply
 -----
 id pk
 post_id fk >- post.id
-user_id fk >- user.id
+user_id fk >- user.id # inline comment
 reply_id null fk >- reply.id
 `.trim()
   parseInput()
