@@ -5,7 +5,7 @@ export class DiagramController {
   message = this.div.querySelector('.message') as HTMLDivElement
   tableMap = new Map<string, TableController>()
   maxZIndex = 0
-  fontSize = +localStorage.getItem('zoom')! || 1
+  fontSize = +(localStorage.getItem('zoom') || '') || 1
   barRadius = this.calcBarRadius()
 
   controls = this.div.querySelector('.controls') as HTMLDivElement
