@@ -5,7 +5,7 @@ export class DiagramController {
   message = this.div.querySelector('.message') as HTMLDivElement
   tableMap = new Map<string, TableController>()
   maxZIndex = 0
-  fontSize = 1
+  fontSize = +localStorage.getItem('zoom')! || 1
   barRadius = this.calcBarRadius()
 
   controls = this.div.querySelector('.controls') as HTMLDivElement
@@ -33,6 +33,8 @@ export class DiagramController {
     this.controls
       .querySelector('#font-dec')
       ?.addEventListener('click', () => this.fontDec())
+
+    this.applyFontSize()
   }
 
   remove(table: TableController) {
@@ -178,7 +180,8 @@ export class DiagramController {
     }
   }
 
-  adjustFontSize() {
+  applyFontSize() {
+    localStorage.setItem('zoom', this.fontSize.toString())
     this.fontSizeSpan.textContent = (this.fontSize * 100).toFixed(0) + '%'
     this.div.style.fontSize = this.fontSize + 'em'
     this.barRadius = this.calcBarRadius()
@@ -192,15 +195,15 @@ export class DiagramController {
   }
   fontInc() {
     this.fontSize += this.calcFontStep()
-    this.adjustFontSize()
+    this.applyFontSize()
   }
   fontDec() {
     this.fontSize -= this.calcFontStep()
-    this.adjustFontSize()
+    this.applyFontSize()
   }
   fontReset() {
     this.fontSize = 1
-    this.adjustFontSize()
+    this.applyFontSize()
   }
 }
 
