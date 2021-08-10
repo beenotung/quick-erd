@@ -178,9 +178,7 @@ export class DiagramController {
     }
   }
 
-  adjustFontSize(sign: 1 | -1) {
-    const step = Math.min(this.fontSize * 0.1, 0.25) * sign
-    this.fontSize += step
+  adjustFontSize() {
     this.fontSizeSpan.textContent = (this.fontSize * 100).toFixed(0) + '%'
     this.div.style.fontSize = this.fontSize + 'em'
     this.barRadius = this.calcBarRadius()
@@ -189,11 +187,20 @@ export class DiagramController {
       table.renderLine(diagramRect)
     })
   }
+  calcFontStep() {
+    return Math.min(this.fontSize * 0.1, 0.25)
+  }
   fontInc() {
-    this.adjustFontSize(1)
+    this.fontSize += this.calcFontStep()
+    this.adjustFontSize()
   }
   fontDec() {
-    this.adjustFontSize(-1)
+    this.fontSize -= this.calcFontStep()
+    this.adjustFontSize()
+  }
+  fontReset() {
+    this.fontSize = 1
+    this.adjustFontSize()
   }
 }
 

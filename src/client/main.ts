@@ -92,6 +92,10 @@ document.querySelector('#auto-place')?.addEventListener('click', () => {
   diagramController.autoPlace()
 })
 
+document.querySelector('#font-reset')?.addEventListener('click', () => {
+  diagramController.fontReset()
+})
+
 window.addEventListener('keypress', e => {
   const tagName = document.activeElement?.tagName
   if (tagName === 'TEXTAREA' || tagName === 'INPUT') return
@@ -107,6 +111,11 @@ window.addEventListener('keypress', e => {
     case 'a':
     case 'A':
       diagramController.autoPlace()
+      return
+    case '0':
+    case 'r':
+    case 'R':
+      diagramController.fontReset()
       return
     default:
     // console.debug(e.key)
