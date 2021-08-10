@@ -27,6 +27,17 @@ button {
   // border-radius: 0.25em;
 }
 
+.controls {
+  position: absolute;
+  top: var(--padding);
+  right: var(--padding);
+  button {
+    width: 1.5em;
+    height: 1.5em;
+    padding: 0;
+  }
+}
+
 main {
   height: calc(100vh - 1.5em - 1em);
   display: flex;

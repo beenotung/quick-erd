@@ -5,6 +5,9 @@ export class DiagramController {
   message = this.div.querySelector('.message') as HTMLDivElement
   tableMap = new Map<string, TableController>()
   maxZIndex = 0
+  fontSize = 1
+
+  controls = this.div.querySelector('.controls') as HTMLDivElement
 
   getSafeZIndex() {
     return (this.maxZIndex + 1) * 100
@@ -12,19 +15,30 @@ export class DiagramController {
 
   onMouseMove?: (ev: MouseEvent) => void
 
-  constructor(public div: HTMLDivElement) {
+  constructor(
+    public div: HTMLDivElement,
+    public fontSizeSpan: HTMLSpanElement,
+  ) {
     this.div.addEventListener('mousemove', ev => {
       this.onMouseMove?.(ev)
     })
     this.div.addEventListener('mouseup', () => {
       delete this.onMouseMove
     })
+
+    this.controls
+      .querySelector('#font-inc')
+      ?.addEventListener('click', () => this.fontInc())
+    this.controls
+      .querySelector('#font-dec')
+      ?.addEventListener('click', () => this.fontDec())
   }
 
   remove(table: TableController) {
     table.remove()
     this.tableMap.delete(table.data.name)
   }
+
   getDiagramRect() {
     return this.div.getBoundingClientRect()
   }
@@ -64,7 +78,7 @@ export class DiagramController {
   render({ table_list }: ParseResult) {
     // show or hide placeholder message
     if (table_list.length === 0) {
-      this.message.style.display = 'initial'
+      this.message.style.display = 'inline-block'
     } else {
       this.message.style.display = 'none'
     }
@@ -94,6 +108,8 @@ export class DiagramController {
     this.tableMap.forEach(table => {
       table.renderLine(diagramRect)
     })
+
+    this.controls.style.zIndex = this.getSafeZIndex().toString()
   }
 
   autoPlace() {
@@ -104,7 +120,7 @@ export class DiagramController {
     })
     const diagramRect = this.div.getBoundingClientRect()
 
-    const timeout = Date.now() + 5000
+    const timeout = Date.now() + 2000
     for (let isMoved = true; isMoved; ) {
       isMoved = false
       if (Date.now() > timeout) break
@@ -154,6 +170,23 @@ export class DiagramController {
         })
       })
     }
+  }
+
+  adjustFontSize(sign: 1 | -1) {
+    const step = Math.min(this.fontSize * 0.1, 0.25) * sign
+    this.fontSize += step
+    this.fontSizeSpan.textContent = (this.fontSize * 100).toFixed(0) + '%'
+    this.div.style.fontSize = this.fontSize + 'em'
+    const diagramRect = this.getDiagramRect()
+    this.tableMap.forEach(table => {
+      table.renderLine(diagramRect)
+    })
+  }
+  fontInc() {
+    this.adjustFontSize(1)
+  }
+  fontDec() {
+    this.adjustFontSize(-1)
   }
 }
 
