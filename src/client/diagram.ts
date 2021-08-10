@@ -14,7 +14,7 @@ export class DiagramController {
     return (this.maxZIndex + 1) * 100
   }
 
-  onMouseMove?: (ev: MouseEvent) => void
+  onMouseMove?: (ev: { clientX: number; clientY: number }) => void
 
   constructor(
     public div: HTMLDivElement,
@@ -23,7 +23,15 @@ export class DiagramController {
     this.div.addEventListener('mousemove', ev => {
       this.onMouseMove?.(ev)
     })
+    this.div.addEventListener('touchmove', ev => {
+      const e = ev.touches.item(0)
+      if (!e) return
+      this.onMouseMove?.(e)
+    })
     this.div.addEventListener('mouseup', () => {
+      delete this.onMouseMove
+    })
+    this.div.addEventListener('touchend', () => {
       delete this.onMouseMove
     })
 
@@ -64,7 +72,7 @@ export class DiagramController {
     let isMouseDown = false
     let startX = 0
     let startY = 0
-    tableDiv.addEventListener('mousedown', ev => {
+    const onMouseDown = (ev: { clientX: number; clientY: number }) => {
       this.maxZIndex++
       tableDiv.style.zIndex = this.maxZIndex.toString()
       isMouseDown = true
@@ -78,8 +86,19 @@ export class DiagramController {
         startY = ev.clientY
         controller.renderTransform(this.getDiagramRect())
       }
+    }
+    tableDiv.addEventListener('mousedown', ev => {
+      onMouseDown(ev)
+    })
+    tableDiv.addEventListener('touchstart', ev => {
+      const e = ev.touches.item(0)
+      if (!e) return
+      onMouseDown(e)
     })
     tableDiv.addEventListener('mouseup', () => {
+      isMouseDown = false
+    })
+    tableDiv.addEventListener('touchend', () => {
       isMouseDown = false
     })
     this.div.appendChild(tableDiv)
