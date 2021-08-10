@@ -27,6 +27,10 @@ button {
   // border-radius: 0.25em;
 }
 
+button key {
+  text-decoration: underline;
+}
+
 .controls {
   position: absolute;
   top: var(--padding);

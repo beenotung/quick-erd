@@ -13,7 +13,12 @@
       <button id="export" hidden>export</button>
       <button id="import" hidden>import</button>
       <button id="load-example">load example</button>
-      <button id="auto-place">auto place</button>
+      <button
+        id="auto-place"
+        title="You can press [A] key as keyboard shortcut"
+      >
+        <key>A</key>uto place
+      </button>
       <button
         onclick="window.open('https://github.com/beenotung/quick-erd', '_blank')"
         style="float: right"
@@ -34,9 +39,19 @@
           >
         </div>
         <div class="controls">
-          <button id="font-dec">-</button>
+          <button
+            id="font-dec"
+            title="You can press [-] key as keyboard shortcut"
+          >
+            -
+          </button>
           <span id="font-size">100%</span>
-          <button id="font-inc">+</button>
+          <button
+            id="font-inc"
+            title="You can press [+] key as keyboard shortcut"
+          >
+            +
+          </button>
         </div>
       </div>
     </main>
