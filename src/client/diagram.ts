@@ -42,8 +42,16 @@ export class DiagramController {
     this.tableMap.delete(table.data.name)
   }
 
-  getDiagramRect() {
-    return this.div.getBoundingClientRect()
+  getDiagramRect(): ClientRect {
+    const rect = this.div.getBoundingClientRect()
+    return {
+      top: rect.top,
+      bottom: rect.bottom,
+      left: rect.left,
+      right: rect.right,
+      width: this.div.scrollWidth,
+      height: this.div.scrollHeight,
+    }
   }
 
   calcBarRadius() {
@@ -435,6 +443,13 @@ class LineController {
   }
 
   render(diagramRect: ClientRect) {
+    requestAnimationFrame(() => {
+      const div = this.diagram.div
+      const offsetX = div.scrollLeft
+      const offsetY = div.scrollTop
+      this.svg.style.left = offsetX + 'px'
+      this.svg.style.top = offsetY + 'px'
+    })
     const fromDiv = this.from.table.getFieldElement(this.from.field)
     if (!fromDiv) return
     const toDiv = this.to.table.getFieldElement(this.to.field)

@@ -5,13 +5,14 @@ body {
 }
 
 :root {
-  --padding: 0.5em;
+  --padding: 0.5rem;
+  --header-height: 2rem;
 }
 
 header {
   padding: var(--padding);
   background-color: steelblue;
-  height: 2em;
+  height: var(--header-height);
 }
 
 button {
@@ -32,12 +33,13 @@ button key {
 }
 
 .controls {
-  position: absolute;
-  top: var(--padding);
-  right: var(--padding);
+  font-size: 1rem;
+  position: fixed;
+  top: calc(var(--padding) * 3 + var(--header-height));
+  right: calc(var(--padding) + 1rem);
   button {
-    width: 1.5em;
-    height: 1.5em;
+    width: 1.5rem;
+    height: 1.5rem;
     padding: 0;
   }
 }
