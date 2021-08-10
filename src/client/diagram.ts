@@ -6,6 +6,7 @@ export class DiagramController {
   tableMap = new Map<string, TableController>()
   maxZIndex = 0
   fontSize = 1
+  barRadius = this.calcBarRadius()
 
   controls = this.div.querySelector('.controls') as HTMLDivElement
 
@@ -41,6 +42,10 @@ export class DiagramController {
 
   getDiagramRect() {
     return this.div.getBoundingClientRect()
+  }
+
+  calcBarRadius() {
+    return +getComputedStyle(this.div).fontSize.replace('px', '') * 2.125
   }
 
   add(table: Table, diagramRect: ClientRect) {
@@ -118,7 +123,7 @@ export class DiagramController {
       const rect = table.div.getBoundingClientRect()
       tableRectMap.set(table, rect)
     })
-    const diagramRect = this.div.getBoundingClientRect()
+    const diagramRect = this.getDiagramRect()
 
     const timeout = Date.now() + 2000
     for (let isMoved = true; isMoved; ) {
@@ -133,6 +138,7 @@ export class DiagramController {
           let offsetX = 0
           let offsetY = 0
           for (;;) {
+            if (Date.now() > timeout) break
             offsetX += floor(random() * 3) - 1
             offsetY += floor(random() * 3) - 1
 
@@ -177,6 +183,7 @@ export class DiagramController {
     this.fontSize += step
     this.fontSizeSpan.textContent = (this.fontSize * 100).toFixed(0) + '%'
     this.div.style.fontSize = this.fontSize + 'em'
+    this.barRadius = this.calcBarRadius()
     const diagramRect = this.getDiagramRect()
     this.tableMap.forEach(table => {
       table.renderLine(diagramRect)
@@ -231,8 +238,6 @@ class TableController {
   tbody: HTMLTableSectionElement
   fieldMap = new Map<string, HTMLTableRowElement>()
 
-  titleHeight: number
-
   constructor(
     public diagram: DiagramController,
     public div: HTMLDivElement,
@@ -246,8 +251,6 @@ class TableController {
 </div>
 `
     this.tbody = this.div.querySelector('tbody') as HTMLTableSectionElement
-    const title = this.div.querySelector('.table-title') as HTMLDivElement
-    this.titleHeight = title.getBoundingClientRect().height
   }
 
   getFieldElement(field: string) {
@@ -360,10 +363,10 @@ class TableController {
     const to: LineReference = { field: reference.field, table: toTable }
 
     const controller = new LineController(
+      this.diagram,
       svg,
       from,
       to,
-      this.titleHeight,
       reference.type,
     )
     this.lineMap.set(field, controller)
@@ -395,10 +398,10 @@ class LineController {
   tail = this.makePath()
 
   constructor(
+    public diagram: DiagramController,
     public svg: SVGElement,
     public from: LineReference,
     public to: LineReference,
-    public barRadius: number,
     public relation: RelationType,
   ) {
     this.render = this.render.bind(this)
@@ -467,17 +470,18 @@ class LineController {
 
     const barRatio = 1 / 2
     const marginRatio = barRatio * 2
+    const barRadius = this.diagram.barRadius
 
     if (from === fromRect.left) {
       // start from left
-      f_b_x = f_x - this.barRadius * barRatio
-      f_b2_x = f_x - (this.barRadius * barRatio) / 3
-      f_m_x = f_x - this.barRadius * marginRatio
+      f_b_x = f_x - barRadius * barRatio
+      f_b2_x = f_x - (barRadius * barRatio) / 3
+      f_m_x = f_x - barRadius * marginRatio
     } else {
       // start from right
-      f_b_x = f_x + this.barRadius * barRatio
-      f_b2_x = f_x + (this.barRadius * barRatio) / 3
-      f_m_x = f_x + this.barRadius * marginRatio
+      f_b_x = f_x + barRadius * barRatio
+      f_b2_x = f_x + (barRadius * barRatio) / 3
+      f_m_x = f_x + barRadius * marginRatio
     }
 
     let t_b_x: number // to bar
@@ -485,14 +489,14 @@ class LineController {
     let t_m_x: number // to margin
     if (to === toRect.left) {
       // end from left
-      t_b_x = t_x - this.barRadius * barRatio
-      t_b2_x = t_x - (this.barRadius * barRatio) / 3
-      t_m_x = t_x - this.barRadius * marginRatio
+      t_b_x = t_x - barRadius * barRatio
+      t_b2_x = t_x - (barRadius * barRatio) / 3
+      t_m_x = t_x - barRadius * marginRatio
     } else {
       // end from right
-      t_b_x = t_x + this.barRadius * barRatio
-      t_b2_x = t_x + (this.barRadius * barRatio) / 3
-      t_m_x = t_x + this.barRadius * marginRatio
+      t_b_x = t_x + barRadius * barRatio
+      t_b2_x = t_x + (barRadius * barRatio) / 3
+      t_m_x = t_x + barRadius * marginRatio
     }
 
     const first = this.relation[0]
@@ -515,7 +519,7 @@ class LineController {
       from_x: f_x,
       from_y: f_y,
       border_x: f_b_x,
-      barRadius: this.barRadius,
+      barRadius: barRadius,
       type: this.relation.startsWith('>0')
         ? 'zero-or-many'
         : first === '>'
@@ -532,7 +536,7 @@ class LineController {
       from_x: t_x,
       from_y: t_y,
       border_x: t_b_x,
-      barRadius: this.barRadius,
+      barRadius: barRadius,
       type: this.relation.endsWith('0<')
         ? 'zero-or-many'
         : last === '<'
