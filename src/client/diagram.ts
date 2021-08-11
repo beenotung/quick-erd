@@ -266,14 +266,32 @@ function isRectInside(outer: ClientRect, inner: ClientRect): boolean {
 class TableController {
   translateX = +(localStorage.getItem(this.data.name + '-x') || '0')
   translateY = +(localStorage.getItem(this.data.name + '-y') || '0')
-  // self field -> line
-  lineMap = new Map<string, LineController>()
+  // self_field + table + other_field -> line
+  _lineMap = new Map<string, LineController>()
   reverseLineSet = new Set<LineController>()
 
   onMoveListenerSet = new Set<(diagramRect: ClientRect) => void>()
 
   tbody: HTMLTableSectionElement
   fieldMap = new Map<string, HTMLTableRowElement>()
+
+  toFieldKey(own_field: string, table: string, other_field: string) {
+    return `${own_field}:${table}.${other_field}`
+  }
+
+  getLine(own_field: string, table: string, other_field: string) {
+    const key = this.toFieldKey(own_field, table, other_field)
+    return this._lineMap.get(key)
+  }
+  setLine(
+    own_field: string,
+    table: string,
+    other_field: string,
+    line: LineController,
+  ) {
+    const key = this.toFieldKey(own_field, table, other_field)
+    this._lineMap.set(key, line)
+  }
 
   constructor(
     public diagram: DiagramController,
@@ -353,29 +371,34 @@ class TableController {
   }
 
   renderLine(diagramRect: ClientRect) {
-    const newLineMap = new Map<string, ForeignKeyReference>()
+    const newFieldRefMap = new Map<string, ForeignKeyReference>()
 
     this.data.field_list.forEach(field => {
       if (field.references) {
-        newLineMap.set(field.name, field.references)
+        newFieldRefMap.set(field.name, field.references)
       }
     })
 
     // remove old lines
-    this.lineMap.forEach((line, name) => {
-      if (!newLineMap.has(name)) {
-        this.removeLine(name, line)
+    this._lineMap.forEach((line, key) => {
+      if (!newFieldRefMap.has(key)) {
+        this.removeLine(key, line)
       }
     })
 
     // add new line or update existing line
-    newLineMap.forEach((reference, name) => {
-      const lineController = this.lineMap.get(name)
+    newFieldRefMap.forEach((reference, field) => {
+      this.toFieldKey
+      const lineController = this.getLine(
+        field,
+        reference.table,
+        reference.field,
+      )
       if (lineController) {
         lineController.relation = reference.type
         lineController.render(diagramRect)
       } else {
-        this.addLine(name, reference, diagramRect)
+        this.addLine(field, reference, diagramRect)
       }
     })
   }
@@ -406,19 +429,19 @@ class TableController {
       to,
       reference.type,
     )
-    this.lineMap.set(field, controller)
+    this.setLine(field, reference.table, reference.field, controller)
     controller.render(diagramRect)
   }
 
-  removeLine(field: string, line: LineController) {
+  removeLine(key: string, line: LineController) {
     line.svg.remove()
-    this.lineMap.delete(field)
+    this._lineMap.delete(key)
   }
 
   remove() {
     this.div.remove()
-    this.lineMap.forEach(line => line.remove())
-    this.lineMap.clear()
+    this._lineMap.forEach(line => line.remove())
+    this._lineMap.clear()
     this.fieldMap.clear()
     localStorage.removeItem(`${this.data.name}-x`)
     localStorage.removeItem(`${this.data.name}-y`)
