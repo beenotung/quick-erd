@@ -50,6 +50,9 @@
   ],
   "dependencies": {
     "@beenotung/tslib": "^17.6.1",
+    "dotenv": "^10.0.0",
+    "knex": "^0.95.11",
+    "pg": "^8.7.1",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
