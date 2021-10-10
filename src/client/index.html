@@ -7,13 +7,30 @@
     <title>quick-erd</title>
     <link rel="stylesheet" href="style.css" />
   </head>
+
   <body>
     <header>
       <button id="export" hidden>export</button>
       <button id="import" hidden>import</button>
       <button id="load-example">load example</button>
-      <button id="auto-place">auto place</button>
-      <button onclick="window.open('https://github.com/beenotung/quick-erd', '_blank')" style="float: right;">About</button>
+      <button
+        id="auto-place"
+        title="You can press [A] key as keyboard shortcut"
+      >
+        <key>A</key>uto place
+      </button>
+      <button
+        id="reset-zoom"
+        title="You can press [R] key or [0] key as keyboard shortcut"
+      >
+        <key>R</key>eset Zoom
+      </button>
+      <button
+        onclick="window.open('https://github.com/beenotung/quick-erd', '_blank')"
+        style="float: right"
+      >
+        About
+      </button>
     </header>
     <main>
       <div id="editor">
@@ -26,6 +43,21 @@
             href="https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model"
             >ERD</a
           >
+        </div>
+        <div class="controls">
+          <button
+            id="font-dec"
+            title="You can press [-] key as keyboard shortcut"
+          >
+            -
+          </button>
+          <span id="font-size">100%</span>
+          <button
+            id="font-inc"
+            title="You can press [+] key as keyboard shortcut"
+          >
+            +
+          </button>
         </div>
       </div>
     </main>

@@ -1,9 +1,10 @@
 import { parse } from './ast'
 import { DiagramController } from './diagram'
 const input = document.querySelector('#editor textarea') as HTMLTextAreaElement
+const fontSize = document.querySelector('#font-size') as HTMLSpanElement
 const diagram = document.querySelector('#diagram') as HTMLDivElement
 
-const diagramController = new DiagramController(diagram)
+const diagramController = new DiagramController(diagram, fontSize)
 
 input.value = localStorage.getItem('input') || input.value
 input.style.width = localStorage.getItem('input_width') || ''
@@ -81,7 +82,7 @@ reply
 -----
 id pk
 post_id fk >- post.id
-user_id fk >- user.id
+user_id fk >- user.id # inline comment
 reply_id null fk >- reply.id
 `.trim()
   parseInput()
@@ -89,4 +90,34 @@ reply_id null fk >- reply.id
 
 document.querySelector('#auto-place')?.addEventListener('click', () => {
   diagramController.autoPlace()
+})
+
+document.querySelector('#font-reset')?.addEventListener('click', () => {
+  diagramController.fontReset()
+})
+
+window.addEventListener('keypress', e => {
+  const tagName = document.activeElement?.tagName
+  if (tagName === 'TEXTAREA' || tagName === 'INPUT') return
+  switch (e.key) {
+    case '-':
+    case '_':
+      diagramController.fontDec()
+      return
+    case '+':
+    case '=':
+      diagramController.fontInc()
+      return
+    case 'a':
+    case 'A':
+      diagramController.autoPlace()
+      return
+    case '0':
+    case 'r':
+    case 'R':
+      diagramController.fontReset()
+      return
+    default:
+    // console.debug(e.key)
+  }
 })

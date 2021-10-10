@@ -5,28 +5,65 @@ export class DiagramController {
   message = this.div.querySelector('.message') as HTMLDivElement
   tableMap = new Map<string, TableController>()
   maxZIndex = 0
+  fontSize = +(localStorage.getItem('zoom') || '') || 1
+  barRadius = this.calcBarRadius()
+
+  controls = this.div.querySelector('.controls') as HTMLDivElement
 
   getSafeZIndex() {
     return (this.maxZIndex + 1) * 100
   }
 
-  onMouseMove?: (ev: MouseEvent) => void
+  onMouseMove?: (ev: { clientX: number; clientY: number }) => void
 
-  constructor(public div: HTMLDivElement) {
+  constructor(
+    public div: HTMLDivElement,
+    public fontSizeSpan: HTMLSpanElement,
+  ) {
     this.div.addEventListener('mousemove', ev => {
       this.onMouseMove?.(ev)
+    })
+    this.div.addEventListener('touchmove', ev => {
+      const e = ev.touches.item(0)
+      if (!e) return
+      this.onMouseMove?.(e)
     })
     this.div.addEventListener('mouseup', () => {
       delete this.onMouseMove
     })
+    this.div.addEventListener('touchend', () => {
+      delete this.onMouseMove
+    })
+
+    this.controls
+      .querySelector('#font-inc')
+      ?.addEventListener('click', () => this.fontInc())
+    this.controls
+      .querySelector('#font-dec')
+      ?.addEventListener('click', () => this.fontDec())
+
+    this.applyFontSize()
   }
 
   remove(table: TableController) {
     table.remove()
     this.tableMap.delete(table.data.name)
   }
-  getDiagramRect() {
-    return this.div.getBoundingClientRect()
+
+  getDiagramRect(): ClientRect {
+    const rect = this.div.getBoundingClientRect()
+    return {
+      top: rect.top,
+      bottom: rect.bottom,
+      left: rect.left,
+      right: rect.right,
+      width: this.div.scrollWidth,
+      height: this.div.scrollHeight,
+    }
+  }
+
+  calcBarRadius() {
+    return +getComputedStyle(this.div).fontSize.replace('px', '') * 2.125
   }
 
   add(table: Table, diagramRect: ClientRect) {
@@ -35,7 +72,7 @@ export class DiagramController {
     let isMouseDown = false
     let startX = 0
     let startY = 0
-    tableDiv.addEventListener('mousedown', ev => {
+    const onMouseDown = (ev: { clientX: number; clientY: number }) => {
       this.maxZIndex++
       tableDiv.style.zIndex = this.maxZIndex.toString()
       isMouseDown = true
@@ -49,8 +86,19 @@ export class DiagramController {
         startY = ev.clientY
         controller.renderTransform(this.getDiagramRect())
       }
+    }
+    tableDiv.addEventListener('mousedown', ev => {
+      onMouseDown(ev)
+    })
+    tableDiv.addEventListener('touchstart', ev => {
+      const e = ev.touches.item(0)
+      if (!e) return
+      onMouseDown(e)
     })
     tableDiv.addEventListener('mouseup', () => {
+      isMouseDown = false
+    })
+    tableDiv.addEventListener('touchend', () => {
       isMouseDown = false
     })
     this.div.appendChild(tableDiv)
@@ -64,7 +112,7 @@ export class DiagramController {
   render({ table_list }: ParseResult) {
     // show or hide placeholder message
     if (table_list.length === 0) {
-      this.message.style.display = 'initial'
+      this.message.style.display = 'inline-block'
     } else {
       this.message.style.display = 'none'
     }
@@ -94,6 +142,8 @@ export class DiagramController {
     this.tableMap.forEach(table => {
       table.renderLine(diagramRect)
     })
+
+    this.controls.style.zIndex = this.getSafeZIndex().toString()
   }
 
   autoPlace() {
@@ -102,9 +152,9 @@ export class DiagramController {
       const rect = table.div.getBoundingClientRect()
       tableRectMap.set(table, rect)
     })
-    const diagramRect = this.div.getBoundingClientRect()
+    const diagramRect = this.getDiagramRect()
 
-    const timeout = Date.now() + 5000
+    const timeout = Date.now() + 2000
     for (let isMoved = true; isMoved; ) {
       isMoved = false
       if (Date.now() > timeout) break
@@ -117,6 +167,7 @@ export class DiagramController {
           let offsetX = 0
           let offsetY = 0
           for (;;) {
+            if (Date.now() > timeout) break
             offsetX += floor(random() * 3) - 1
             offsetY += floor(random() * 3) - 1
 
@@ -155,6 +206,32 @@ export class DiagramController {
       })
     }
   }
+
+  applyFontSize() {
+    localStorage.setItem('zoom', this.fontSize.toString())
+    this.fontSizeSpan.textContent = (this.fontSize * 100).toFixed(0) + '%'
+    this.div.style.fontSize = this.fontSize + 'em'
+    this.barRadius = this.calcBarRadius()
+    const diagramRect = this.getDiagramRect()
+    this.tableMap.forEach(table => {
+      table.renderLine(diagramRect)
+    })
+  }
+  calcFontStep() {
+    return Math.min(this.fontSize * 0.1, 0.25)
+  }
+  fontInc() {
+    this.fontSize += this.calcFontStep()
+    this.applyFontSize()
+  }
+  fontDec() {
+    this.fontSize -= this.calcFontStep()
+    this.applyFontSize()
+  }
+  fontReset() {
+    this.fontSize = 1
+    this.applyFontSize()
+  }
 }
 
 function isRectCollide(self: ClientRect, other: ClientRect): boolean {
@@ -189,8 +266,8 @@ function isRectInside(outer: ClientRect, inner: ClientRect): boolean {
 class TableController {
   translateX = +(localStorage.getItem(this.data.name + '-x') || '0')
   translateY = +(localStorage.getItem(this.data.name + '-y') || '0')
-  // self field -> line
-  lineMap = new Map<string, LineController>()
+  // self_field + table + other_field -> line
+  _lineMap = new Map<string, LineController>()
   reverseLineSet = new Set<LineController>()
 
   onMoveListenerSet = new Set<(diagramRect: ClientRect) => void>()
@@ -198,7 +275,23 @@ class TableController {
   tbody: HTMLTableSectionElement
   fieldMap = new Map<string, HTMLTableRowElement>()
 
-  titleHeight: number
+  toFieldKey(own_field: string, table: string, other_field: string) {
+    return `${own_field}:${table}.${other_field}`
+  }
+
+  getLine(own_field: string, table: string, other_field: string) {
+    const key = this.toFieldKey(own_field, table, other_field)
+    return this._lineMap.get(key)
+  }
+  setLine(
+    own_field: string,
+    table: string,
+    other_field: string,
+    line: LineController,
+  ) {
+    const key = this.toFieldKey(own_field, table, other_field)
+    this._lineMap.set(key, line)
+  }
 
   constructor(
     public diagram: DiagramController,
@@ -213,8 +306,6 @@ class TableController {
 </div>
 `
     this.tbody = this.div.querySelector('tbody') as HTMLTableSectionElement
-    const title = this.div.querySelector('.table-title') as HTMLDivElement
-    this.titleHeight = title.getBoundingClientRect().height
   }
 
   getFieldElement(field: string) {
@@ -280,29 +371,34 @@ class TableController {
   }
 
   renderLine(diagramRect: ClientRect) {
-    const newLineMap = new Map<string, ForeignKeyReference>()
+    const newFieldRefMap = new Map<string, ForeignKeyReference>()
 
     this.data.field_list.forEach(field => {
       if (field.references) {
-        newLineMap.set(field.name, field.references)
+        newFieldRefMap.set(field.name, field.references)
       }
     })
 
     // remove old lines
-    this.lineMap.forEach((line, name) => {
-      if (!newLineMap.has(name)) {
-        this.removeLine(name, line)
+    this._lineMap.forEach((line, key) => {
+      if (!newFieldRefMap.has(key)) {
+        this.removeLine(key, line)
       }
     })
 
     // add new line or update existing line
-    newLineMap.forEach((reference, name) => {
-      const lineController = this.lineMap.get(name)
+    newFieldRefMap.forEach((reference, field) => {
+      this.toFieldKey
+      const lineController = this.getLine(
+        field,
+        reference.table,
+        reference.field,
+      )
       if (lineController) {
         lineController.relation = reference.type
         lineController.render(diagramRect)
       } else {
-        this.addLine(name, reference, diagramRect)
+        this.addLine(field, reference, diagramRect)
       }
     })
   }
@@ -327,25 +423,25 @@ class TableController {
     const to: LineReference = { field: reference.field, table: toTable }
 
     const controller = new LineController(
+      this.diagram,
       svg,
       from,
       to,
-      this.titleHeight,
       reference.type,
     )
-    this.lineMap.set(field, controller)
+    this.setLine(field, reference.table, reference.field, controller)
     controller.render(diagramRect)
   }
 
-  removeLine(field: string, line: LineController) {
+  removeLine(key: string, line: LineController) {
     line.svg.remove()
-    this.lineMap.delete(field)
+    this._lineMap.delete(key)
   }
 
   remove() {
     this.div.remove()
-    this.lineMap.forEach(line => line.remove())
-    this.lineMap.clear()
+    this._lineMap.forEach(line => line.remove())
+    this._lineMap.clear()
     this.fieldMap.clear()
     localStorage.removeItem(`${this.data.name}-x`)
     localStorage.removeItem(`${this.data.name}-y`)
@@ -362,10 +458,10 @@ class LineController {
   tail = this.makePath()
 
   constructor(
+    public diagram: DiagramController,
     public svg: SVGElement,
     public from: LineReference,
     public to: LineReference,
-    public barRadius: number,
     public relation: RelationType,
   ) {
     this.render = this.render.bind(this)
@@ -389,6 +485,13 @@ class LineController {
   }
 
   render(diagramRect: ClientRect) {
+    requestAnimationFrame(() => {
+      const div = this.diagram.div
+      const offsetX = div.scrollLeft
+      const offsetY = div.scrollTop
+      this.svg.style.left = offsetX + 'px'
+      this.svg.style.top = offsetY + 'px'
+    })
     const fromDiv = this.from.table.getFieldElement(this.from.field)
     if (!fromDiv) return
     const toDiv = this.to.table.getFieldElement(this.to.field)
@@ -434,17 +537,18 @@ class LineController {
 
     const barRatio = 1 / 2
     const marginRatio = barRatio * 2
+    const barRadius = this.diagram.barRadius
 
     if (from === fromRect.left) {
       // start from left
-      f_b_x = f_x - this.barRadius * barRatio
-      f_b2_x = f_x - (this.barRadius * barRatio) / 3
-      f_m_x = f_x - this.barRadius * marginRatio
+      f_b_x = f_x - barRadius * barRatio
+      f_b2_x = f_x - (barRadius * barRatio) / 3
+      f_m_x = f_x - barRadius * marginRatio
     } else {
       // start from right
-      f_b_x = f_x + this.barRadius * barRatio
-      f_b2_x = f_x + (this.barRadius * barRatio) / 3
-      f_m_x = f_x + this.barRadius * marginRatio
+      f_b_x = f_x + barRadius * barRatio
+      f_b2_x = f_x + (barRadius * barRatio) / 3
+      f_m_x = f_x + barRadius * marginRatio
     }
 
     let t_b_x: number // to bar
@@ -452,14 +556,14 @@ class LineController {
     let t_m_x: number // to margin
     if (to === toRect.left) {
       // end from left
-      t_b_x = t_x - this.barRadius * barRatio
-      t_b2_x = t_x - (this.barRadius * barRatio) / 3
-      t_m_x = t_x - this.barRadius * marginRatio
+      t_b_x = t_x - barRadius * barRatio
+      t_b2_x = t_x - (barRadius * barRatio) / 3
+      t_m_x = t_x - barRadius * marginRatio
     } else {
       // end from right
-      t_b_x = t_x + this.barRadius * barRatio
-      t_b2_x = t_x + (this.barRadius * barRatio) / 3
-      t_m_x = t_x + this.barRadius * marginRatio
+      t_b_x = t_x + barRadius * barRatio
+      t_b2_x = t_x + (barRadius * barRatio) / 3
+      t_m_x = t_x + barRadius * marginRatio
     }
 
     const first = this.relation[0]
@@ -482,7 +586,7 @@ class LineController {
       from_x: f_x,
       from_y: f_y,
       border_x: f_b_x,
-      barRadius: this.barRadius,
+      barRadius: barRadius,
       type: this.relation.startsWith('>0')
         ? 'zero-or-many'
         : first === '>'
@@ -499,7 +603,7 @@ class LineController {
       from_x: t_x,
       from_y: t_y,
       border_x: t_b_x,
-      barRadius: this.barRadius,
+      barRadius: barRadius,
       type: this.relation.endsWith('0<')
         ? 'zero-or-many'
         : last === '<'

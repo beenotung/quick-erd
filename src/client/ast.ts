@@ -12,10 +12,10 @@ class Parser implements ParseResult {
   table_list: Table[] = []
   line_list: string[] = []
   parse(input: string) {
-    this.line_list = input
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => !line.startsWith('#'))
+    input.split('\n').forEach(line => {
+      if (line.trim().startsWith('#')) return
+      this.line_list.push(line.replace(/#.*/, '').trim())
+    })
     this.table_list = []
     while (this.hasTable()) {
       this.table_list.push(this.parseTable())
