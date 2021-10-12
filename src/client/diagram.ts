@@ -256,6 +256,17 @@ export class DiagramController {
   resetView() {
     this.fontReset()
     this.tablesContainer.resetView()
+    this.resetColor()
+  }
+  randomColor() {
+    this.div.querySelectorAll('.table-title').forEach(div => {
+      (div as HTMLDivElement).style.backgroundColor = randomDarkColor()
+    })
+  }
+  resetColor() {
+    this.div.querySelectorAll('.table-title').forEach(div => {
+      (div as HTMLDivElement).style.backgroundColor = ''
+    })
   }
 }
 
@@ -353,6 +364,17 @@ function isRectInside(outer: DOMRect, inner: DOMRect): boolean {
     (outer.left <= inner.left && inner.right <= outer.right) ||
     (outer.top <= inner.top && inner.bottom <= outer.bottom)
   )
+}
+
+function randomDarkHex() {
+  return floor(random() * 9).toString(16)
+}
+
+function randomDarkColor() {
+  const r = randomDarkHex() + randomDarkHex()
+  const g = randomDarkHex() + randomDarkHex()
+  const b = randomDarkHex() + randomDarkHex()
+  return '#' + r + g + b
 }
 
 class TableController {

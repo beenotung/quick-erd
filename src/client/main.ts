@@ -92,6 +92,14 @@ document.querySelector('#auto-place')?.addEventListener('click', () => {
   diagramController.autoPlace()
 })
 
+document.querySelector('#random-color')?.addEventListener('click', () => {
+  diagramController.randomColor()
+})
+
+document.querySelector('#reset-color')?.addEventListener('click', () => {
+  diagramController.resetColor()
+})
+
 document.querySelector('#reset-zoom')?.addEventListener('click', () => {
   diagramController.resetView()
 })
