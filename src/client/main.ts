@@ -92,7 +92,7 @@ document.querySelector('#auto-place')?.addEventListener('click', () => {
   diagramController.autoPlace()
 })
 
-document.querySelector('#font-reset')?.addEventListener('click', () => {
+document.querySelector('#reset-zoom')?.addEventListener('click', () => {
   diagramController.fontReset()
 })
 
