@@ -96,6 +96,15 @@ main {
   flex-grow: 1;
   overflow: auto;
   position: relative;
+  #tables-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: block;
+    outline: 1px solid lightgrey;
+  }
   svg {
     position: absolute;
     width: 100%;
@@ -105,6 +114,7 @@ main {
     bottom: 0;
     left: 0;
     right: 0;
+    pointer-events: none;
   }
 }
 

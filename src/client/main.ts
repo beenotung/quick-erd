@@ -93,7 +93,7 @@ document.querySelector('#auto-place')?.addEventListener('click', () => {
 })
 
 document.querySelector('#reset-zoom')?.addEventListener('click', () => {
-  diagramController.fontReset()
+  diagramController.resetView()
 })
 
 window.addEventListener('keypress', e => {
@@ -113,9 +113,11 @@ window.addEventListener('keypress', e => {
       diagramController.autoPlace()
       return
     case '0':
+      diagramController.fontReset()
+      return
     case 'r':
     case 'R':
-      diagramController.fontReset()
+      diagramController.resetView()
       return
     default:
     // console.debug(e.key)

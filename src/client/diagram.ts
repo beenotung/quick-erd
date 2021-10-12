@@ -12,6 +12,10 @@ type Rect = {
 
 export class DiagramController {
   message = this.div.querySelector('.message') as HTMLDivElement
+  tablesContainer = new TablesContainer(
+    this,
+    this.div.querySelector('#tables-container') as HTMLDivElement,
+  )
   tableMap = new Map<string, TableController>()
   maxZIndex = 0
   fontSize = +(localStorage.getItem('zoom') || '') || 1
@@ -30,12 +34,20 @@ export class DiagramController {
     public fontSizeSpan: HTMLSpanElement,
   ) {
     this.div.addEventListener('mousemove', ev => {
-      this.onMouseMove?.(ev)
+      if (this.onMouseMove) {
+        this.onMouseMove(ev)
+      } else {
+        this.tablesContainer.onMouseMove(ev)
+      }
     })
     this.div.addEventListener('touchmove', ev => {
       const e = ev.touches.item(0)
       if (!e) return
-      this.onMouseMove?.(e)
+      if (this.onMouseMove) {
+        this.onMouseMove(e)
+      } else {
+        this.tablesContainer.onMouseMove(e)
+      }
     })
     this.div.addEventListener('mouseup', () => {
       delete this.onMouseMove
@@ -110,7 +122,7 @@ export class DiagramController {
     tableDiv.addEventListener('touchend', () => {
       isMouseDown = false
     })
-    this.div.appendChild(tableDiv)
+    this.tablesContainer.appendChild(tableDiv)
 
     const controller = new TableController(this, tableDiv, table)
     this.tableMap.set(table.name, controller)
@@ -240,6 +252,77 @@ export class DiagramController {
   fontReset() {
     this.fontSize = 1
     this.applyFontSize()
+  }
+  resetView() {
+    this.fontReset()
+    this.tablesContainer.resetView()
+  }
+}
+
+export class TablesContainer {
+  translateX = +(localStorage.getItem('view:x') || '0')
+  translateY = +(localStorage.getItem('view:y') || '0')
+  onMouseMove: (ev: { clientX: number; clientY: number }) => void
+
+  constructor(public diagram: DiagramController, public div: HTMLDivElement) {
+    this.div.style.transform = `translate(${this.translateX}px,${this.translateY}px)`
+
+    let isMouseDown = false
+    let startX = 0
+    let startY = 0
+    this.onMouseMove = ev => {
+      if (!isMouseDown) return
+
+      this.translateX += ev.clientX - startX
+      this.translateY += ev.clientY - startY
+
+      startX = ev.clientX
+      startY = ev.clientY
+
+      this.renderTransform()
+    }
+    const onMouseDown = (ev: { clientX: number; clientY: number }) => {
+      isMouseDown = true
+      startX = ev.clientX
+      startY = ev.clientY
+    }
+    const container = this.diagram.div
+    container.addEventListener('mousedown', ev => {
+      onMouseDown(ev)
+    })
+    container.addEventListener('touchstart', ev => {
+      const e = ev.touches.item(0)
+      if (!e) return
+      onMouseDown(e)
+    })
+    container.addEventListener('mouseup', () => {
+      isMouseDown = false
+    })
+    container.addEventListener('touchend', () => {
+      isMouseDown = false
+    })
+  }
+
+  appendChild(node: Node) {
+    this.div.appendChild(node)
+  }
+
+  renderTransform() {
+    const x = this.translateX.toString()
+    const y = this.translateY.toString()
+    this.div.style.transform = `translate(${x}px,${y}px)`
+    localStorage.setItem(`view:x`, x)
+    localStorage.setItem(`view:y`, y)
+    const diagramRect = this.diagram.getDiagramRect()
+    this.diagram.tableMap.forEach(tableController =>
+      tableController.renderLinesTransform(diagramRect),
+    )
+  }
+
+  resetView() {
+    this.translateX = 0
+    this.translateY = 0
+    this.renderTransform()
   }
 }
 
@@ -377,6 +460,10 @@ class TableController {
     localStorage.setItem(`${this.data.name}-x`, x)
     localStorage.setItem(`${this.data.name}-y`, y)
     this.onMoveListenerSet.forEach(fn => fn(diagramRect))
+  }
+
+  renderLinesTransform(diagramRect: Rect) {
+    this._lineMap.forEach(lineController => lineController.render(diagramRect))
   }
 
   renderLine(diagramRect: Rect) {
