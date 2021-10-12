@@ -448,8 +448,10 @@ class TableController {
     this._lineMap.forEach(line => line.remove())
     this._lineMap.clear()
     this.fieldMap.clear()
-    localStorage.removeItem(`${this.data.name}-x`)
-    localStorage.removeItem(`${this.data.name}-y`)
+    if (!'preserve position') {
+      localStorage.removeItem(`${this.data.name}-x`)
+      localStorage.removeItem(`${this.data.name}-y`)
+    }
   }
 }
 
