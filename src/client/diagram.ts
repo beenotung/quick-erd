@@ -1,6 +1,15 @@
 import { ForeignKeyReference, ParseResult, RelationType, Table } from './ast'
 const { random, floor, abs, sign } = Math
 
+type Rect = {
+  left: number
+  right: number
+  top: number
+  bottom: number
+  width: number
+  height: number
+}
+
 export class DiagramController {
   message = this.div.querySelector('.message') as HTMLDivElement
   tableMap = new Map<string, TableController>()
@@ -50,7 +59,7 @@ export class DiagramController {
     this.tableMap.delete(table.data.name)
   }
 
-  getDiagramRect(): ClientRect {
+  getDiagramRect(): Rect {
     const rect = this.div.getBoundingClientRect()
     return {
       top: rect.top,
@@ -66,7 +75,7 @@ export class DiagramController {
     return +getComputedStyle(this.div).fontSize.replace('px', '') * 2.125
   }
 
-  add(table: Table, diagramRect: ClientRect) {
+  add(table: Table, diagramRect: Rect) {
     const tableDiv = document.createElement('div')
     tableDiv.dataset.table = table.name
     let isMouseDown = false
@@ -147,7 +156,7 @@ export class DiagramController {
   }
 
   autoPlace() {
-    const tableRectMap = new Map<TableController, ClientRect>()
+    const tableRectMap = new Map<TableController, DOMRect>()
     this.tableMap.forEach(table => {
       const rect = table.div.getBoundingClientRect()
       tableRectMap.set(table, rect)
@@ -234,7 +243,7 @@ export class DiagramController {
   }
 }
 
-function isRectCollide(self: ClientRect, other: ClientRect): boolean {
+function isRectCollide(self: DOMRect, other: DOMRect): boolean {
   const list = [
     [self, other],
     [other, self],
@@ -253,10 +262,10 @@ function isRectCollide(self: ClientRect, other: ClientRect): boolean {
   return false
 }
 
-function isPointInside(rect: ClientRect, x: number, y: number): boolean {
+function isPointInside(rect: DOMRect, x: number, y: number): boolean {
   return rect.left <= x && x <= rect.right && rect.top <= y && y <= rect.bottom
 }
-function isRectInside(outer: ClientRect, inner: ClientRect): boolean {
+function isRectInside(outer: DOMRect, inner: DOMRect): boolean {
   return (
     (outer.left <= inner.left && inner.right <= outer.right) ||
     (outer.top <= inner.top && inner.bottom <= outer.bottom)
@@ -270,7 +279,7 @@ class TableController {
   _lineMap = new Map<string, LineController>()
   reverseLineSet = new Set<LineController>()
 
-  onMoveListenerSet = new Set<(diagramRect: ClientRect) => void>()
+  onMoveListenerSet = new Set<(diagramRect: Rect) => void>()
 
   tbody: HTMLTableSectionElement
   fieldMap = new Map<string, HTMLTableRowElement>()
@@ -361,7 +370,7 @@ class TableController {
     )
   }
 
-  renderTransform(diagramRect: ClientRect) {
+  renderTransform(diagramRect: Rect) {
     const x = this.translateX.toString()
     const y = this.translateY.toString()
     this.div.style.transform = `translate(${x}px,${y}px)`
@@ -370,7 +379,7 @@ class TableController {
     this.onMoveListenerSet.forEach(fn => fn(diagramRect))
   }
 
-  renderLine(diagramRect: ClientRect) {
+  renderLine(diagramRect: Rect) {
     const newFieldRefMap = new Map<string, ForeignKeyReference>()
 
     this.data.field_list.forEach(field => {
@@ -403,11 +412,7 @@ class TableController {
     })
   }
 
-  addLine(
-    field: string,
-    reference: ForeignKeyReference,
-    diagramRect: ClientRect,
-  ) {
+  addLine(field: string, reference: ForeignKeyReference, diagramRect: Rect) {
     const fromDiv = this.getFieldElement(field)
     if (!fromDiv) return
 
@@ -484,7 +489,7 @@ class LineController {
     this.to.table.onMoveListenerSet.delete(this.remove)
   }
 
-  render(diagramRect: ClientRect) {
+  render(diagramRect: Rect) {
     requestAnimationFrame(() => {
       const div = this.diagram.div
       const offsetX = div.scrollLeft
