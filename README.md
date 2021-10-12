@@ -29,14 +29,14 @@ Option 2: Run it locally
 
 1. Update `package.json`:
 
-Change the line from `"type": "module",` to `"type": "not_module",`
+Change the line from `"type": "module",` to `"type": "commonjs",`
 
 2. Set the database connection credential in `.env`.
 
 You can refer to `.env.example`
 
-3. Run `npx ts-node src/db/pg.ts`
+3. Run `npx ts-node src/db/pg-to-text`
 
-You can save the output into a file using pipe. e.g. `npx ts-node src/db/pg.ts > erd.txt`
+You can save the output into a file using pipe. e.g. `npx ts-node src/db/pg-to-text > erd.txt`
 
 4. Copy the output text into the web erd editor
