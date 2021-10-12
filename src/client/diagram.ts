@@ -256,7 +256,6 @@ export class DiagramController {
   resetView() {
     this.fontReset()
     this.tablesContainer.resetView()
-    this.resetColor()
   }
   randomColor() {
     this.div.querySelectorAll('.table-title').forEach(div => {
