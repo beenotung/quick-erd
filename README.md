@@ -7,9 +7,15 @@ quick and easy text-based ERD editor with drag and drop visualization
 ## Features
 
 - [x] text-based erd editor
-- [x] web-based visualization with drag-and-drop moving
 - [x] import from existing postgresql schema
 - [x] generate knex migration (for initial schema)
+- [x] web-based visualization
+  - [x] zoom in/out
+  - [x] drag-and-drop moving
+  - [x] show/hide non-relational columns
+  - [x] plain/colorful table heading
+  - [x] keyboard shortcuts
+  - [x] auto save-and-restore with localStorage
 
 ## Usage
 
