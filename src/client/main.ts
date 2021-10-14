@@ -120,6 +120,10 @@ window.addEventListener('keypress', e => {
     case 'A':
       diagramController.autoPlace()
       return
+    case 'c':
+    case 'C':
+      diagramController.randomColor()
+      return
     case '0':
       diagramController.fontReset()
       return
