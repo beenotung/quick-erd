@@ -36,9 +36,10 @@ Option 2: Run it locally
 
 #### Setup
 
-1. Update `package.json`:
+1. Run `npm run type:commonjs`
 
-Change the line from `"type": "module",` to `"type": "commonjs",`
+This script changes the package from "module" mode into "commonjs" mode.
+This is mandatory for ts-node to load typescript files.
 
 2. Set the database connection credential in `.env`.
 
@@ -64,8 +65,8 @@ Also, you can save the result into a knex migration script. e.g.
 # create migrations directory if not exist
 mkdir -p migrations
 
-# read from erd.txt, save to migrations/create-tables.ts
-npx ts-node src/db/text-to-knex < erd.txt > migrations/00000000000000-create-tables.ts
+# read from erd.txt, save to migrations/YYYYmmddHHMMSS-create-tables.ts
+npx ts-node src/db/text-to-knex < erd.txt > migrations/$(date +"%Y%m%d%H%M%S")-create-tables.ts
 ```
 
 ## Todo

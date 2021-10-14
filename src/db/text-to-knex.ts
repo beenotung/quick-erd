@@ -1,5 +1,5 @@
-import { Table, Field, parse } from '../client/ast'
-import { knex } from './db'
+import { parse } from '../client/ast'
+import { knex } from './knex'
 
 function main() {
   let text = ''

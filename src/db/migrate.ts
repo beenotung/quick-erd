@@ -1,6 +1,6 @@
 import Knex from 'knex'
-import { down, up } from '../migrate'
-import { knex } from '../src/db/db'
+import { knex } from './knex'
+import { down, up } from '../../migrate'
 
 down(knex)
   .then(() => up(knex))

@@ -1,5 +1,5 @@
 import { Table, Field } from '../client/ast'
-import { knex } from './db'
+import { knex } from './knex'
 
 function toDataType(type: string): string {
   if (type.includes('character varying')) {
