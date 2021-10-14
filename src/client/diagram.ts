@@ -1,4 +1,5 @@
 import { ForeignKeyReference, ParseResult, RelationType, Table } from './ast'
+import { StoredValue } from './storage'
 const { random, floor, abs, sign } = Math
 
 type Rect = {
@@ -22,6 +23,8 @@ export class DiagramController {
   barRadius = this.calcBarRadius()
 
   controls = this.div.querySelector('.controls') as HTMLDivElement
+
+  isDetailMode = new StoredValue('is_detail_mode', true)
 
   getSafeZIndex() {
     return (this.maxZIndex + 1) * 100
@@ -228,6 +231,15 @@ export class DiagramController {
     }
   }
 
+  toggleDetails() {
+    this.isDetailMode.value = !this.isDetailMode.value
+    const diagramRect = this.getDiagramRect()
+    this.tableMap.forEach(table => {
+      table.rerenderColumns()
+      table.renderLine(diagramRect)
+    })
+  }
+
   applyFontSize() {
     localStorage.setItem('zoom', this.fontSize.toString())
     this.fontSizeSpan.textContent = (this.fontSize * 100).toFixed(0) + '%'
@@ -422,9 +434,10 @@ class TableController {
   }
 
   getFieldElement(field: string) {
-    return this.div.querySelector<HTMLDivElement>(
-      `[data-table-field='${field}']`,
-    )
+    return this.fieldMap.get(field)
+    // return this.div.querySelector<HTMLDivElement>(
+    //   `[data-table-field='${field}']`,
+    // )
   }
 
   render(data: Table) {
@@ -454,14 +467,14 @@ class TableController {
         const tag = tags.join(', ')
         const null_text = is_null ? 'NULL' : ''
 
-        let tr = this.div.querySelector(
-          `[data-table-field='${name}']`,
-        ) as HTMLTableRowElement
+        let tr = this.fieldMap.get(name)
         if (!tr) {
           tr = document.createElement('tr')
           tr.dataset.tableField = name
           this.fieldMap.set(name, tr)
         }
+
+        tr.hidden = !this.diagram.isDetailMode.value && tags.length === 0
 
         tr.innerHTML = /* html */ `
   <td class='table-field-tag'>${tag}</td>
@@ -472,6 +485,15 @@ class TableController {
         this.tbody.appendChild(tr)
       },
     )
+  }
+
+  rerenderColumns() {
+    this.data.field_list.forEach(field => {
+      if (field.is_primary_key || field.references) return
+      const tr = this.fieldMap.get(field.name)
+      if (!tr) return
+      tr.hidden = !this.diagram.isDetailMode.value
+    })
   }
 
   renderTransform(diagramRect: Rect) {

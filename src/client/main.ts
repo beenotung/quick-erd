@@ -92,6 +92,10 @@ document.querySelector('#auto-place')?.addEventListener('click', () => {
   diagramController.autoPlace()
 })
 
+document.querySelector('#toggle-details')?.addEventListener('click', () => {
+  diagramController.toggleDetails()
+})
+
 document.querySelector('#random-color')?.addEventListener('click', () => {
   diagramController.randomColor()
 })
@@ -119,6 +123,10 @@ window.addEventListener('keypress', e => {
     case 'a':
     case 'A':
       diagramController.autoPlace()
+      return
+    case 'd':
+    case 'D':
+      diagramController.toggleDetails()
       return
     case 'c':
     case 'C':
