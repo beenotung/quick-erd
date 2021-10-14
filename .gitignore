@@ -1,15 +1,24 @@
-
+# npm
 node_modules/
 package-lock.json
 pnpm-lock.yaml
 pnpm-debug.log
+*.tgz
+
+# built files
 dist/
 .cache/
-*.tgz
+build/
+
+# config files
 .env
 .husky/_
+.last
+
+# test report files
 .nyc_output
 coverage/
-build/
-.last
-erd.txt
+
+# output files
+/erd.txt
+/migrate.ts
