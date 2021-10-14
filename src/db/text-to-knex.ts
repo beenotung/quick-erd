@@ -52,6 +52,12 @@ export async function up(knex: Knex): Promise<void> {
               code += `.unsigned()`
             }
             code += `.primary()`
+          } else {
+            if (field.is_null) {
+              code += `.nullable()`
+            } else {
+              code += `.notNullable()`
+            }
           }
 
           const ref = field.references
