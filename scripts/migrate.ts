@@ -1,14 +1,6 @@
 import Knex from 'knex'
 import { down, up } from '../migrate'
-
-const knex = Knex({
-  client: 'pg',
-  connection: {
-    database: 'erd',
-    user: 'erd',
-    password: 'erd',
-  },
-})
+import { knex } from '../src/db/db'
 
 down(knex)
   .then(() => up(knex))

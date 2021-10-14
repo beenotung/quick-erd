@@ -16,6 +16,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
+    "migrate": "ts-node scripts/migrate.ts",
     "dev": "snowpack dev",
     "upload": "run-s clean build:client surge:all",
     "build:client": "snowpack build",
