@@ -53,6 +53,7 @@ You can save the output into a file using pipe. e.g. `npx ts-node src/db/pg-to-t
 You can save the erd text into a file, then load it as stdin. e.g. `npx ts-node src/db/text-to-knex < erd.txt`
 
 Also, you can save the result into a knex migration script. e.g.
+
 ```bash
 # create migrations directory if not exist
 mkdir -p migrations
@@ -62,4 +63,5 @@ npx ts-node src/db/text-to-knex < erd.txt > migrations/00000000000000-create-tab
 ```
 
 ## Todo
+
 - publish text-to-knex and pg-to-text as npm bin
