@@ -71,3 +71,4 @@ npx ts-node src/db/text-to-knex < erd.txt > migrations/00000000000000-create-tab
 ## Todo
 
 - publish text-to-knex and pg-to-text as npm bin
+- improve "Auto Place" algorithm
