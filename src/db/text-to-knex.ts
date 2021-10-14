@@ -19,7 +19,7 @@ export async function up(knex: Knex): Promise<void> {
 `
 
       const table_list = result.table_list
-      table_list.forEach(self => {
+      table_list.slice().forEach(self => {
         self.field_list.forEach(field => {
           const ref = field.references
           if (!ref) return
