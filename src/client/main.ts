@@ -96,8 +96,14 @@ document.querySelector('#normalize')?.addEventListener('click', showNormalize)
 function showNormalize() {
   const dialog = openDialog(diagramController)
   dialog.innerHTML = /* html */ `
-<label for="field">Field</label>
+<label for="field">field:</label>
+<br>
 <input id="field" name="field" type="text">
+<br>
+<br>
+<label for="table">table (optional):</label>
+<br>
+<input id="table" name="table" type="text">
 <br>
 <br>
 <button class='cancel'>close</button>
@@ -109,20 +115,24 @@ function showNormalize() {
   dialog.querySelector('.confirm')?.addEventListener('click', () => {
     applyNormalize()
   })
-  const field = dialog.querySelector('input') as HTMLInputElement
-  field.focus()
-  field.addEventListener('keypress', e => {
-    if (e.key === 'Enter') {
+  const field = dialog.querySelector('input[name=field]') as HTMLInputElement
+  const table = dialog.querySelector('input[name=table]') as HTMLInputElement
+  field.addEventListener('keypress', onKeypress)
+  table.addEventListener('keypress', onKeypress)
+  function onKeypress(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
       applyNormalize()
     }
-  })
+  }
   function applyNormalize() {
-    const name = field.value.trim()
-    if (!name) return
-    input.value = normalize(input.value, name)
+    const fieldName = field.value.trim()
+    if (!fieldName) return
+    const tableName = table.value.trim() || fieldName
+    input.value = normalize(input.value, fieldName, tableName)
     parseInput()
     localStorage.setItem('input', input.value)
   }
+  field.focus()
 }
 
 document.querySelector('#auto-place')?.addEventListener('click', () => {
