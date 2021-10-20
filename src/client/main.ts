@@ -57,6 +57,8 @@ document.querySelector('#load-example')?.addEventListener('click', () => {
 
 function loadExample() {
   input.value = `
+# ${location.origin}
+#
 # Relationship Types
 #  -    - one to one
 #  -<   - one to many
