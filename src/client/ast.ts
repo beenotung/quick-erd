@@ -14,7 +14,12 @@ class Parser implements ParseResult {
   parse(input: string) {
     input.split('\n').forEach(line => {
       if (line.trim().startsWith('#')) return
-      this.line_list.push(line.replace(/#.*/, '').trim())
+      this.line_list.push(
+        line
+          .replace(/#.*/, '')
+          .replace(/\/\/.*/, '')
+          .trim(),
+      )
     })
     this.table_list = []
     while (this.hasTable()) {
