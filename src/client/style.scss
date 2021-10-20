@@ -28,6 +28,10 @@ button {
   // border-radius: 0.25em;
 }
 
+label {
+  text-transform: capitalize;
+}
+
 button key {
   text-decoration: underline;
 }
@@ -121,6 +125,7 @@ main {
 dialog[open] {
   position: absolute;
   top: 25%;
+  background-color: #ffffffd0;
 }
 
 .confirm {
