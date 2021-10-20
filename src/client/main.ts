@@ -1,5 +1,7 @@
 import { parse } from './ast'
 import { DiagramController } from './diagram'
+import { openDialog } from './dialog'
+import { normalize } from './normalize'
 const input = document.querySelector('#editor textarea') as HTMLTextAreaElement
 const fontSize = document.querySelector('#font-size') as HTMLSpanElement
 const diagram = document.querySelector('#diagram') as HTMLDivElement
@@ -37,10 +39,7 @@ document.querySelector('#load-example')?.addEventListener('click', () => {
     loadExample()
     return
   }
-  const dialog = document.createElement('dialog')
-  dialog.style.zIndex = diagramController.getSafeZIndex().toString()
-  dialog.setAttribute('open', '')
-  document.body.appendChild(dialog)
+  const dialog = openDialog(diagramController)
   dialog.innerHTML = /* html */ `
 <p>Confirm to overwrite existing content with example?</p>
 <button class='cancel'>cancel</button>
@@ -90,6 +89,40 @@ reply_id null fk >- reply.id
   parseInput()
 }
 
+document.querySelector('#normalize')?.addEventListener('click', showNormalize)
+
+function showNormalize() {
+  const dialog = openDialog(diagramController)
+  dialog.innerHTML = /* html */ `
+<label for="field">Field</label>
+<input id="field" name="field" type="text">
+<br>
+<br>
+<button class='cancel'>close</button>
+<button class='confirm'>normalize</button>
+`
+  dialog.querySelector('.cancel')?.addEventListener('click', () => {
+    dialog.remove()
+  })
+  dialog.querySelector('.confirm')?.addEventListener('click', () => {
+    applyNormalize()
+  })
+  const field = dialog.querySelector('input') as HTMLInputElement
+  field.focus()
+  field.addEventListener('keypress', e => {
+    if (e.key === 'Enter') {
+      applyNormalize()
+    }
+  })
+  function applyNormalize() {
+    const name = field.value.trim()
+    if (!name) return
+    input.value = normalize(input.value, name)
+    parseInput()
+    localStorage.setItem('input', input.value)
+  }
+}
+
 document.querySelector('#auto-place')?.addEventListener('click', () => {
   diagramController.autoPlace()
 })
@@ -109,6 +142,14 @@ document.querySelector('#reset-color')?.addEventListener('click', () => {
 document.querySelector('#reset-zoom')?.addEventListener('click', () => {
   diagramController.resetView()
 })
+
+function closeDialog() {
+  const es = document.querySelectorAll('dialog')
+  const last = es.item(es.length - 1)
+  if (last) {
+    last.remove()
+  }
+}
 
 window.addEventListener('keypress', e => {
   const tagName = document.activeElement?.tagName
@@ -140,6 +181,14 @@ window.addEventListener('keypress', e => {
     case 'r':
     case 'R':
       diagramController.resetView()
+      return
+    case 'n':
+    case 'N':
+      showNormalize()
+      return
+    case 'q':
+    case 'Q':
+      closeDialog()
       return
     default:
     // console.debug(e.key)
