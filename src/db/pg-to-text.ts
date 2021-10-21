@@ -52,10 +52,13 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
         [table.name, column_row.column_name],
       )
       const fk_row = rows[0]
+      const type = toDataType(column_row.data_type)
       table.field_list.push({
         name: column_row.column_name,
-        type: toDataType(column_row.data_type),
-        is_primary_key: false,
+        type,
+        is_primary_key:
+          column_row.column_name === 'id' &&
+          (type === 'integer' || type === 'int'),
         is_null: column_row.is_nullable === 'YES',
         references: fk_row
           ? {
