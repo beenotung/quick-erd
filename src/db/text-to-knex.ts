@@ -44,22 +44,21 @@ export async function up(knex: Knex): Promise<void> {
   if (!(await knex.schema.hasTable('${table.name}'))) {
     await knex.schema.createTable('${table.name}', table => {`
         table.field_list.forEach(field => {
+          if (field.is_primary_key) {
+            code += `
+      table.increments('${field.name}')`
+            return
+          }
+
           const type = field.type
 
           code += `
       table.${type}('${field.name}')`
 
-          if (field.is_primary_key) {
-            if (type === 'integer') {
-              code += `.unsigned()`
-            }
-            code += `.primary()`
+          if (field.is_null) {
+            code += `.nullable()`
           } else {
-            if (field.is_null) {
-              code += `.nullable()`
-            } else {
-              code += `.notNullable()`
-            }
+            code += `.notNullable()`
           }
 
           const ref = field.references
