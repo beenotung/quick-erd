@@ -14,14 +14,94 @@ create table test (
         name: 'id',
         type: 'integer',
         is_primary_key: false,
-        is_null: false,
+        is_null: true,
         references: undefined,
       },
       {
         name: 'content',
         type: 'text',
         is_primary_key: false,
+        is_null: true,
+        references: undefined,
+      },
+    ]
+    expect(parseCreateTable(sql)).to.deep.equals(ast)
+  })
+  it('should parse columns with null statement', () => {
+    let sql = /* sql */ `
+create table test (
+  f1 null integer
+, f2 integer null
+, f3 null
+, f4
+)`
+    let ast: Field[] = [
+      {
+        name: 'f1',
+        type: 'integer',
+        is_primary_key: false,
+        is_null: true,
+        references: undefined,
+      },
+      {
+        name: 'f2',
+        type: 'integer',
+        is_primary_key: false,
+        is_null: true,
+        references: undefined,
+      },
+      {
+        name: 'f3',
+        type: '',
+        is_primary_key: false,
+        is_null: true,
+        references: undefined,
+      },
+      {
+        name: 'f4',
+        type: '',
+        is_primary_key: false,
+        is_null: true,
+        references: undefined,
+      },
+    ]
+    expect(parseCreateTable(sql)).to.deep.equals(ast)
+  })
+  it('should parse columns with not-null statement', () => {
+    let sql = /* sql */ `
+create table test (
+  f1 not null integer
+, f2 integer not null
+, f3 not null
+, f4
+)`
+    let ast: Field[] = [
+      {
+        name: 'f1',
+        type: 'integer',
+        is_primary_key: false,
         is_null: false,
+        references: undefined,
+      },
+      {
+        name: 'f2',
+        type: 'integer',
+        is_primary_key: false,
+        is_null: false,
+        references: undefined,
+      },
+      {
+        name: 'f3',
+        type: '',
+        is_primary_key: false,
+        is_null: false,
+        references: undefined,
+      },
+      {
+        name: 'f4',
+        type: '',
+        is_primary_key: false,
+        is_null: true,
         references: undefined,
       },
     ]
@@ -38,14 +118,14 @@ create table test (
         name: 'id',
         type: 'integer',
         is_primary_key: true,
-        is_null: false,
+        is_null: true,
         references: undefined,
       },
       {
         name: 'content',
         type: 'text',
         is_primary_key: false,
-        is_null: false,
+        is_null: true,
         references: undefined,
       },
     ]
@@ -63,14 +143,14 @@ create table test (
         name: 'id',
         type: '',
         is_primary_key: true,
-        is_null: false,
+        is_null: true,
         references: undefined,
       },
       {
         name: 'content',
         type: 'text',
         is_primary_key: false,
-        is_null: false,
+        is_null: true,
         references: undefined,
       },
     ]
@@ -88,14 +168,14 @@ create table test (
         name: 'id',
         type: 'integer',
         is_primary_key: true,
-        is_null: false,
+        is_null: true,
         references: undefined,
       },
       {
         name: 'content',
         type: 'text',
         is_primary_key: false,
-        is_null: false,
+        is_null: true,
         references: undefined,
       },
     ]
@@ -113,21 +193,21 @@ create table test (
         name: 'id',
         type: 'integer',
         is_primary_key: false,
-        is_null: false,
+        is_null: true,
         references: undefined,
       },
       {
         name: 'user_id',
         type: 'integer',
         is_primary_key: false,
-        is_null: false,
+        is_null: true,
         references: { table: 'user', field: 'id', type: '>-' },
       },
       {
         name: 'post_id',
         type: 'integer',
         is_primary_key: false,
-        is_null: false,
+        is_null: true,
         references: { table: 'post', field: 'id', type: '>-' },
       },
     ]
@@ -144,14 +224,14 @@ create table test (
         name: 'user_id',
         type: '',
         is_primary_key: false,
-        is_null: false,
+        is_null: true,
         references: { table: 'user', field: 'id', type: '>-' },
       },
       {
         name: 'post_id',
         type: '',
         is_primary_key: false,
-        is_null: false,
+        is_null: true,
         references: { table: 'post', field: 'id', type: '>-' },
       },
     ]
@@ -170,14 +250,14 @@ CREATE TABLE test(
         name: 'user_id',
         type: 'integer',
         is_primary_key: false,
-        is_null: false,
+        is_null: true,
         references: { table: 'user', field: 'id', type: '>-' },
       },
       {
         name: 'post_id',
         type: 'integer',
         is_primary_key: false,
-        is_null: false,
+        is_null: true,
         references: { table: 'post', field: 'id', type: '>-' },
       },
     ]

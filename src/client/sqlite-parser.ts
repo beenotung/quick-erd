@@ -34,6 +34,18 @@ export function parseCreateTable(sql: string): Field[] | null {
       field.references = { table: refTable, field: refField, type: '>-' }
       return
     }
+    let is_null = true
+    rest = ' ' + rest + ' '
+    lower = rest.toLowerCase()
+    if (lower.includes(' not null ')) {
+      is_null = false
+      const [before, after] = split(rest, lower, ' not null ')
+      rest = before + ' ' + after
+    } else if (lower.includes(' null ')) {
+      const [before, after] = split(rest, lower, ' null ')
+      rest = before + ' ' + after
+    }
+    rest = rest.trim()
     const [name, rest1] = parseName(rest)
     rest = rest1.trim()
     lower = rest.toLowerCase()
@@ -74,7 +86,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       name,
       type: type.toLowerCase(),
       is_primary_key,
-      is_null: false,
+      is_null,
       references,
     }
   })
@@ -82,10 +94,11 @@ export function parseCreateTable(sql: string): Field[] | null {
 }
 
 function firstIndexOf(string: string, patterns: string[], offset = 0): number {
-  return patterns
+  const index_list = patterns
     .map(pattern => string.indexOf(pattern, offset))
     .filter(index => index !== -1)
-    .sort((a, b) => a - b)[0]
+    .sort((a, b) => a - b)
+  return index_list.length === 0 ? -1 : index_list[0]
 }
 
 function parseName(sql: string) {
@@ -113,4 +126,12 @@ function parseNameInBracket(sql: string) {
   const after = sql.substring(end + 1)
   const [name] = parseName(middle)
   return [name, after]
+}
+
+function split(sql: string, lower: string, separator: string) {
+  const start = lower.indexOf(separator)
+  const end = start + separator.length
+  const before = sql.substring(0, start)
+  const after = sql.substring(end)
+  return [before, after] as const
 }
