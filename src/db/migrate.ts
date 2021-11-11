@@ -1,4 +1,3 @@
-import Knex from 'knex'
 import { knex } from './knex'
 import { down, up } from '../../migrate'
 

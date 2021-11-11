@@ -578,6 +578,7 @@ class TableController {
     this._lineMap.forEach(line => line.remove())
     this._lineMap.clear()
     this.fieldMap.clear()
+    // eslint-disable-next-line no-constant-condition
     if (!'preserve position') {
       localStorage.removeItem(`${this.data.name}-x`)
       localStorage.removeItem(`${this.data.name}-y`)
