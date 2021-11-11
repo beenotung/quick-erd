@@ -56,7 +56,7 @@ class Parser implements ParseResult {
     let is_primary_key = false
     let references: ForeignKeyReference | undefined
     for (;;) {
-      const name = this.parseOptionalName()
+      const name = this.parseType()
       if (!name) break
       switch (name.toUpperCase()) {
         case 'NULL':
@@ -93,18 +93,22 @@ class Parser implements ParseResult {
     }
     this.line_list.shift()
   }
-  parseOptionalName(): string | undefined {
-    try {
-      return this.parseName()
-    } catch (error) {
-      return
-    }
-  }
   parseName(): string {
     let line = this.peekLine()
     const match = line.match(/[a-zA-Z0-9_]+/)
     if (!match) {
       throw new ParseNameError(line)
+    }
+    const name = match[0]
+    line = line.replace(name, '').trim()
+    this.line_list[0] = line
+    return name
+  }
+  parseType(): string | undefined {
+    let line = this.peekLine()
+    const match = line.match(/[a-zA-Z0-9_(),"']+/)
+    if (!match) {
+      return
     }
     const name = match[0]
     line = line.replace(name, '').trim()
