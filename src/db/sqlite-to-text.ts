@@ -1,8 +1,8 @@
 import { existsSync } from 'fs'
 import Knex from 'knex'
-import { Field, Table } from '../client/ast'
-import { DDLParser } from '@vuerd/sql-ddl-parser'
-import { parseTable } from '../client/sqlite-parser'
+import { Table } from '../client/ast'
+import { parseCreateTable } from '../client/sqlite-parser'
+import { printTables } from './table'
 
 const dbFile = process.argv[2]
 if (!dbFile) {
@@ -21,22 +21,24 @@ const knex = Knex({
 })
 
 async function scanTableSchema() {
-  const tableList: Table[] = []
+  const table_list: Table[] = []
   const table_rows: Array<{ name: string; sql: string }> = await knex
     .select('name', 'sql')
     .from('sqlite_master')
     .where({ type: 'table' })
   table_rows.forEach(row => {
-    // const result = DDLParser(row.sql)
-    // console.log(row.sql)
-    // console.dir(result, { depth: 20 })
-    const table = parseTable(row.sql)
-    console.log('table:', table)
+    const field_list = parseCreateTable(row.sql)
+    if (!field_list) {
+      throw new Error('Failed to parse table: ' + row.sql)
+    }
+    table_list.push({ name: row.name, field_list: field_list })
   })
+  return table_list
 }
 
 async function main() {
-  await scanTableSchema()
+  const tables = await scanTableSchema()
+  printTables(tables)
   await knex.destroy()
 }
 

@@ -1,5 +1,6 @@
-import { Table, Field } from '../client/ast'
+import { Table } from '../client/ast'
 import { knex } from './knex'
+import { printTables } from './table'
 
 function toDataType(type: string): string {
   if (type.includes('character varying')) {
@@ -73,33 +74,9 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
   return tableList
 }
 
-function tableToString(table: Table): string {
-  return `
-${table.name}
-${'-'.repeat(table.name.length)}
-${table.field_list.map(fieldToString).join('\n')}
-`
-}
-function fieldToString(field: Field): string {
-  let text = `${field.name} ${field.type}`
-  if (field.is_null) {
-    text += ' NULL'
-  }
-  if (field.is_primary_key) {
-    text += ' PK'
-  }
-  if (field.references) {
-    const ref = field.references
-    text += ` FK ${ref.type} ${ref.table}.${ref.field}`
-  }
-  return text
-}
-
 async function main() {
   const tableList = await scanTableSchema()
-  const text = tableList.map(tableToString).join('\n')
-  console.log(text)
-  // console.dir(tableList ,{depth:20})
+  printTables(tableList)
   await knex.destroy()
 }
 

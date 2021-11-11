@@ -46,9 +46,13 @@ This is mandatory for ts-node to load typescript files.
 
 You can refer to `.env.example`
 
-#### Import from Existing Postgresql Schema
+#### Import from Existing Schema
 
-1. Run `npx ts-node src/db/pg-to-text`
+1. Extract from live database
+
+For Postgresql Schema: Run `npx ts-node src/db/pg-to-text`
+
+For Sqlite Schema: Run `npx ts-node src/db/sqlite-to-text`
 
 You can save the output into a file using pipe. e.g. `npx ts-node src/db/pg-to-text > erd.txt`
 

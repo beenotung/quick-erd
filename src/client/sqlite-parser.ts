@@ -1,6 +1,6 @@
-import { Field } from './ast'
+import { Field, ForeignKeyReference } from './ast'
 
-export function parseTable(sql: string): Field[] | null {
+export function parseCreateTable(sql: string): Field[] | null {
   const start = sql.indexOf('(')
   if (start === -1) return null
   const end = sql.lastIndexOf(')')
@@ -9,42 +9,85 @@ export function parseTable(sql: string): Field[] | null {
   const field_dict: Record<string, Field> = {}
   sql.split(',').forEach(part => {
     let rest = part.trim()
-    if (rest.toLowerCase().startsWith('primary key')) {
-      const start = rest.indexOf('(')
-      const end = rest.indexOf(')')
-      rest = rest.substring(start + 1, end)
-      const [name] = parseName(rest)
+    let lower = rest.toLowerCase()
+    if (lower.startsWith('primary key')) {
+      const [name] = parseNameInBracket(rest)
       const field = field_dict[name]
       if (field) {
         field.is_primary_key = true
       }
       return
     }
+    if (lower.startsWith('foreign key')) {
+      const [fieldName, rest1] = parseNameInBracket(rest)
+      rest = rest1.trim()
+      lower = rest.toLowerCase()
+      if (!lower.startsWith('references')) {
+        return
+      }
+      rest = rest.substring('references'.length).trim()
+      const [refTable, rest2] = parseName(rest)
+      rest = rest2.trim()
+      const [refField] = parseNameInBracket(rest)
+      const field = field_dict[fieldName]
+      if (!field) return
+      field.references = { table: refTable, field: refField, type: '>-' }
+      return
+    }
     const [name, rest1] = parseName(rest)
     rest = rest1.trim()
-    const [type, rest2] = parseName(rest)
-    rest = rest2.trim()
+    lower = rest.toLowerCase()
+    let type: string
+    if (lower.startsWith('references') || lower.startsWith('primary key')) {
+      type = ''
+    } else {
+      const [type2, rest2] = parseName(rest)
+      type = type2
+      rest = rest2.trim()
+      lower = rest.toLowerCase()
+    }
     let is_primary_key = false
-    const lower = rest.toLowerCase()
     if (lower.includes('primary key')) {
       const start = lower.indexOf('primary key')
+      const end = start + 'primary key'.length
       const before = rest.substring(0, start)
-      const after = rest.substring(start + 'primary key'.length)
-      console.log('before:', rest)
-      rest = before + after
-      console.log('after:', rest)
+      const after = rest.substring(end)
+      rest = (before + after).trim()
+      lower = rest.toLowerCase()
       is_primary_key = true
+    }
+    let references: ForeignKeyReference | undefined = undefined
+    if (lower.includes('references')) {
+      const start = lower.indexOf('references')
+      const end = start + 'references'.length
+      const before = rest.substring(0, start)
+      let after = rest.substring(end).trim()
+      const [table, rest3] = parseName(after)
+      after = rest3.trim()
+      const [field, rest4] = parseNameInBracket(after)
+      after = rest4.trim()
+      references = { table, field, type: '>-' }
+      rest = before + after
+      lower = rest.toLowerCase()
     }
     field_dict[name] = {
       name,
       type: type.toLowerCase(),
       is_primary_key,
       is_null: false,
-      references: undefined,
+      references,
     }
   })
   return Object.values(field_dict)
 }
+
+function firstIndexOf(string: string, patterns: string[], offset = 0): number {
+  return patterns
+    .map(pattern => string.indexOf(pattern, offset))
+    .filter(index => index !== -1)
+    .sort((a, b) => a - b)[0]
+}
+
 function parseName(sql: string) {
   let start: number
   let end: number
@@ -53,7 +96,7 @@ function parseName(sql: string) {
     end = sql.indexOf('"', 1)
   } else {
     start = 0
-    end = sql.indexOf(' ')
+    end = firstIndexOf(sql, [' ', '('])
   }
   if (end === -1) {
     end = sql.length
@@ -61,4 +104,13 @@ function parseName(sql: string) {
   const name = sql.substring(start, end)
   const rest = sql.substring(end + 1)
   return [name, rest] as const
+}
+
+function parseNameInBracket(sql: string) {
+  const start = sql.indexOf('(')
+  const end = sql.indexOf(')', start)
+  const middle = sql.substring(start + 1, end).trim()
+  const after = sql.substring(end + 1)
+  const [name] = parseName(middle)
+  return [name, after]
 }
