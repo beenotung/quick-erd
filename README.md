@@ -17,6 +17,7 @@ quick and easy text-based ERD editor with drag and drop visualization
   - [x] keyboard shortcuts
   - [x] auto save-and-restore with localStorage
   - [x] auto normalize specified column
+  - [x] auto avoid table overlapping visually
 
 ## Usage
 
@@ -77,4 +78,4 @@ npx ts-node src/db/text-to-knex < erd.txt > migrations/$(date +"%Y%m%d%H%M%S")-c
 ## Todo
 
 - publish text-to-knex and pg-to-text as npm bin
-- improve "Auto Place" algorithm
+- auto avoid relationship lines overlap the tables
