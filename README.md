@@ -17,6 +17,7 @@ quick and easy text-based ERD editor with drag and drop visualization
   - [x] keyboard shortcuts
   - [x] auto save-and-restore with localStorage
   - [x] auto normalize specified column
+  - [x] auto avoid table overlapping visually
 
 ## Usage
 
@@ -46,9 +47,13 @@ This is mandatory for ts-node to load typescript files.
 
 You can refer to `.env.example`
 
-#### Import from Existing Postgresql Schema
+#### Import from Existing Schema
 
-1. Run `npx ts-node src/db/pg-to-text`
+1. Extract from live database
+
+For Postgresql Schema: Run `npx ts-node src/db/pg-to-text`
+
+For Sqlite Schema: Run `npx ts-node src/db/sqlite-to-text`
 
 You can save the output into a file using pipe. e.g. `npx ts-node src/db/pg-to-text > erd.txt`
 
@@ -73,4 +78,4 @@ npx ts-node src/db/text-to-knex < erd.txt > migrations/$(date +"%Y%m%d%H%M%S")-c
 ## Todo
 
 - publish text-to-knex and pg-to-text as npm bin
-- improve "Auto Place" algorithm
+- auto avoid relationship lines overlap the tables

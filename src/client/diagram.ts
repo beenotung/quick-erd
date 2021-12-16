@@ -26,6 +26,8 @@ export class DiagramController {
 
   isDetailMode = new StoredValue('is_detail_mode', true)
 
+  isAutoMoving = false
+
   getSafeZIndex() {
     return (this.maxZIndex + 1) * 100
   }
@@ -171,64 +173,117 @@ export class DiagramController {
   }
 
   autoPlace() {
-    const tableRectMap = new Map<TableController, DOMRect>()
+    this.isAutoMoving = !this.isAutoMoving
+
+    if (!this.isAutoMoving) return
+
+    const tables: Array<{
+      table: TableController
+      rect: {
+        top: number
+        bottom: number
+        left: number
+        right: number
+        force: { x: number; y: number }
+        speed: { x: number; y: number }
+      }
+    }> = []
     this.tableMap.forEach(table => {
       const rect = table.div.getBoundingClientRect()
-      tableRectMap.set(table, rect)
+      tables.push({
+        table,
+        rect: {
+          top: rect.top,
+          bottom: rect.bottom,
+          left: rect.left,
+          right: rect.right,
+          force: { x: 0, y: 0 },
+          speed: { x: 0, y: 0 },
+        },
+      })
     })
     const diagramRect = this.getDiagramRect()
 
-    const timeout = Date.now() + 2000
-    for (let isMoved = true; isMoved; ) {
-      isMoved = false
-      if (Date.now() > timeout) break
+    const loop = () => {
+      if (!this.isAutoMoving) return
 
-      tableRectMap.forEach((rect, table) => {
-        tableRectMap.forEach((otherRect, otherTable) => {
-          if (table === otherTable) return
-          if (!isRectCollide(rect, otherRect)) return
-          const exploreRect = { ...rect }
-          let offsetX = 0
-          let offsetY = 0
-          for (;;) {
-            if (Date.now() > timeout) break
-            offsetX += floor(random() * 3) - 1
-            offsetY += floor(random() * 3) - 1
+      let isMoved = false
 
-            exploreRect.left = rect.left + offsetX
-            exploreRect.right = rect.right + offsetX
-            exploreRect.top = rect.top + offsetY
-            exploreRect.bottom = rect.bottom + offsetY
+      tables.forEach(({ table, rect }) => {
+        // calculate force from border
+        rect.force.y =
+          rect.top < diagramRect.top
+            ? +1
+            : rect.bottom > diagramRect.bottom
+            ? -1
+            : 0
+        rect.force.x =
+          rect.left < diagramRect.left
+            ? +1
+            : rect.right > diagramRect.right
+            ? -1
+            : 0
 
-            if (exploreRect.left < diagramRect.left) {
-              offsetX = 0
-              continue
-            }
-            if (exploreRect.right > diagramRect.right) {
-              offsetX = diagramRect.width - rect.width
-              continue
-            }
-            if (exploreRect.top < diagramRect.top) {
-              offsetY = 0
-              continue
-            }
-            if (exploreRect.bottom > diagramRect.bottom) {
-              offsetY = diagramRect.height - rect.height
-              continue
-            }
-
-            if (!isRectCollide(exploreRect, otherRect)) {
-              table.translateX += offsetX
-              table.translateY += offsetY
-              table.renderTransform(diagramRect)
-              tableRectMap.set(table, table.div.getBoundingClientRect())
-              isMoved = true
-              return
-            }
+        // calculate force with other tables
+        tables.forEach(other => {
+          if (other.table === table) return
+          if (isPointInside(other.rect, rect.left, rect.top)) {
+            rect.force.x += 1
+            rect.force.y += 1
+          }
+          if (isPointInside(other.rect, rect.right, rect.top)) {
+            rect.force.x -= 1
+            rect.force.y += 1
+          }
+          if (isPointInside(other.rect, rect.left, rect.bottom)) {
+            rect.force.x += 1
+            rect.force.y -= 1
+          }
+          if (isPointInside(other.rect, rect.right, rect.bottom)) {
+            rect.force.x -= 1
+            rect.force.y -= 1
           }
         })
+
+        // apply force
+        rect.speed.x += rect.force.x
+        rect.speed.y += rect.force.y
+
+        // check if need to move
+        const minSpeed = 1
+        if (
+          Math.abs(rect.speed.x) < minSpeed &&
+          Math.abs(rect.speed.y) < minSpeed
+        ) {
+          return
+        }
+
+        // move and render
+        table.translateX += rect.speed.x
+        table.translateY += rect.speed.y
+        table.quickRenderTransform(diagramRect)
+        isMoved = true
+
+        // update new position
+        rect.left += rect.speed.x
+        rect.right += rect.speed.x
+        rect.top += rect.speed.y
+        rect.bottom += rect.speed.y
+
+        // apply friction
+        rect.speed.x *= 0.95
+        rect.speed.y *= 0.95
       })
+
+      if (!isMoved) {
+        this.isAutoMoving = false
+        tables.forEach(({ table }) => table.saveTransform())
+        return
+      }
+
+      requestAnimationFrame(loop)
     }
+    requestAnimationFrame(loop)
   }
 
   toggleDetails() {
@@ -266,6 +321,7 @@ export class DiagramController {
     this.applyFontSize()
   }
   resetView() {
+    this.isAutoMoving = false
     this.fontReset()
     this.tablesContainer.resetView()
   }
@@ -367,10 +423,16 @@ function isRectCollide(self: DOMRect, other: DOMRect): boolean {
   return false
 }
 
-function isPointInside(rect: DOMRect, x: number, y: number): boolean {
+type RectCorner = {
+  left: number
+  right: number
+  top: number
+  bottom: number
+}
+function isPointInside(rect: RectCorner, x: number, y: number): boolean {
   return rect.left <= x && x <= rect.right && rect.top <= y && y <= rect.bottom
 }
-function isRectInside(outer: DOMRect, inner: DOMRect): boolean {
+function isRectInside(outer: RectCorner, inner: RectCorner): boolean {
   return (
     (outer.left <= inner.left && inner.right <= outer.right) ||
     (outer.top <= inner.top && inner.bottom <= outer.bottom)
@@ -505,6 +567,20 @@ class TableController {
     this.onMoveListenerSet.forEach(fn => fn(diagramRect))
   }
 
+  quickRenderTransform(diagramRect: Rect) {
+    const x = this.translateX.toString()
+    const y = this.translateY.toString()
+    this.div.style.transform = `translate(${x}px,${y}px)`
+    this.onMoveListenerSet.forEach(fn => fn(diagramRect))
+  }
+
+  saveTransform() {
+    const x = this.translateX.toString()
+    const y = this.translateY.toString()
+    localStorage.setItem(`${this.data.name}-x`, x)
+    localStorage.setItem(`${this.data.name}-y`, y)
+  }
+
   renderLinesTransform(diagramRect: Rect) {
     this._lineMap.forEach(lineController => lineController.render(diagramRect))
   }
@@ -527,7 +603,6 @@ class TableController {
 
     // add new line or update existing line
     newFieldRefMap.forEach((reference, field) => {
-      this.toFieldKey
       const lineController = this.getLine(
         field,
         reference.table,
@@ -578,6 +653,7 @@ class TableController {
     this._lineMap.forEach(line => line.remove())
     this._lineMap.clear()
     this.fieldMap.clear()
+    // eslint-disable-next-line no-constant-condition
     if (!'preserve position') {
       localStorage.removeItem(`${this.data.name}-x`)
       localStorage.removeItem(`${this.data.name}-y`)

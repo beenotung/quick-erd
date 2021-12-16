@@ -87,6 +87,7 @@ export async function down(knex: Knex): Promise<void> {`
 }
 `
 
+      // eslint-disable-next-line no-console
       console.log(code)
 
       await knex.destroy()

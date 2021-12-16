@@ -74,12 +74,14 @@ function loadExample() {
 user
 ----
 id pk
-username text
+username varchar(64)
 
 post
 ----
 id pk
 user_id fk >- user.id
+content text
+status enum('active','pending')
 
 reply
 -----
@@ -87,6 +89,7 @@ id pk
 post_id fk >- post.id
 user_id fk >- user.id # inline comment
 reply_id null fk >- reply.id
+content text
 `.trim()
   parseInput()
 }
