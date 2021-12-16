@@ -25,9 +25,7 @@
     "surge:all": "run-s surge:erd surge:quick",
     "surge:erd": "surge build https://erd.surge.sh",
     "surge:quick": "surge build https://quick-erd.surge.sh",
-    "prepare": "run-p prepare:*",
-    "prepare:husky": "husky install",
-    "prepare:tslib": "rimraf node_modules/@beenotung/tslib/index.*",
+    "prepare": "husky install",
     "clean": "rimraf dist build",
     "format": "run-s format:*",
     "format:prettier": "prettier --write .",
@@ -52,7 +50,6 @@
     "dist"
   ],
   "dependencies": {
-    "@beenotung/tslib": "^17.6.1",
     "dotenv": "^10.0.0",
     "knex": "^0.95.11",
     "pg": "^8.7.1",
