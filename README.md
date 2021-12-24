@@ -43,8 +43,6 @@ Option 2: Run it locally
 This script changes the package from "module" mode into "commonjs" mode.
 This is mandatory for ts-node to load typescript files.
 
-**For windows users**: run `node scripts\to-module.js` instead
-
 2. Set the database connection credential in `.env`.
 
 You can refer to `.env.example`
