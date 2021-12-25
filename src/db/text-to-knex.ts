@@ -39,10 +39,12 @@ export async function up(knex: Knex): Promise<void> {
       }
 
       table_list.forEach(table => {
+        let fields: Record<string, 1> = {}
         code += `
   if (!(await knex.schema.hasTable('${table.name}'))) {
     await knex.schema.createTable('${table.name}', table => {`
         table.field_list.forEach(field => {
+          fields[field.name] = 1
           if (field.is_primary_key) {
             code += `
       table.increments('${field.name}')`
@@ -65,8 +67,11 @@ export async function up(knex: Knex): Promise<void> {
             code += `.references('${ref.table}.${ref.field}')`
           }
         })
+        if (!fields.created_at && !fields.updated_at) {
+          code += `
+      table.timestamps(false, true)`
+        }
         code += `
-      table.timestamps(false, true)
     })
   }
 `
