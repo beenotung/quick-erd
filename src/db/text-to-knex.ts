@@ -1,11 +1,10 @@
 import { parse } from '../client/ast'
-import { knex } from './knex'
 
 function main() {
   let text = ''
   process.stdin
     .on('data', chunk => (text += chunk))
-    .on('end', async () => {
+    .on('end', () => {
       if (!text) {
         console.error('missing erd text from stdin')
         process.exit(1)
@@ -89,8 +88,6 @@ export async function down(knex: Knex): Promise<void> {`
 
       // eslint-disable-next-line no-console
       console.log(code)
-
-      await knex.destroy()
     })
 }
 
