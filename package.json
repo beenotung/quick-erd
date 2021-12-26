@@ -62,8 +62,7 @@
     "better-sqlite3": "^7.4.5",
     "dotenv": "^10.0.0",
     "knex": "^0.95.11",
-    "pg": "^8.7.1",
-    "tslib": "^2.3.0"
+    "pg": "^8.7.1"
   },
   "devDependencies": {
     "@snowpack/plugin-sass": "^1.4.0",
