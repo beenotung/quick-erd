@@ -1,6 +1,6 @@
-import { Field } from './../src/client/ast'
+import { Field } from './../src/core/ast'
 import { expect } from 'chai'
-import { parseCreateTable } from '../src/client/sqlite-parser'
+import { parseCreateTable } from '../src/core/sqlite-parser'
 
 describe('sqlite-parser TestSuit', () => {
   it('should parse plain columns', () => {

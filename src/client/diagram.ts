@@ -1,4 +1,9 @@
-import { ForeignKeyReference, ParseResult, RelationType, Table } from '../core/ast'
+import {
+  ForeignKeyReference,
+  ParseResult,
+  RelationType,
+  Table,
+} from '../core/ast'
 import { StoredValue } from './storage'
 const { random, floor, abs, sign } = Math
 
