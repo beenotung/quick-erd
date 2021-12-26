@@ -1,4 +1,4 @@
-import { parse } from '../client/ast'
+import { parse } from '../core/ast'
 
 function main() {
   let text = ''

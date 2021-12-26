@@ -1,7 +1,7 @@
 import { existsSync } from 'fs'
 import Knex from 'knex'
-import { Table } from '../client/ast'
-import { parseCreateTable } from '../client/sqlite-parser'
+import { Table } from '../core/ast'
+import { parseCreateTable } from '../core/sqlite-parser'
 import { printTables } from './table'
 
 const dbFile = process.argv[2]

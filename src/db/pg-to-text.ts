@@ -1,4 +1,4 @@
-import { Table } from '../client/ast'
+import { Table } from '../core/ast'
 import { knex } from './knex'
 import { printTables } from './table'
 

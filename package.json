@@ -16,9 +16,9 @@
   "sideEffects": false,
   "type": "module",
   "bin": {
-    "pg-to-erd": "./cli/pg-to-text.js",
-    "sqlite-to-erd": "./cli/sqlite-to-text.js",
-    "erd-to-knex": "./cli/text-to-knex.js"
+    "pg-to-erd": "./cli/pg-to-erd.js",
+    "sqlite-to-erd": "./cli/sqlite-to-erd.js",
+    "erd-to-knex": "./cli/erd-to-knex.js"
   },
   "scripts": {
     "dev": "npm run type:module && snowpack dev",
@@ -31,7 +31,7 @@
     "surge:erd": "surge build https://erd.surge.sh",
     "surge:quick": "surge build https://quick-erd.surge.sh",
     "prepare": "husky install",
-    "clean": "rimraf dist build",
+    "clean": "rimraf dist build migrate.ts",
     "format": "run-s format:*",
     "format:prettier": "prettier --write .",
     "format:json": "format-json-cli",
@@ -53,6 +53,8 @@
     "test": "test"
   },
   "files": [
+    "src",
+    "test",
     "dist"
   ],
   "dependencies": {

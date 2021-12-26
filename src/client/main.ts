@@ -1,4 +1,4 @@
-import { parse } from './ast'
+import { parse } from '../core/ast'
 import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
 import { normalize } from './normalize'

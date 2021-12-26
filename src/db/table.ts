@@ -1,4 +1,4 @@
-import { Field, Table } from '../client/ast'
+import { Field, Table } from '../core/ast'
 
 export function tableToString(table: Table): string {
   return `
