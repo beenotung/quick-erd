@@ -58,10 +58,11 @@
     "dist"
   ],
   "dependencies": {
+    "@types/better-sqlite3": "^7.4.1",
+    "better-sqlite3": "^7.4.5",
     "dotenv": "^10.0.0",
     "knex": "^0.95.11",
     "pg": "^8.7.1",
-    "sqlite3": "^5.0.2",
     "tslib": "^2.3.0"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 import { existsSync } from 'fs'
-import Knex from 'knex'
+import DB from 'better-sqlite3'
 import { Table } from '../core/ast'
 import { parseCreateTable } from '../core/sqlite-parser'
 import { printTables } from './table'
@@ -14,18 +14,16 @@ if (!existsSync(dbFile)) {
   process.exit(1)
 }
 
-const knex = Knex({
-  client: 'sqlite3',
-  connection: { filename: dbFile },
-  useNullAsDefault: true,
+const db = DB(dbFile, {
+  readonly: true,
+  fileMustExist: true,
 })
 
-async function scanTableSchema() {
+function scanTableSchema() {
   const table_list: Table[] = []
-  const table_rows: Array<{ name: string; sql: string }> = await knex
-    .select('name', 'sql')
-    .from('sqlite_master')
-    .where({ type: 'table' })
+  const table_rows: Array<{ name: string; sql: string }> = db
+    .prepare(`select name, sql from sqlite_master where type = 'table'`)
+    .all()
   table_rows.forEach(row => {
     const field_list = parseCreateTable(row.sql)
     if (!field_list) {
@@ -36,10 +34,9 @@ async function scanTableSchema() {
   return table_list
 }
 
-async function main() {
-  const tables = await scanTableSchema()
+function main() {
+  const tables = scanTableSchema()
   printTables(tables)
-  await knex.destroy()
 }
 
 main()
