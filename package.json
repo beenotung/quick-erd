@@ -15,6 +15,11 @@
   "module": "dist/esm/index.js",
   "sideEffects": false,
   "type": "module",
+  "bin": {
+    "pg-to-erd": "./cli/pg-to-text.js",
+    "sqlite-to-erd": "./cli/sqlite-to-text.js",
+    "erd-to-knex": "./cli/text-to-knex.js"
+  },
   "scripts": {
     "dev": "npm run type:module && snowpack dev",
     "migrate": "npm run type:commonjs && ts-node src/db/migrate.ts",
@@ -31,10 +36,11 @@
     "format:prettier": "prettier --write .",
     "format:json": "format-json-cli",
     "format:eslint": "eslint --ext .ts --fix .",
-    "build": "run-s clean tsc",
+    "build": "run-s clean tsc fix",
     "tsc": "run-p tsc:*",
     "tsc:cjs": "tsc -p tsconfig.cjs.json",
     "tsc:esm": "tsc -p tsconfig.esm.json",
+    "fix": "fix-esm-import-path dist/esm",
     "test": "run-s format tsc mocha",
     "mocha": "ts-mocha \"{src,test}/**/*.spec.ts\"",
     "coverage": "nyc npm run mocha -- --reporter=progress",
@@ -66,6 +72,7 @@
     "@typescript-eslint/parser": "^4.29.0",
     "chai": "^4.3.4",
     "eslint": "^7.32.0",
+    "fix-esm-import-path": "^1.2.1",
     "format-json-cli": "^1.0.1",
     "husky": "^7.0.1",
     "mocha": "^8.0.0",
