@@ -404,39 +404,15 @@ export class TablesContainer {
   }
 }
 
-function isRectCollide(self: DOMRect, other: DOMRect): boolean {
-  const list = [
-    [self, other],
-    [other, self],
-  ]
-  for (const [self, other] of list) {
-    if (
-      isPointInside(self, other.left, other.top) ||
-      isPointInside(self, other.right, other.top) ||
-      isPointInside(self, other.right, other.bottom) ||
-      isPointInside(self, other.left, other.bottom) ||
-      isRectInside(self, other)
-    ) {
-      return true
-    }
-  }
-  return false
-}
-
 type RectCorner = {
   left: number
   right: number
   top: number
   bottom: number
 }
+
 function isPointInside(rect: RectCorner, x: number, y: number): boolean {
   return rect.left <= x && x <= rect.right && rect.top <= y && y <= rect.bottom
-}
-function isRectInside(outer: RectCorner, inner: RectCorner): boolean {
-  return (
-    (outer.left <= inner.left && inner.right <= outer.right) ||
-    (outer.top <= inner.top && inner.bottom <= outer.bottom)
-  )
 }
 
 function randomDarkHex() {

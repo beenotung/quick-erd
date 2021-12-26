@@ -5,11 +5,12 @@ config()
 
 const env = process.env
 
-let database = env.DB_NAME
-let user = env.DB_USERNAME || env.DB_USER
+const database = env.DB_NAME
+const user = env.DB_USERNAME || env.DB_USER
 
 if (!database && !user) {
   console.error('Missing database credential in env.')
+  // eslint-disable-next-line no-console
   console.log(`
 Template for .env file:
 

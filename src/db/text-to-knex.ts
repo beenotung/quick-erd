@@ -39,7 +39,7 @@ export async function up(knex: Knex): Promise<void> {
       }
 
       table_list.forEach(table => {
-        let fields: Record<string, 1> = {}
+        const fields: Record<string, 1> = {}
         code += `
   if (!(await knex.schema.hasTable('${table.name}'))) {
     await knex.schema.createTable('${table.name}', table => {`
