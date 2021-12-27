@@ -6,6 +6,7 @@ export default {
   mount: {
     /* ... */
     'src/client': '/',
+    'src/core': '/core',
   },
   plugins: [
     /* ... */
