@@ -1,4 +1,5 @@
 import { parse } from '../core/ast'
+import { makeGuide } from '../core/guide'
 import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
 import { normalize } from './normalize'
@@ -56,25 +57,14 @@ document.querySelector('#load-example')?.addEventListener('click', () => {
 
 function loadExample() {
   input.value = `
-# ${location.origin}
-#
-# Relationship Types
-#  -    - one to one
-#  -<   - one to many
-#  >-   - many to one
-#  >-<  - many to many
-#  -0   - one to zero or one
-#  0-   - zero or one to one
-#  0-0  - zero or one to zero or one
-#  -0<  - one to zero or many
-#  >0-  - zero or many to one
-#
-////////////////////////////////////
+${makeGuide(location.origin)}
+
 
 user
 ----
 id pk
 username varchar(64)
+
 
 post
 ----
@@ -82,6 +72,7 @@ id pk
 user_id fk >- user.id
 content text
 status enum('active','pending')
+
 
 reply
 -----
