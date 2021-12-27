@@ -331,13 +331,13 @@ export class DiagramController {
     this.tablesContainer.resetView()
   }
   randomColor() {
-    this.div.querySelectorAll('.table-title').forEach(div => {
-      (div as HTMLDivElement).style.backgroundColor = randomDarkColor()
+    this.div.querySelectorAll<HTMLDivElement>('.table-title').forEach(div => {
+      div.style.backgroundColor = randomDarkColor()
     })
   }
   resetColor() {
-    this.div.querySelectorAll('.table-title').forEach(div => {
-      (div as HTMLDivElement).style.backgroundColor = ''
+    this.div.querySelectorAll<HTMLDivElement>('.table-title').forEach(div => {
+      div.style.backgroundColor = ''
     })
   }
 }
