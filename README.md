@@ -9,6 +9,7 @@ quick and easy text-based ERD editor with drag and drop visualization
 - [x] text-based erd editor
 - [x] import from existing postgresql schema
 - [x] generate knex migration (for initial schema)
+- [x] published as npx script
 - [x] web-based visualization
   - [x] zoom in/out
   - [x] drag-and-drop moving
@@ -38,12 +39,18 @@ Option 2: Run it locally
 
 #### Setup
 
-1. Run `npm run type:commonjs`
+1. Install this package globally, run: `npm i -g quick-erd`
 
-This script changes the package from "module" mode into "commonjs" mode.
-This is mandatory for ts-node to load typescript files.
+For MacOS users, you may need sudo permission to install global package, e.g. by running: `sudo npm i -g quick-erd`
 
-2. Set the database connection credential in `.env`.
+If you do not prefer to install global package, you can run below commands with npx, e.g.
+  - `npx -p quick-erd pg-to-erd > erd.txt`,
+  - `npx -p quick-erd sqlite-to-erd > erd.txt`, or
+  - `npx -p quick-erd erd-to-knex < erd.txt`
+
+2. Setup database connection credential in `.env`.
+
+This step is not needed for sqlite
 
 You can refer to `.env.example`
 
@@ -51,19 +58,19 @@ You can refer to `.env.example`
 
 1. Extract from live database
 
-For Postgresql Schema: Run `npx ts-node src/db/pg-to-text`
+For Postgresql schema: Run `pg-to-erd`
 
-For Sqlite Schema: Run `npx ts-node src/db/sqlite-to-text`
+For Sqlite schema: Run `sqlite-to-erd`
 
-You can save the output into a file using pipe. e.g. `npx ts-node src/db/pg-to-text > erd.txt`
+You can save the output into a file using pipe. e.g. by running: `pg-to-erd > erd.txt`
 
 2. Copy the output text into the web erd editor
 
 #### Export as Knex Migration Script
 
-1. Run `npx ts-node src/db/text-to-knex < erd.txt > migrate.ts`
+1. Run `erd-to-knex < erd.txt > migrate.ts`
 
-You can save the erd text into a file, then load it as stdin. e.g. `npx ts-node src/db/text-to-knex < erd.txt`
+You can save the erd text into a file, then load it as stdin. e.g. `erd-to-knex < erd.txt`
 
 Also, you can save the result into a knex migration script. e.g.
 
@@ -72,10 +79,20 @@ Also, you can save the result into a knex migration script. e.g.
 mkdir -p migrations
 
 # read from erd.txt, save to migrations/YYYYmmddHHMMSS-create-tables.ts
-npx ts-node src/db/text-to-knex < erd.txt > migrations/$(date +"%Y%m%d%H%M%S")-create-tables.ts
+erd-to-knex < erd.txt > migrations/$(date +"%Y%m%d%H%M%S")-create-tables.ts
 ```
 
 ## Todo
 
-- publish text-to-knex and pg-to-text as npm bin
-- auto avoid relationship lines overlap the tables
+- update "auto place" algorithm to avoid relationship lines overlap the tables visually
+
+## License
+
+This project is licensed with [BSD-2-Clause](./LICENSE)
+
+This is free, libre, and open-source software. It comes down to four essential freedoms [[ref]](https://seirdy.one/2021/01/27/whatsapp-and-the-domestication-of-users.html#fnref:2):
+
+- The freedom to run the program as you wish, for any purpose
+- The freedom to study how the program works, and change it so it does your computing as you wish
+- The freedom to redistribute copies so you can help others
+- The freedom to distribute copies of your modified versions to others

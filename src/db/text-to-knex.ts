@@ -1,11 +1,10 @@
-import { parse } from '../client/ast'
-import { knex } from './knex'
+import { parse } from '../core/ast'
 
 function main() {
   let text = ''
   process.stdin
     .on('data', chunk => (text += chunk))
-    .on('end', async () => {
+    .on('end', () => {
       if (!text) {
         console.error('missing erd text from stdin')
         process.exit(1)
@@ -40,10 +39,12 @@ export async function up(knex: Knex): Promise<void> {
       }
 
       table_list.forEach(table => {
+        const fields: Record<string, 1> = {}
         code += `
   if (!(await knex.schema.hasTable('${table.name}'))) {
     await knex.schema.createTable('${table.name}', table => {`
         table.field_list.forEach(field => {
+          fields[field.name] = 1
           if (field.is_primary_key) {
             code += `
       table.increments('${field.name}')`
@@ -66,8 +67,11 @@ export async function up(knex: Knex): Promise<void> {
             code += `.references('${ref.table}.${ref.field}')`
           }
         })
+        if (!fields.created_at && !fields.updated_at) {
+          code += `
+      table.timestamps(false, true)`
+        }
         code += `
-      table.timestamps(false, true)
     })
   }
 `
@@ -89,8 +93,6 @@ export async function down(knex: Knex): Promise<void> {`
 
       // eslint-disable-next-line no-console
       console.log(code)
-
-      await knex.destroy()
     })
 }
 

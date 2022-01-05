@@ -1,4 +1,9 @@
-import { ForeignKeyReference, ParseResult, RelationType, Table } from './ast'
+import {
+  ForeignKeyReference,
+  ParseResult,
+  RelationType,
+  Table,
+} from '../core/ast'
 import { StoredValue } from './storage'
 const { random, floor, abs, sign } = Math
 
@@ -326,13 +331,13 @@ export class DiagramController {
     this.tablesContainer.resetView()
   }
   randomColor() {
-    this.div.querySelectorAll('.table-title').forEach(div => {
-      (div as HTMLDivElement).style.backgroundColor = randomDarkColor()
+    this.div.querySelectorAll<HTMLDivElement>('.table-title').forEach(div => {
+      div.style.backgroundColor = randomDarkColor()
     })
   }
   resetColor() {
-    this.div.querySelectorAll('.table-title').forEach(div => {
-      (div as HTMLDivElement).style.backgroundColor = ''
+    this.div.querySelectorAll<HTMLDivElement>('.table-title').forEach(div => {
+      div.style.backgroundColor = ''
     })
   }
 }
@@ -404,39 +409,15 @@ export class TablesContainer {
   }
 }
 
-function isRectCollide(self: DOMRect, other: DOMRect): boolean {
-  const list = [
-    [self, other],
-    [other, self],
-  ]
-  for (const [self, other] of list) {
-    if (
-      isPointInside(self, other.left, other.top) ||
-      isPointInside(self, other.right, other.top) ||
-      isPointInside(self, other.right, other.bottom) ||
-      isPointInside(self, other.left, other.bottom) ||
-      isRectInside(self, other)
-    ) {
-      return true
-    }
-  }
-  return false
-}
-
 type RectCorner = {
   left: number
   right: number
   top: number
   bottom: number
 }
+
 function isPointInside(rect: RectCorner, x: number, y: number): boolean {
   return rect.left <= x && x <= rect.right && rect.top <= y && y <= rect.bottom
-}
-function isRectInside(outer: RectCorner, inner: RectCorner): boolean {
-  return (
-    (outer.left <= inner.left && inner.right <= outer.right) ||
-    (outer.top <= inner.top && inner.bottom <= outer.bottom)
-  )
 }
 
 function randomDarkHex() {

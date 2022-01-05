@@ -1,4 +1,5 @@
-import { Field, Table } from '../client/ast'
+import { Field, Table } from '../core/ast'
+import { makeGuide } from '../core/guide'
 
 export function tableToString(table: Table): string {
   return `
@@ -24,7 +25,12 @@ export function fieldToString(field: Field): string {
 }
 
 export function printTables(tables: Table[]) {
-  const text = tables.map(tableToString).join('\n')
+  const text =
+    makeGuide('https://erd.surge.sh or https://quick-erd.surge.sh')
+      .replace(' or ', '\n# or ')
+      .trim() +
+    '\n\n\n' +
+    tables.map(tableToString).join('\n').trim()
   // eslint-disable-next-line no-console
   console.log(text)
 }

@@ -5,12 +5,29 @@ config()
 
 const env = process.env
 
+const database = env.DB_NAME
+const user = env.DB_USERNAME || env.DB_USER
+
+if (!database && !user) {
+  console.error('Missing database credential in env.')
+  // eslint-disable-next-line no-console
+  console.log(`
+Template for .env file:
+
+DB_NAME=
+DB_HOST=
+DB_USERNAME=
+DB_PASSWORD=
+`)
+  process.exit(1)
+}
+
 export const knex = Knex({
   client: 'pg',
   connection: {
-    database: env.DB_NAME,
+    database,
     host: env.DB_HOST,
-    user: env.DB_USERNAME,
+    user,
     password: env.DB_PASSWORD,
     multipleStatements: true,
   },

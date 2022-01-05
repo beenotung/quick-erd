@@ -10,14 +10,14 @@
     "strict": true,
     "skipLibCheck": true,
     "downlevelIteration": false,
-    "importHelpers": true,
+    "importHelpers": false,
     "lib": [
       "dom",
       "es2018"
     ],
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "es2015",
+    "target": "es2017",
     "outDir": "dist"
   },
   "include": [
