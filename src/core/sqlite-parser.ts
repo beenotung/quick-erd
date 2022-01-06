@@ -107,6 +107,9 @@ function parseName(sql: string) {
   if (sql[0] === '"') {
     start = 1
     end = sql.indexOf('"', 1)
+  } else if (sql[0] === '`') {
+    start = 1
+    end = sql.indexOf('`', 1)
   } else {
     start = 0
     end = firstIndexOf(sql, [' ', '('])
