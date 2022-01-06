@@ -22,3 +22,6 @@ coverage/
 # output files
 /erd.txt
 /migrate.ts
+
+# database file
+*.sqlite3
