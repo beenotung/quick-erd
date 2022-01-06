@@ -46,9 +46,9 @@ For MacOS users, you may need sudo permission to install global package, e.g. by
 
 If you do not prefer to install global package, you can run below commands with npx, e.g.
 
-- `npx -p quick-erd pg-to-erd > erd.txt`,
-- `npx -p quick-erd sqlite-to-erd > erd.txt`, or
-- `npx -p quick-erd erd-to-knex < erd.txt`
+- `npx --yes -p quick-erd pg-to-erd > erd.txt`,
+- `npx --yes -p quick-erd sqlite-to-erd > erd.txt`, or
+- `npx --yes -p quick-erd erd-to-knex < erd.txt`
 
 2. Setup database connection credential in `.env`.
 
