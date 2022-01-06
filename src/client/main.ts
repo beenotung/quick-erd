@@ -35,6 +35,73 @@ function parseInput() {
 input.addEventListener('input', parseInput)
 setTimeout(parseInput)
 
+document.querySelector('#export')?.addEventListener('click', () => {
+  const dialog = openDialog(diagramController)
+  dialog.innerHTML = /* html */ `
+<textarea cols=30></textarea>
+<p style='color: black'>not copied in clipboard</p>
+<button class='cancel'>close</button>
+<button class='confirm'>copy</button>
+`
+  const textarea = dialog.querySelector('textarea') as HTMLTextAreaElement
+  const p = dialog.querySelector('p') as HTMLDivElement
+  textarea.value = JSON.stringify(localStorage)
+  dialog.querySelector('.cancel')?.addEventListener('click', () => {
+    dialog.remove()
+  })
+  dialog.querySelector('.confirm')?.addEventListener('click', () => {
+    textarea.select()
+    if (document.execCommand('copy')) {
+      p.textContent = 'copied to clipboard'
+      p.style.color = 'green'
+    } else {
+      p.textContent =
+        'copy to clipboard is not supported, please copy it manually'
+      p.style.color = 'red'
+    }
+  })
+})
+
+document.querySelector('#import')?.addEventListener('click', () => {
+  const dialog = openDialog(diagramController)
+  dialog.innerHTML = /* html */ `
+<textarea cols=30></textarea>
+<p style='color: black'>not imported yet</p>
+<button class='cancel'>close</button>
+<button class='confirm'>import</button>
+`
+  const textarea = dialog.querySelector('textarea') as HTMLTextAreaElement
+  const p = dialog.querySelector('p') as HTMLDivElement
+  textarea.value = JSON.stringify(localStorage)
+  dialog.querySelector('.cancel')?.addEventListener('click', () => {
+    dialog.remove()
+  })
+  dialog.querySelector('.confirm')?.addEventListener('click', () => {
+    try {
+      const json = JSON.parse(textarea.value)
+
+      const zoom = +json.zoom
+      if (zoom) {
+        input.value = ''
+        parseInput()
+        diagramController.fontSize = zoom
+        diagramController.applyFontSize()
+      }
+
+      Object.assign(localStorage, json)
+
+      input.value = json.input
+      parseInput()
+
+      p.textContent = 'import successfully'
+      p.style.color = 'green'
+    } catch (error) {
+      p.textContent = 'invalid json'
+      p.style.color = 'red'
+    }
+  })
+})
+
 document.querySelector('#load-example')?.addEventListener('click', () => {
   if (!input.value.trim()) {
     loadExample()

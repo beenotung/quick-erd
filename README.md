@@ -19,6 +19,7 @@ quick and easy text-based ERD editor with drag and drop visualization
   - [x] auto save-and-restore with localStorage
   - [x] auto normalize specified column
   - [x] auto avoid table overlapping visually
+  - [x] import/export diagram with drag position and zoom level
 
 ## Usage
 
