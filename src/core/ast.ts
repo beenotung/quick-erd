@@ -13,13 +13,13 @@ class Parser implements ParseResult {
   line_list: string[] = []
   parse(input: string) {
     input.split('\n').forEach(line => {
-      if (line.trim().startsWith('#')) return
-      this.line_list.push(
-        line
-          .replace(/#.*/, '')
-          .replace(/\/\/.*/, '')
-          .trim(),
-      )
+      line = line
+        .trim()
+        .replace(/#.*/, '')
+        .replace(/\/\/.*/, '')
+        .trim()
+      if (!line) return
+      this.line_list.push(line)
     })
     this.table_list = []
     while (this.hasTable()) {
