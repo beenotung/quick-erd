@@ -185,7 +185,7 @@ export type ForeignKeyReference = {
 export type Relation = {
   from: { table: string; field: string }
   to: { table: string; field: string }
-  /* 
+  /*
   -     - one TO one
   -<    - one TO many
   >-    - many TO one
@@ -194,7 +194,7 @@ export type Relation = {
   0-    - zero or one TO one
   0-0   - zero or one TO zero or one
   -0<   - one TO zero or many
-  >0-   - zero or many TO one	
+  >0-   - zero or many TO one
 */
   type: RelationType
 }
