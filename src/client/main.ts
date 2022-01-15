@@ -45,7 +45,9 @@ document.querySelector('#export')?.addEventListener('click', () => {
 `
   const textarea = dialog.querySelector('textarea') as HTMLTextAreaElement
   const p = dialog.querySelector('p') as HTMLDivElement
-  textarea.value = JSON.stringify(localStorage)
+  const json = { input: input.value }
+  diagramController.exportJSON(json)
+  textarea.value = JSON.stringify(json)
   dialog.querySelector('.cancel')?.addEventListener('click', () => {
     dialog.remove()
   })
@@ -72,7 +74,6 @@ document.querySelector('#import')?.addEventListener('click', () => {
 `
   const textarea = dialog.querySelector('textarea') as HTMLTextAreaElement
   const p = dialog.querySelector('p') as HTMLDivElement
-  textarea.value = JSON.stringify(localStorage)
   dialog.querySelector('.cancel')?.addEventListener('click', () => {
     dialog.remove()
   })

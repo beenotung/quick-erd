@@ -340,6 +340,13 @@ export class DiagramController {
       div.style.backgroundColor = ''
     })
   }
+  exportJSON(json: any) {
+    json.zoom = this.fontSize
+    this.tablesContainer.exportJSON(json)
+    this.tableMap.forEach(table => {
+      table.exportJSON(json)
+    })
+  }
 }
 
 export class TablesContainer {
@@ -406,6 +413,11 @@ export class TablesContainer {
     this.translateX = 0
     this.translateY = 0
     this.renderTransform()
+  }
+
+  exportJSON(json: any) {
+    json['view:x'] = this.translateX
+    json['view:y'] = this.translateY
   }
 }
 
@@ -639,6 +651,12 @@ class TableController {
       localStorage.removeItem(`${this.data.name}-x`)
       localStorage.removeItem(`${this.data.name}-y`)
     }
+  }
+
+  exportJSON(json: any) {
+    const name = this.data.name
+    json[name + '-x'] = this.translateX
+    json[name + '-y'] = this.translateY
   }
 }
 
