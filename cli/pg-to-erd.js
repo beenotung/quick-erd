@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 if (typeof module == 'undefined') {
-  import('../dist/esm/db/pg-to-text.js')
+  import('../dist/esm/cli/pg-to-erd.js')
 } else {
-  require('../dist/cjs/db/pg-to-text')
+  require('../dist/cjs/cli/pg-to-erd')
 }

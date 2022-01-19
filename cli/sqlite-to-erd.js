@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 if (typeof module == 'undefined') {
-  import('../dist/esm/db/sqlite-to-text.js')
+  import('../dist/esm/cli/sqlite-to-erd.js')
 } else {
-  require('../dist/cjs/db/sqlite-to-text')
+  require('../dist/cjs/cli/sqlite-to-erd')
 }

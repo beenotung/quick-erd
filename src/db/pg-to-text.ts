@@ -1,6 +1,5 @@
 import { Table } from '../core/ast'
 import { knex } from './knex'
-import { printTables } from './table'
 
 function toDataType(type: string): string {
   if (type.includes('character varying')) {
@@ -12,7 +11,7 @@ function toDataType(type: string): string {
   return type
 }
 
-async function scanTableSchema() {
+export async function scanPGTableSchema() {
   const tableList: Table[] = []
   const table_rows = await knex
     .select('tablename')
@@ -73,11 +72,3 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
   }
   return tableList
 }
-
-async function main() {
-  const tableList = await scanTableSchema()
-  printTables(tableList)
-  await knex.destroy()
-}
-
-main()

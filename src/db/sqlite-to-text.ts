@@ -2,7 +2,6 @@ import { existsSync } from 'fs'
 import DB from 'better-sqlite3'
 import { Table } from '../core/ast'
 import { parseCreateTable } from '../core/sqlite-parser'
-import { printTables } from './table'
 
 const dbFile = process.argv[2]
 if (!dbFile) {
@@ -19,7 +18,7 @@ const db = DB(dbFile, {
   fileMustExist: true,
 })
 
-function scanTableSchema() {
+export function scanSqliteTableSchema() {
   const table_list: Table[] = []
   const table_rows: Array<{ name: string; sql: string }> = db
     .prepare(`select name, sql from sqlite_master where type = 'table'`)
@@ -33,10 +32,3 @@ function scanTableSchema() {
   })
   return table_list
 }
-
-function main() {
-  const tables = scanTableSchema()
-  printTables(tables)
-}
-
-main()
