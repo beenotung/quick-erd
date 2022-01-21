@@ -43,10 +43,26 @@ export async function up(knex: Knex): Promise<void> {
         return
       }
 
-      const type = field.type
+      let type = field.type
 
-      code += `
+      type = type.replace(/^varchar/, 'string')
+
+      let length = ''
+      if (type.startsWith('string')) {
+        length = type
+          .replace('string', '')
+          .replace(/^\(/, '')
+          .replace(/\)$/, '')
+        type = 'string'
+      }
+
+      if (length) {
+        code += `
+      table.${type}('${field.name}', ${length})`
+      } else {
+        code += `
       table.${type}('${field.name}')`
+      }
 
       if (field.is_null) {
         code += `.nullable()`
