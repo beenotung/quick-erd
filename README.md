@@ -40,21 +40,18 @@ Option 2: Run it locally
 
 #### Setup
 
-1. Install this package globally, run: `npm i -g quick-erd`
-
-For MacOS users, you may need sudo permission to install global package, e.g. by running: `sudo npm i -g quick-erd`
-
-If you do not prefer to install global package, you can run below commands with npx, e.g.
-
-- `npx --yes -p quick-erd pg-to-erd > erd.txt`,
-- `npx --yes -p quick-erd sqlite-to-erd > erd.txt`, or
-- `npx --yes -p quick-erd erd-to-knex < erd.txt`
+1. Install this package as devDependency, run `npm i -D quick-erd`
 
 2. Setup database connection credential in `.env`.
 
-This step is not needed for sqlite
+`.env` is not needed for sqlite
 
 You can refer to `.env.example`
+
+A set of available commands in example:
+- `npx pg-to-erd > erd.txt`,
+- `npx sqlite-to-erd dev.sqlite3 > erd.txt`, or
+- `npx erd-to-knex < erd.txt`
 
 #### Import from Existing Schema
 
@@ -62,7 +59,7 @@ You can refer to `.env.example`
 
 For Postgresql schema: Run `pg-to-erd`
 
-For Sqlite schema: Run `sqlite-to-erd`
+For Sqlite schema: Run `sqlite-to-erd SQLITE_FILENAME`
 
 You can save the output into a file using pipe. e.g. by running: `pg-to-erd > erd.txt`
 
