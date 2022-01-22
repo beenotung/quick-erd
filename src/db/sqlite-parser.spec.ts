@@ -4,12 +4,12 @@ import { parseCreateTable } from './sqlite-parser'
 
 describe('sqlite-parser TestSuit', () => {
   it('should parse plain columns', () => {
-    let sql = /* sql */ `
+    const sql = /* sql */ `
 create table test (
   id integer
 , "content" text
 )`
-    let ast: Field[] = [
+    const ast: Field[] = [
       {
         name: 'id',
         type: 'integer',
@@ -28,14 +28,14 @@ create table test (
     expect(parseCreateTable(sql)).to.deep.equals(ast)
   })
   it('should parse columns with null statement', () => {
-    let sql = /* sql */ `
+    const sql = /* sql */ `
 create table test (
   f1 null integer
 , f2 integer null
 , f3 null
 , f4
 )`
-    let ast: Field[] = [
+    const ast: Field[] = [
       {
         name: 'f1',
         type: 'integer',
@@ -68,14 +68,14 @@ create table test (
     expect(parseCreateTable(sql)).to.deep.equals(ast)
   })
   it('should parse columns with not-null statement', () => {
-    let sql = /* sql */ `
+    const sql = /* sql */ `
 create table test (
   f1 not null integer
 , f2 integer not null
 , f3 not null
 , f4
 )`
-    let ast: Field[] = [
+    const ast: Field[] = [
       {
         name: 'f1',
         type: 'integer',
@@ -108,12 +108,12 @@ create table test (
     expect(parseCreateTable(sql)).to.deep.equals(ast)
   })
   it('should parse inline primary key', () => {
-    let sql = /* sql */ `
+    const sql = /* sql */ `
 create table test (
   id integer primary key
 , content text
 )`
-    let ast: Field[] = [
+    const ast: Field[] = [
       {
         name: 'id',
         type: 'integer',
@@ -133,12 +133,12 @@ create table test (
   })
 
   it('should parse inline primary key without type', () => {
-    let sql = /* sql */ `
+    const sql = /* sql */ `
 create table test (
   id primary key
 , content text
 )`
-    let ast: Field[] = [
+    const ast: Field[] = [
       {
         name: 'id',
         type: '',
@@ -157,13 +157,13 @@ create table test (
     expect(parseCreateTable(sql)).to.deep.equals(ast)
   })
   it('should parse separated primary key', () => {
-    let sql = /* sql */ `
+    const sql = /* sql */ `
 create table test (
   id integer
 , content text
 , primary key("id")
 )`
-    let ast: Field[] = [
+    const ast: Field[] = [
       {
         name: 'id',
         type: 'integer',
@@ -182,13 +182,13 @@ create table test (
     expect(parseCreateTable(sql)).to.deep.equals(ast)
   })
   it('should parse inline foreign key', () => {
-    let sql = /* sql */ `
+    const sql = /* sql */ `
 create table test (
   id integer
 , user_id integer references user(id)
 , post_id integer references post("id")
 )`
-    let ast: Field[] = [
+    const ast: Field[] = [
       {
         name: 'id',
         type: 'integer',
@@ -214,12 +214,12 @@ create table test (
     expect(parseCreateTable(sql)).to.deep.equals(ast)
   })
   it('should parse inline foreign key without field type', () => {
-    let sql = /* sql */ `
+    const sql = /* sql */ `
 create table test (
   user_id references user(id)
 , post_id REFERENCES post("id")
 )`
-    let ast: Field[] = [
+    const ast: Field[] = [
       {
         name: 'user_id',
         type: '',
@@ -238,14 +238,14 @@ create table test (
     expect(parseCreateTable(sql)).to.deep.equals(ast)
   })
   it('should parse separated foreign key', () => {
-    let sql = /* sql */ `
+    const sql = /* sql */ `
 CREATE TABLE test(
   user_id   INTEGER,
   "post_id" INTEGER,
   FOREIGN KEY("user_id") REFERENCES user(id),
   FOREIGN KEY(post_id) REFERENCES post("id")
 )`
-    let ast: Field[] = [
+    const ast: Field[] = [
       {
         name: 'user_id',
         type: 'integer',

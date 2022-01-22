@@ -4,7 +4,7 @@ import { textToKnex } from './text-to-knex'
 describe('text-to-knex TestSuit', () => {
   context('varchar', () => {
     it('should convert varchar to string', () => {
-      let text = `
+      const text = `
 user
 ----
 username varchar(32)
@@ -13,7 +13,7 @@ username varchar(32)
     })
 
     it('should support string column type as alias to varchar', () => {
-      let text = `
+      const text = `
 user
 ----
 username string(32)
@@ -22,7 +22,7 @@ username string(32)
     })
 
     it('should support string column type without length', () => {
-      let text = `
+      const text = `
 user
 ----
 username string

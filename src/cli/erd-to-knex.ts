@@ -9,7 +9,7 @@ function main() {
         console.error('missing erd text from stdin')
         process.exit(1)
       }
-      let code = textToKnex(text)
+      const code = textToKnex(text)
       // eslint-disable-next-line no-console
       console.log(code)
     })

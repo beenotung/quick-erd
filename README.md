@@ -49,6 +49,7 @@ Option 2: Run it locally
 You can refer to `.env.example`
 
 A set of available commands in example:
+
 - `npx pg-to-erd > erd.txt`,
 - `npx sqlite-to-erd dev.sqlite3 > erd.txt`, or
 - `npx erd-to-knex < erd.txt`
