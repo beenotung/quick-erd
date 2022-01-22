@@ -1,7 +1,7 @@
 import { existsSync } from 'fs'
 import DB from 'better-sqlite3'
 import { Table } from '../core/ast'
-import { parseCreateTable } from '../core/sqlite-parser'
+import { parseCreateTable } from './sqlite-parser'
 
 const dbFile = process.argv[2]
 if (!dbFile) {

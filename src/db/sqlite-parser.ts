@@ -1,4 +1,4 @@
-import { Field, ForeignKeyReference } from './ast'
+import { Field, ForeignKeyReference } from "../core/ast"
 
 export function parseCreateTable(sql: string): Field[] | null {
   const start = sql.indexOf('(')
