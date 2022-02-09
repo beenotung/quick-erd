@@ -18,6 +18,7 @@
   "bin": {
     "pg-to-erd": "./cli/pg-to-erd.js",
     "sqlite-to-erd": "./cli/sqlite-to-erd.js",
+    "erd-to-sqlite": "./cli/erd-to-sqlite.js",
     "erd-to-knex": "./cli/erd-to-knex.js"
   },
   "scripts": {
