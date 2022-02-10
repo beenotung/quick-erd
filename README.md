@@ -8,7 +8,9 @@ quick and easy text-based ERD editor with drag and drop visualization
 
 - [x] text-based erd editor
 - [x] import from existing postgresql schema
-- [x] generate knex migration (for initial schema)
+- [x] generate (initial) database schema migration
+  - [x] knex migrate script
+  - [x] sqlite migrate statements
 - [x] published as npx script
 - [x] web-based visualization
   - [x] zoom in/out
@@ -50,9 +52,10 @@ You can refer to `.env.example`
 
 A set of available commands in example:
 
-- `npx pg-to-erd > erd.txt`,
-- `npx sqlite-to-erd dev.sqlite3 > erd.txt`, or
-- `npx erd-to-knex < erd.txt`
+- `npx pg-to-erd > erd.txt`
+- `npx sqlite-to-erd dev.sqlite3 > erd.txt`
+- `npx erd-to-knex < erd.txt > migrations/000-create-tables.ts`
+- `npx erd-to-sqlite < erd.txt > migrations/000-create-tables.sql`
 
 #### Import from Existing Schema
 
@@ -66,7 +69,13 @@ You can save the output into a file using pipe. e.g. by running: `pg-to-erd > er
 
 2. Copy the output text into the web erd editor
 
-#### Export as Knex Migration Script
+#### Export as Migration Script
+
+You can export the erd.txt to a database migration script. This process is also called forward-engineering for database schema.
+
+Supported schema format includes: [knex](https://github.com/knex/knex) and [better-sqlite3-helper](https://github.com/Kauto/better-sqlite3-helper)
+
+##### Export as Knex Migration Script
 
 1. Run `erd-to-knex < erd.txt > migrate.ts`
 
@@ -80,6 +89,20 @@ mkdir -p migrations
 
 # read from erd.txt, save to migrations/YYYYmmddHHMMSS-create-tables.ts
 erd-to-knex < erd.txt > migrations/$(date +"%Y%m%d%H%M%S")-create-tables.ts
+```
+
+##### Export as Sqlite Migration Script
+
+1. Run `erd-to-sqlite < erd.txt > migrate.sql`
+
+Depending on your migration directory (default is ./migrations/), you may save the migration script in corresponding directory. e.g.
+
+```bash
+# create migrations directory if not exist
+mkdir -p migrations
+
+# read from erd.txt, save to migrations/000-create-tables.sql
+erd-to-sqlite < erd.txt > migrations/000-create-tables.sql
 ```
 
 ## Todo
