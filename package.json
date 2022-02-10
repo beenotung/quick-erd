@@ -50,12 +50,7 @@
     "report": "run-s report:update report:open",
     "prepublishOnly": "run-s test build"
   },
-  "directories": {
-    "test": "test"
-  },
   "files": [
-    "src",
-    "test",
     "dist"
   ],
   "dependencies": {
