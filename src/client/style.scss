@@ -32,8 +32,9 @@ label {
   text-transform: capitalize;
 }
 
-button key {
+button kbd {
   text-decoration: underline;
+  font-family: inherit;
 }
 
 .controls {
