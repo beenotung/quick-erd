@@ -158,7 +158,7 @@ document.querySelector('#format')?.addEventListener('click', format)
 
 function format() {
   const result = parse(input.value)
-  input.value = tablesToText(result.table_list)
+  input.value = tablesToText(result.table_list) + '\n'
 }
 
 document.querySelector('#normalize')?.addEventListener('click', showNormalize)
