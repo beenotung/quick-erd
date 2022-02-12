@@ -55,8 +55,8 @@ A set of available commands in example:
 
 - `npx pg-to-erd > erd.txt`
 - `npx sqlite-to-erd dev.sqlite3 > erd.txt`
-- `npx erd-to-knex < erd.txt > migrations/000-create-tables.ts`
-- `npx erd-to-sqlite < erd.txt > migrations/000-create-tables.sql`
+- `npx erd-to-knex < erd.txt > migrations/001-create-tables.ts`
+- `npx erd-to-sqlite < erd.txt > migrations/001-create-tables.sql`
 - `npx format-erd erd.txt`
 
 #### Import from Existing Schema
