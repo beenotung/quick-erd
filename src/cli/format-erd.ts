@@ -3,14 +3,14 @@ import { parse } from '../core/ast'
 import { tablesToText } from '../core/table'
 
 function main() {
-  let file = process.argv[2]
+  const file = process.argv[2]
   if (!file) {
     console.error('missing filename in argument')
     process.exit(1)
   }
-  let text = fs.readFileSync(file).toString()
-  let result = parse(text)
-  let newText = tablesToText(result.table_list)
+  const text = fs.readFileSync(file).toString()
+  const result = parse(text)
+  const newText = tablesToText(result.table_list)
 
   if (newText === text) {
     // eslint-disable-next-line no-console
@@ -25,7 +25,7 @@ function main() {
 }
 
 function backupFileSuffix() {
-  let date = new Date()
+  const date = new Date()
   return (
     '.bk_' +
     date.getFullYear() +
