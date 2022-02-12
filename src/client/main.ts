@@ -1,6 +1,6 @@
 import { parse } from '../core/ast'
 import { makeGuide } from '../core/guide'
-import { tablesToText } from './table'
+import { tablesToText } from '../core/table'
 import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
 import { normalize } from './normalize'

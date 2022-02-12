@@ -1,5 +1,5 @@
-import { Field, Table } from '../core/ast'
-import { makeGuide } from '../core/guide'
+import { Field, Table } from './ast'
+import { makeGuide } from './guide'
 
 export function tableToString(table: Table): string {
   return `
