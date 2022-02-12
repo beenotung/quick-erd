@@ -47,6 +47,13 @@ class Parser implements ParseResult {
       }
       return this.parseField()
     })
+    const has_primary_key = field_list.some(field => field.is_primary_key)
+    if (!has_primary_key) {
+      const field = field_list.find(field => field.name === 'id')
+      if (field) {
+        field.is_primary_key = true
+      }
+    }
     return { name, field_list }
   }
   parseField(): Field {
