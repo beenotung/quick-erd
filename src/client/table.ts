@@ -24,13 +24,18 @@ export function fieldToString(field: Field): string {
   return text
 }
 
-export function printTables(tables: Table[]) {
+export function tablesToText(tables: Table[]) {
   const text =
     makeGuide('https://erd.surge.sh or https://quick-erd.surge.sh')
       .replace(' or ', '\n# or ')
       .trim() +
     '\n\n\n' +
     tables.map(tableToString).join('\n').trim()
+  return text
+}
+
+export function printTables(tables: Table[]) {
+  const text = tablesToText(tables)
   // eslint-disable-next-line no-console
   console.log(text)
 }

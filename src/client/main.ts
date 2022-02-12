@@ -1,5 +1,6 @@
 import { parse } from '../core/ast'
 import { makeGuide } from '../core/guide'
+import { tablesToText } from './table'
 import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
 import { normalize } from './normalize'
@@ -151,6 +152,13 @@ reply_id null fk >- reply.id
 content text
 `.trim()
   parseInput()
+}
+
+document.querySelector('#format')?.addEventListener('click', format)
+
+function format() {
+  const result = parse(input.value)
+  input.value = tablesToText(result.table_list)
 }
 
 document.querySelector('#normalize')?.addEventListener('click', showNormalize)
