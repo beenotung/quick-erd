@@ -57,6 +57,7 @@ A set of available commands in example:
 - `npx sqlite-to-erd dev.sqlite3 > erd.txt`
 - `npx erd-to-knex < erd.txt > migrations/000-create-tables.ts`
 - `npx erd-to-sqlite < erd.txt > migrations/000-create-tables.sql`
+- `npx format-erd erd.txt`
 
 #### Import from Existing Schema
 
@@ -105,6 +106,16 @@ mkdir -p migrations
 # read from erd.txt, save to migrations/000-create-tables.sql
 erd-to-sqlite < erd.txt > migrations/000-create-tables.sql
 ```
+
+##### Format Diagram Text
+
+1. Run `format-erd erd.txt`
+
+The original text file will be backup with suffix, e.g. 'erd.txt.bk_20220212144828'
+
+The formatted erd text will be saved in-place.
+
+Warning: Comments are not preserved in the current version. If you want to restore the comments, you may use diff tools like [meld](https://meldmerge.org/) to compare the formatted version and original version.
 
 ## Todo
 

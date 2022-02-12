@@ -23,6 +23,7 @@ coverage/
 /erd.txt
 /migrate.ts
 /migrate.sql
+*.bk_*
 
 # database file
 *.sqlite3
