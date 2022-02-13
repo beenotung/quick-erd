@@ -10,7 +10,7 @@ function main() {
   }
   const text = fs.readFileSync(file).toString()
   const result = parse(text)
-  const newText = tablesToText(result.table_list)
+  const newText = tablesToText(result.table_list) + '\n'
 
   if (newText === text) {
     // eslint-disable-next-line no-console
