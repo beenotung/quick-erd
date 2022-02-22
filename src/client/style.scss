@@ -42,6 +42,7 @@ button kbd {
   position: fixed;
   top: calc(var(--padding) * 3 + var(--header-height));
   right: calc(var(--padding) + 1rem);
+  user-select: none;
   button {
     width: 1.5rem;
     height: 1.5rem;
