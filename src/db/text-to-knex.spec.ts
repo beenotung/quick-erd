@@ -30,4 +30,15 @@ username string
       expect(textToKnex(text)).to.contains("table.string('username')")
     })
   })
+
+  it('should support inline enum as column type', () => {
+    const text = `
+application
+----
+status enum('pending','approved','rejected')
+`
+    expect(textToKnex(text)).to.contains(
+      "table.enum('status', ['pending','approved','rejected'])",
+    )
+  })
 })

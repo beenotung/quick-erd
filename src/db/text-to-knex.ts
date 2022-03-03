@@ -27,23 +27,33 @@ export async function up(knex: Knex): Promise<void> {
 
       let type = field.type
 
-      type = type.replace(/^varchar/, 'string')
+      if (type.match(/^enum/i)) {
+        let values = type
+          .replace(/^enum/i, '')
+          .replace(/^\(/, '[')
+          .replace(/\)$/, ']')
 
-      let length = ''
-      if (type.startsWith('string')) {
-        length = type
-          .replace('string', '')
-          .replace(/^\(/, '')
-          .replace(/\)$/, '')
-        type = 'string'
-      }
-
-      if (length) {
         code += `
-      table.${type}('${field.name}', ${length})`
+      table.enum('${field.name}', ${values})`
       } else {
-        code += `
+        type = type.replace(/^varchar/i, 'string')
+
+        let length = ''
+        if (type.match(/^string/i)) {
+          length = type
+            .replace(/^string/i, '')
+            .replace(/^\(/, '')
+            .replace(/\)$/, '')
+          type = 'string'
+        }
+
+        if (length) {
+          code += `
+      table.${type}('${field.name}', ${length})`
+        } else {
+          code += `
       table.${type}('${field.name}')`
+        }
       }
 
       if (field.is_null) {
