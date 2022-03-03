@@ -44,8 +44,8 @@ create table if not exists ${table.name} (`
       }
 
       let type = field.type
-      type = type.replace(/^varchar/, 'text')
-      type = type.replace(/^string/, 'text')
+      type = type.replace(/^varchar/i, 'text')
+      type = type.replace(/^string/i, 'text')
 
       up += `${field.name} ${type}`
 
