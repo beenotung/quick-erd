@@ -44,8 +44,16 @@ create table if not exists ${table.name} (`
       }
 
       let type = field.type
-      type = type.replace(/^varchar/i, 'text')
-      type = type.replace(/^string/i, 'text')
+
+      if (type.match(/^varchar/i) || type.match(/^string/i)) {
+        type = 'text'
+      }
+
+      let enums = ''
+      if (type.match(/^enum/i)) {
+        enums = type.replace(/^enum/i, '')
+        type = 'text'
+      }
 
       up += `${field.name} ${type}`
 
@@ -53,6 +61,10 @@ create table if not exists ${table.name} (`
         up += ` null`
       } else {
         up += ` not null`
+      }
+
+      if (enums) {
+        up += ` check(${field.name} in ${enums})`
       }
 
       const ref = field.references
