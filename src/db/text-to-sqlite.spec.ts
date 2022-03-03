@@ -1,5 +1,4 @@
 import { expect } from 'chai'
-import { parse } from '../core/ast'
 import { textToSqlite } from './text-to-sqlite'
 
 describe('text-to-sqlite TestSuit', () => {
