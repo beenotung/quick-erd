@@ -28,7 +28,7 @@ export async function up(knex: Knex): Promise<void> {
       let type = field.type
 
       if (type.match(/^enum/i)) {
-        let values = type
+        const values = type
           .replace(/^enum/i, '')
           .replace(/^\(/, '[')
           .replace(/\)$/, ']')
