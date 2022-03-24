@@ -64,7 +64,7 @@ export async function up(knex: Knex): Promise<void> {
 
       const ref = field.references
       if (ref) {
-        code += `.references('${ref.table}.${ref.field}')`
+        code += `.unsigned().references('${ref.table}.${ref.field}')`
       }
     })
     if (!fields.created_at && !fields.updated_at) {
