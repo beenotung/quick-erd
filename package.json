@@ -24,7 +24,6 @@
   },
   "scripts": {
     "dev": "npm run type:module && snowpack dev",
-    "migrate": "npm run type:commonjs && ts-node src/db/migrate.ts",
     "upload": "run-s clean build:client surge:all",
     "type:module": "node set-type.js module",
     "type:commonjs": "node set-type.js commonjs",
@@ -33,7 +32,7 @@
     "surge:erd": "surge build https://erd.surge.sh",
     "surge:quick": "surge build https://quick-erd.surge.sh",
     "prepare": "husky install",
-    "clean": "rimraf dist build migrate.ts",
+    "clean": "rimraf dist build",
     "format": "run-s format:*",
     "format:eslint": "eslint --ext .ts --fix .",
     "format:prettier": "prettier --write .",
