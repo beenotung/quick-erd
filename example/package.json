@@ -1,0 +1,23 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^7.5.0",
+    "dotenv": "^16.0.0",
+    "knex": "^1.0.3",
+    "mysql": "^2.18.1",
+    "pg": "^8.7.3",
+    "populate-env": "^2.0.0",
+    "quick-erd": "link:.."
+  },
+  "devDependencies": {
+    "gen-env": "^0.2.0"
+  }
+}
