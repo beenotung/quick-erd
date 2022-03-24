@@ -1,3 +1,5 @@
+process.env.DB_CLIENT = 'pg'
+
 import { knex } from '../db/knex'
 import { scanPGTableSchema } from '../db/pg-to-text'
 import { printTables } from '../core/table'

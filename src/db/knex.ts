@@ -5,8 +5,10 @@ config()
 
 const env = process.env
 
+const client = env.DB_CLIENT || 'pg'
 const database = env.DB_NAME
 const user = env.DB_USERNAME || env.DB_USER
+const password = env.DB_PASSWORD||env.DB_PASS
 
 if (!database && !user) {
   console.error('Missing database credential in env.')
@@ -14,8 +16,9 @@ if (!database && !user) {
   console.log(`
 Template for .env file:
 
-DB_NAME=
+DB_CLIENT=better-sqlite3|pg|mysql
 DB_HOST=
+DB_NAME=
 DB_USERNAME=
 DB_PASSWORD=
 `)
@@ -23,12 +26,12 @@ DB_PASSWORD=
 }
 
 export const knex = Knex({
-  client: 'pg',
+  client,
   connection: {
     database,
     host: env.DB_HOST,
     user,
-    password: env.DB_PASSWORD,
+    password,
     multipleStatements: true,
   },
   pool: {
