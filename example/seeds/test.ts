@@ -16,7 +16,7 @@ export async function seed(knex: Knex): Promise<void> {
 function parseCreateTable(sql: string) {
   let startIdx = sql.indexOf('(')
   let endIdx = sql.lastIndexOf(') ENGINE=')
-  sql = sql.slice(startIdx + 1, endIdx)
+  sql = sql.slice(startIdx + 1, endIdx).trim()
   for (;;) {
     let field = parseStatement(sql)
     console.log('field:', field)
@@ -28,9 +28,7 @@ function parseCreateTable(sql: string) {
     if (!sql) {
       break
     }
-    console.log('unknown:', sql)
-    process.exit(1)
-    return
+    throw new Error(`unknown tokens: ${JSON.stringify(sql)}`)
   }
 }
 
@@ -66,23 +64,26 @@ function parseStatement(sql: string) {
 
   /* parse primary key */
   let is_primary_key = sql.startsWith('PRIMARY KEY')
-
-  /* parse field name */
-  let startIdx = sql.indexOf('`')
-  let endIdx = sql.indexOf('`', startIdx + 1)
-  let name = sql.slice(startIdx + 1, endIdx)
-  sql = sql.slice(endIdx + 1).trim()
-
   if (is_primary_key) {
-    endIdx = sql.indexOf(')')
-    sql = sql.slice(endIdx + 1).trim()
+    sql = sql.slice('PRIMARY KEY'.length).trim()
+    let { name, rest } = parseNameInBracket(sql, 'PRIMARY KEY')
+    sql = rest
+    if (sql && !sql.startsWith(',')) {
+      throw new Error(
+        `unknown tokens after PRIMARY KEY: ${JSON.stringify(sql)}`,
+      )
+    }
     return { is_skip, is_primary_key, name, rest: sql }
   }
 
+  /* parse field name */
+  let result = parseName(sql)
+  let name = result.name
+  sql = result.rest
+
   /* parse field type */
-  startIdx = 0
-  endIdx = sql.indexOf(' ')
-  let type = sql.slice(startIdx, endIdx)
+  let endIdx = sql.indexOf(' ')
+  let type = sql.slice(0, endIdx)
   sql = sql.slice(endIdx + 1).trim()
 
   /* parse unsigned */
@@ -122,4 +123,28 @@ function parseStatement(sql: string) {
   return { is_skip, is_primary_key, name, type, not_null, auto_inc, rest: sql }
 }
 
-function parseType(sql: string, idx: number) {}
+function parseName(sql: string) {
+  let startIdx = sql.indexOf('`')
+  if (startIdx !== 0) {
+    let tokens = sql.slice(0, startIdx)
+    throw new Error(`unknown tokens: ${JSON.stringify(tokens)}`)
+  }
+  let endIdx = sql.indexOf('`', startIdx + 1)
+  let name = sql.slice(startIdx + 1, endIdx)
+  sql = sql.slice(endIdx + 1).trim()
+  return { name, rest: sql }
+}
+
+function parseNameInBracket(sql: string, context: string) {
+  if (!sql.startsWith('(')) {
+    throw new Error(`missing '(' for ${context}`)
+  }
+  sql = sql.slice(1)
+  let result = parseName(sql)
+  sql = result.rest
+  if (!sql.startsWith(')')) {
+    throw new Error(`missing ')' for ${context}`)
+  }
+  sql = sql.slice(1)
+  return { name: result.name, rest: sql }
+}
