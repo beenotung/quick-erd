@@ -3,14 +3,14 @@
 import { env } from './env'
 
 module.exports = {
-  development_: {
+  sqlite: {
     client: 'better-sqlite3',
     connection: {
       filename: './dev.sqlite3',
     },
   },
 
-  development: {
+  mysql: {
     client: 'mysql',
     connection: {
       database: env.DB_NAME,
@@ -26,7 +26,7 @@ module.exports = {
     },
   },
 
-  development__: {
+  pg: {
     client: 'postgresql',
     connection: {
       database: env.DB_NAME,
@@ -42,3 +42,5 @@ module.exports = {
     },
   },
 }
+
+module.exports.development = module.exports.mysql
