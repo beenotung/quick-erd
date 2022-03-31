@@ -17,6 +17,7 @@
   "type": "module",
   "bin": {
     "pg-to-erd": "./cli/pg-to-erd.js",
+    "mysql-to-erd": "./cli/mysql-to-erd.js",
     "sqlite-to-erd": "./cli/sqlite-to-erd.js",
     "format-erd": "./cli/format-erd.js",
     "erd-to-sqlite": "./cli/erd-to-sqlite.js",
