@@ -11,8 +11,8 @@ function toDataType(type: string): string {
   return type
 }
 
-export async function scanPGTableSchema() {
-  const tableList: Table[] = []
+export async function scanPGTableSchema(): Promise<Table[]> {
+  const table_list: Table[] = []
   const table_rows = await knex
     .select('tablename')
     .from('pg_tables')
@@ -25,7 +25,7 @@ export async function scanPGTableSchema() {
     if (table.name.startsWith('knex_migrations')) {
       continue
     }
-    tableList.push(table)
+    table_list.push(table)
     const column_rows = await knex
       .select('column_name', 'data_type', 'is_nullable')
       .from('information_schema.columns')
@@ -70,5 +70,5 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
       })
     }
   }
-  return tableList
+  return table_list
 }
