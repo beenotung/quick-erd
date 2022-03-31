@@ -56,15 +56,18 @@ You can refer to `.env.example`
 Below are available commands in example.
 
 **To reverse-engineer erd from live database**:
+
 - `npx pg-to-erd > erd.txt`
 - `npx mysql-to-erd > erd.txt`
 - `npx sqlite-to-erd dev.sqlite3 > erd.txt`
 
 **To generate database migration script from erd**:
+
 - `npx erd-to-knex < erd.txt > migrations/001-create-tables.ts`
 - `npx erd-to-sqlite < erd.txt > migrations/001-create-tables.sql`
 
 **To formate erd file**:
+
 - `npx format-erd erd.txt`
 
 #### Import from Existing Schema

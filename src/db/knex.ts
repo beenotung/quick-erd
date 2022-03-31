@@ -8,7 +8,7 @@ const env = process.env
 const client = env.DB_CLIENT || 'pg'
 const database = env.DB_NAME
 const user = env.DB_USERNAME || env.DB_USER
-const password = env.DB_PASSWORD||env.DB_PASS
+const password = env.DB_PASSWORD || env.DB_PASS
 
 if (!database && !user) {
   console.error('Missing database credential in env.')

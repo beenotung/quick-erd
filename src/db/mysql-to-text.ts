@@ -4,13 +4,13 @@ import { knex } from './knex'
 export async function scanMysqlTableSchema(): Promise<Table[]> {
   const table_list: Table[] = []
 
-  let [rows, fields] = await knex.raw(`show tables`)
-  let name = fields[0].name
-  for (let row of rows) {
-    let table = row[name]
-    let result = await knex.raw(`show create table \`${table}\``)
-    let sql: string = result[0][0]['Create Table']
-    let field_list = parseCreateTable(sql)
+  const [rows, fields] = await knex.raw(`show tables`)
+  const name = fields[0].name
+  for (const row of rows) {
+    const table = row[name]
+    const result = await knex.raw(`show create table \`${table}\``)
+    const sql: string = result[0][0]['Create Table']
+    const field_list = parseCreateTable(sql)
     table_list.push({ name: table, field_list })
   }
 
@@ -18,14 +18,14 @@ export async function scanMysqlTableSchema(): Promise<Table[]> {
 }
 
 function parseCreateTable(sql: string): Field[] {
-  let startIdx = sql.indexOf('(')
-  let endIdx = sql.lastIndexOf(') ENGINE=')
+  const startIdx = sql.indexOf('(')
+  const endIdx = sql.lastIndexOf(') ENGINE=')
   sql = sql.slice(startIdx + 1, endIdx).trim()
-  let field_list: Field[] = []
-  let primary_key_set = new Set<string>()
-  let foreign_key_map = new Map<string, ForeignKeyReference>()
+  const field_list: Field[] = []
+  const primary_key_set = new Set<string>()
+  const foreign_key_map = new Map<string, ForeignKeyReference>()
   for (;;) {
-    let field = parseStatement(sql)
+    const field = parseStatement(sql)
     sql = field.rest
     if (field.is_skip === false) {
       if (field.is_primary_key === true) {
@@ -55,14 +55,14 @@ function parseCreateTable(sql: string): Field[] {
     }
     throw new Error(`unknown tokens: ${JSON.stringify(sql)}`)
   }
-  for (let name of primary_key_set) {
-    let field = field_list.find(field => field.name === name)
+  for (const name of primary_key_set) {
+    const field = field_list.find(field => field.name === name)
     if (field) {
       field.is_primary_key = true
     }
   }
-  for (let [name, ref] of foreign_key_map.entries()) {
-    let field = field_list.find(field => field.name === name)
+  for (const [name, ref] of foreign_key_map.entries()) {
+    const field = field_list.find(field => field.name === name)
     if (field) {
       field.references = ref
     }
@@ -71,10 +71,10 @@ function parseCreateTable(sql: string): Field[] {
 }
 
 function nextPart(sql: string) {
-  let startIdx = sql.indexOf(' ')
-  let endIdx1 = sql.indexOf(' ', startIdx + 1)
-  let endIdx2 = sql.indexOf(',', startIdx + 1)
-  let endIdx =
+  const startIdx = sql.indexOf(' ')
+  const endIdx1 = sql.indexOf(' ', startIdx + 1)
+  const endIdx2 = sql.indexOf(',', startIdx + 1)
+  const endIdx =
     endIdx1 === -1
       ? endIdx2
       : endIdx2 === -1
@@ -85,7 +85,7 @@ function nextPart(sql: string) {
 }
 
 function nextStatement(sql: string) {
-  let idx = sql.indexOf(',')
+  const idx = sql.indexOf(',')
   if (idx === -1) {
     return ''
   }
@@ -125,20 +125,20 @@ type Statement =
 
 function parseStatement(sql: string): Statement {
   /* check named key */
-  let is_skip = sql.startsWith('KEY ')
+  const is_skip = sql.startsWith('KEY ')
   if (is_skip) {
     sql = nextStatement(sql)
     return { is_skip, rest: sql }
   }
 
   /* parse primary key */
-  let is_primary_key = sql.startsWith('PRIMARY KEY')
+  const is_primary_key = sql.startsWith('PRIMARY KEY')
   if (is_primary_key) {
     return parsePrimaryKeyStatement(sql)
   }
 
   /* parse foreign key constraint */
-  let is_constraint = sql.startsWith('CONSTRAINT')
+  const is_constraint = sql.startsWith('CONSTRAINT')
   if (is_constraint) {
     return parseConstraintStatement(sql)
   }
@@ -147,12 +147,12 @@ function parseStatement(sql: string): Statement {
 }
 function parseColumnStatement(sql: string): Statement {
   /* parse field name */
-  let result = parseName(sql)
-  let name = result.name
+  const result = parseName(sql)
+  const name = result.name
   sql = result.rest
 
   /* parse field type */
-  let endIdx = sql.indexOf(' ')
+  const endIdx = sql.indexOf(' ')
   let type = sql.slice(0, endIdx)
   type = toDataType(type)
   sql = sql.slice(endIdx + 1).trim()
@@ -169,7 +169,7 @@ function parseColumnStatement(sql: string): Statement {
   }
 
   /* parse not null */
-  let not_null = sql.startsWith('NOT NULL')
+  const not_null = sql.startsWith('NOT NULL')
   if (not_null) {
     sql = sql.slice('NOT NULL'.length).trim()
   }
@@ -186,12 +186,12 @@ function parseColumnStatement(sql: string): Statement {
   }
 
   /* parse auto increment */
-  let auto_inc = sql.startsWith('AUTO_INCREMENT')
+  const auto_inc = sql.startsWith('AUTO_INCREMENT')
   if (auto_inc) {
     sql = sql.slice('AUTO_INCREMENT'.length).trim()
   }
 
-  let has_comment = sql.startsWith('COMMENT')
+  const has_comment = sql.startsWith('COMMENT')
   if (has_comment) {
     sql = parseComment(sql)
   }
@@ -209,7 +209,7 @@ function parseColumnStatement(sql: string): Statement {
 }
 function parsePrimaryKeyStatement(sql: string): Statement {
   sql = sql.slice('PRIMARY KEY'.length).trim()
-  let { name, rest } = parseNameInBracket(sql, 'PRIMARY KEY')
+  const { name, rest } = parseNameInBracket(sql, 'PRIMARY KEY')
   sql = rest
   if (sql && !sql.startsWith(',')) {
     throw new Error(`unknown tokens after PRIMARY KEY: ${JSON.stringify(sql)}`)
@@ -224,7 +224,7 @@ function parseConstraintStatement(sql: string): Statement {
   sql = result.rest.trim()
 
   /* parse constraint type */
-  let is_foreign_key = sql.startsWith('FOREIGN KEY')
+  const is_foreign_key = sql.startsWith('FOREIGN KEY')
   if (!is_foreign_key) {
     throw new Error('unknown type of constraint')
   }
@@ -232,11 +232,11 @@ function parseConstraintStatement(sql: string): Statement {
 
   /* parse own field name */
   result = parseNameInBracket(sql, 'FOREIGN KEY own field')
-  let field = result.name
+  const field = result.name
   sql = result.rest.trim()
 
   /* parse 'REFERENCES' keyword */
-  let is_references = sql.startsWith('REFERENCES')
+  const is_references = sql.startsWith('REFERENCES')
   if (!is_references) {
     throw new Error("missing 'REFERENCES' in foreign key constraint")
   }
@@ -244,12 +244,12 @@ function parseConstraintStatement(sql: string): Statement {
 
   /* parse reference table name */
   result = parseName(sql)
-  let ref_table = result.name
+  const ref_table = result.name
   sql = result.rest.trim()
 
   /* parse reference field name */
   result = parseNameInBracket(sql, 'FOREIGN KEY reference field name')
-  let ref_field = result.name
+  const ref_field = result.name
   sql = result.rest.trim()
 
   return {
@@ -287,13 +287,13 @@ function parseComment(sql: string) {
 }
 
 function parseName(sql: string) {
-  let startIdx = sql.indexOf('`')
+  const startIdx = sql.indexOf('`')
   if (startIdx !== 0) {
-    let tokens = sql.slice(0, startIdx)
+    const tokens = sql.slice(0, startIdx)
     throw new Error(`unknown tokens: ${JSON.stringify(tokens)}`)
   }
-  let endIdx = sql.indexOf('`', startIdx + 1)
-  let name = sql.slice(startIdx + 1, endIdx)
+  const endIdx = sql.indexOf('`', startIdx + 1)
+  const name = sql.slice(startIdx + 1, endIdx)
   sql = sql.slice(endIdx + 1).trim()
   return { name, rest: sql }
 }
@@ -303,7 +303,7 @@ function parseNameInBracket(sql: string, context: string) {
     throw new Error(`missing '(' for ${context}`)
   }
   sql = sql.slice(1)
-  let result = parseName(sql)
+  const result = parseName(sql)
   sql = result.rest
   if (!sql.startsWith(')')) {
     throw new Error(`missing ')' for ${context}`)

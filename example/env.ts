@@ -3,7 +3,7 @@ import { config } from 'dotenv'
 
 config()
 
-export let env = {
+export const env = {
   DB_HOST: '',
   DB_NAME: '',
   DB_USERNAME: '',
