@@ -51,12 +51,20 @@ Option 2: Run it locally
 
 You can refer to `.env.example`
 
-A set of available commands in example:
+#### Overview of Commands
 
+Below are available commands in example.
+
+**To reverse-engineer erd from live database**:
 - `npx pg-to-erd > erd.txt`
+- `npx mysql-to-erd > erd.txt`
 - `npx sqlite-to-erd dev.sqlite3 > erd.txt`
+
+**To generate database migration script from erd**:
 - `npx erd-to-knex < erd.txt > migrations/001-create-tables.ts`
 - `npx erd-to-sqlite < erd.txt > migrations/001-create-tables.sql`
+
+**To formate erd file**:
 - `npx format-erd erd.txt`
 
 #### Import from Existing Schema
@@ -64,6 +72,8 @@ A set of available commands in example:
 1. Extract from live database
 
 For Postgresql schema: Run `pg-to-erd`
+
+For Mysql/MariaDB schema: Run `mysql-to-erd`
 
 For Sqlite schema: Run `sqlite-to-erd SQLITE_FILENAME`
 
