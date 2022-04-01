@@ -1,4 +1,4 @@
-import { Field, ForeignKeyReference, Table } from '../core/ast'
+import { Table } from '../core/ast'
 import { knex } from './knex'
 import { parseCreateTable } from './mysql-parser'
 
