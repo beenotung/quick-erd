@@ -2,6 +2,13 @@ import { expect } from 'chai'
 import { parse } from './ast'
 
 describe('ast TestSuit', () => {
+  function parseSingleTable(text: string) {
+    const result = parse(text)
+    expect(result).not.to.be.undefined
+    expect(result.table_list).to.have.lengthOf(1)
+    return result.table_list[0]
+  }
+
   it('should parse varchar', () => {
     const text = `
 user
@@ -9,12 +16,11 @@ user
 id pk
 username varchar(32)
 `
-    const result = parse(text)
-    expect(result).not.to.be.undefined
-    expect(result.table_list).to.have.lengthOf(1)
-    expect(result.table_list[0].field_list).to.have.lengthOf(2)
-    expect(result.table_list[0].field_list[1].name).to.equals('username')
-    expect(result.table_list[0].field_list[1].type).to.equals('varchar(32)')
+    const table = parseSingleTable(text)
+    const field_list = table.field_list
+    expect(field_list).to.have.lengthOf(2)
+    expect(field_list[1].name).to.equals('username')
+    expect(field_list[1].type).to.equals('varchar(32)')
   })
 
   describe('auto detect primary key', () => {
@@ -25,10 +31,8 @@ user
 id
 username text
 `
-      const result = parse(text)
-      expect(result).not.to.be.undefined
-      expect(result.table_list).to.have.lengthOf(1)
-      const field_list = result.table_list[0].field_list
+      const table = parseSingleTable(text)
+      const field_list = table.field_list
       expect(field_list).to.have.lengthOf(2)
 
       expect(field_list[0].name).to.equals('id')
