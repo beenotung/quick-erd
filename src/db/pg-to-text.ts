@@ -60,6 +60,7 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
           column_row.column_name === 'id' &&
           (type === 'integer' || type === 'int'),
         is_null: column_row.is_nullable === 'YES',
+        is_unsigned: false,
         references: fk_row
           ? {
               type: '>-',

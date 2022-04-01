@@ -87,6 +87,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       type: type.toLowerCase(),
       is_primary_key,
       is_null,
+      is_unsigned: false,
       references,
     }
   })

@@ -18,6 +18,7 @@ export function textToSqlite(text: string) {
         type: 'integer',
         is_primary_key: true,
         is_null: false,
+        is_unsigned: false,
         references: undefined,
       })
     }
