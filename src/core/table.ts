@@ -11,6 +11,9 @@ ${table.field_list.map(fieldToString).join('\n')}
 
 export function fieldToString(field: Field): string {
   let text = `${field.name} ${field.type}`
+  if (field.is_unsigned) {
+    text += ` unsigned`
+  }
   if (field.is_null) {
     text += ' NULL'
   }
