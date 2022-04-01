@@ -3,7 +3,7 @@ import { Field } from '../core/ast'
 import { parseCreateTable } from './mysql-parser'
 
 describe('mysql-parser TestSuit', () => {
-  let sql = `
+  const sql = `
 CREATE TABLE \`user\` (
   \`id\` int(10) unsigned NOT NULL AUTO_INCREMENT,
   \`username\` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -19,13 +19,15 @@ CREATE TABLE \`user\` (
   })
 
   it('should parse primary key', () => {
-    expect(fields).deep.contains({
+    const field: Field = {
       name: 'id',
-      type: 'int(10) unsigned',
+      type: 'int(10)',
       is_primary_key: true,
       is_null: false,
+      is_unsigned: true,
       references: undefined,
-    })
+    }
+    expect(fields).deep.contains(field)
   })
 
   it('should parse varchar', () => {
@@ -34,6 +36,7 @@ CREATE TABLE \`user\` (
       type: 'varchar(64)',
       is_primary_key: false,
       is_null: false,
+      is_unsigned: false,
       references: undefined,
     })
   })
@@ -44,6 +47,7 @@ CREATE TABLE \`user\` (
       type: 'datetime',
       is_primary_key: false,
       is_null: false,
+      is_unsigned: false,
       references: undefined,
     })
     expect(fields).deep.contains({
@@ -51,6 +55,7 @@ CREATE TABLE \`user\` (
       type: 'datetime',
       is_primary_key: false,
       is_null: false,
+      is_unsigned: false,
       references: undefined,
     })
   })

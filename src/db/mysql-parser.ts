@@ -24,6 +24,7 @@ export function parseCreateTable(sql: string): Field[] {
           name: field.name,
           type: field.type,
           is_primary_key: field.is_primary_key,
+          is_unsigned: field.unsigned,
           is_null: !field.not_null,
           references: undefined,
         })
@@ -94,6 +95,7 @@ type Statement =
       type: string
       not_null: boolean
       auto_inc: boolean
+      unsigned: boolean
       rest: string
     }
   | {
@@ -141,8 +143,8 @@ function parseColumnStatement(sql: string): Statement {
   sql = sql.slice(endIdx + 1).trim()
 
   /* parse unsigned */
-  if (sql.startsWith('unsigned')) {
-    type += ' unsigned'
+  const unsigned = sql.startsWith('unsigned')
+  if (unsigned) {
     sql = sql.slice('unsigned'.length).trim()
   }
 
@@ -185,6 +187,7 @@ function parseColumnStatement(sql: string): Statement {
     is_foreign_key: false,
     name,
     type,
+    unsigned,
     not_null,
     auto_inc,
     rest: sql,
