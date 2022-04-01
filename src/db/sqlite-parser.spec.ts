@@ -15,6 +15,7 @@ create table test (
         type: 'integer',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
       {
@@ -22,6 +23,7 @@ create table test (
         type: 'text',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
     ]
@@ -41,6 +43,7 @@ create table test (
         type: 'integer',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
       {
@@ -48,6 +51,7 @@ create table test (
         type: 'integer',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
       {
@@ -55,6 +59,7 @@ create table test (
         type: '',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
       {
@@ -62,6 +67,7 @@ create table test (
         type: '',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
     ]
@@ -81,6 +87,7 @@ create table test (
         type: 'integer',
         is_primary_key: false,
         is_null: false,
+        is_unsigned: false,
         references: undefined,
       },
       {
@@ -88,6 +95,7 @@ create table test (
         type: 'integer',
         is_primary_key: false,
         is_null: false,
+        is_unsigned: false,
         references: undefined,
       },
       {
@@ -95,6 +103,7 @@ create table test (
         type: '',
         is_primary_key: false,
         is_null: false,
+        is_unsigned: false,
         references: undefined,
       },
       {
@@ -102,6 +111,7 @@ create table test (
         type: '',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
     ]
@@ -119,6 +129,7 @@ create table test (
         type: 'integer',
         is_primary_key: true,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
       {
@@ -126,6 +137,7 @@ create table test (
         type: 'text',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
     ]
@@ -144,6 +156,7 @@ create table test (
         type: '',
         is_primary_key: true,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
       {
@@ -151,6 +164,7 @@ create table test (
         type: 'text',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
     ]
@@ -169,6 +183,7 @@ create table test (
         type: 'integer',
         is_primary_key: true,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
       {
@@ -176,6 +191,7 @@ create table test (
         type: 'text',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
     ]
@@ -194,6 +210,7 @@ create table test (
         type: 'integer',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: undefined,
       },
       {
@@ -201,6 +218,7 @@ create table test (
         type: 'integer',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: { table: 'user', field: 'id', type: '>-' },
       },
       {
@@ -208,6 +226,7 @@ create table test (
         type: 'integer',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: { table: 'post', field: 'id', type: '>-' },
       },
     ]
@@ -225,6 +244,7 @@ create table test (
         type: '',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: { table: 'user', field: 'id', type: '>-' },
       },
       {
@@ -232,6 +252,7 @@ create table test (
         type: '',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: { table: 'post', field: 'id', type: '>-' },
       },
     ]
@@ -251,6 +272,7 @@ CREATE TABLE test(
         type: 'integer',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: { table: 'user', field: 'id', type: '>-' },
       },
       {
@@ -258,6 +280,7 @@ CREATE TABLE test(
         type: 'integer',
         is_primary_key: false,
         is_null: true,
+        is_unsigned: false,
         references: { table: 'post', field: 'id', type: '>-' },
       },
     ]
