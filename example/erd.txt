@@ -15,54 +15,12 @@
 ////////////////////////////////////
 
 
-forum
------
-id int(10) unsigned PK
-name text
-created_at datetime
-updated_at datetime
-level int(11) NULL
-
-
-knex_migrations
----------------
-id int(10) unsigned PK
-name varchar(255) NULL
-batch int(11) NULL
-migration_time timestamp
-
-
-knex_migrations_lock
---------------------
-index int(10) unsigned PK
-is_locked int(11) NULL
-
-
-like
-----
-user_id int(10) unsigned FK >- user.id
-post_id int(10) unsigned FK >- post.id
-created_at datetime
-updated_at datetime
-
-
-post
+user
 ----
 id int(10) unsigned PK
-reply_id int(10) unsigned NULL FK >- post.id
-user_id int(10) unsigned FK >- user.id
-thread_id int(10) unsigned FK >- thread.id
-content text
+username varchar(64)
 created_at datetime
 updated_at datetime
-
-
-test
-----
-id int(11) PK
-username varchar(32) NULL
-password_hash varchar(60) NULL
-user_id int(10) unsigned NULL FK >- user.id
 
 
 thread
@@ -76,18 +34,29 @@ created_at datetime
 updated_at datetime
 
 
-transaction
------------
-raw_id int(11) PK
-receiver_user_id int(11)
-sender_user_id int(11)
-fee int(11)
-create_timestamp timestamp
+forum
+-----
+id int(10) unsigned PK
+name text
+created_at datetime
+updated_at datetime
+level int(11) NULL
 
 
-user
+post
 ----
 id int(10) unsigned PK
-username varchar(64)
+reply_id int(10) unsigned NULL FK >- post.id
+user_id int(10) unsigned FK >- user.id
+thread_id int(10) unsigned FK >- thread.id
+content text
+created_at datetime
+updated_at datetime
+
+
+like
+----
+user_id int(10) unsigned FK >- user.id
+post_id int(10) unsigned FK >- post.id
 created_at datetime
 updated_at datetime
