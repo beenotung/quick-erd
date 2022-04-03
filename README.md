@@ -55,20 +55,30 @@ You can refer to `.env.example`
 
 Below are available commands in example.
 
-**To reverse-engineer erd from live database**:
+**To reverse-engineer erd file from live database**:
 
 - `npx pg-to-erd > erd.txt`
 - `npx mysql-to-erd > erd.txt`
 - `npx sqlite-to-erd dev.sqlite3 > erd.txt`
 
-**To generate database migration script from erd**:
+**To generate database migration script from erd file**:
 
 - `npx erd-to-knex < erd.txt > migrations/001-create-tables.ts`
 - `npx erd-to-sqlite < erd.txt > migrations/001-create-tables.sql`
 
-**To formate erd file**:
+**To format erd file**:
 
 - `npx format-erd erd.txt`
+- `npx format-erd --ref ordered_erd.txt new_erd.txt`
+
+**To update erd file from live database**:
+
+```bash
+npx pg-to-erd > erd.tmp
+npx format-erd -r erd.txt erd.tmp
+meld erd.txt erd.tmp
+rm erd.tmp
+```
 
 #### Import from Existing Schema
 
@@ -122,7 +132,10 @@ erd-to-sqlite < erd.txt > migrations/000-create-tables.sql
 
 ##### Format Diagram Text
 
-1. Run `format-erd erd.txt`
+To "prettify" the erd, run: `format-erd erd.txt`
+
+To sort the tables and fields of exported erd according to previous version of erd, run:
+`format-erd --ref old_erd.txt new_erd.txt`
 
 The original text file will be backup with suffix, e.g. 'erd.txt.bk_20220212144828'
 
