@@ -309,4 +309,32 @@ CREATE TABLE test(
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
   })
+  it('should parse unique column', () => {
+    const sql = /* sql */ `
+create table user (
+  username text unique
+, domain text
+)`
+    const ast: Field[] = [
+      {
+        name: 'username',
+        type: 'text',
+        is_primary_key: false,
+        is_null: true,
+        is_unique: true,
+        is_unsigned: false,
+        references: undefined,
+      },
+      {
+        name: 'domain',
+        type: 'text',
+        is_primary_key: false,
+        is_null: true,
+        is_unique: false,
+        is_unsigned: false,
+        references: undefined,
+      },
+    ]
+    expect(parseCreateTable(sql)).to.deep.equals(ast)
+  })
 })
