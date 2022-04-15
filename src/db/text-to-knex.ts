@@ -1,4 +1,4 @@
-import { parse } from '../core/ast'
+import { parse, Field } from '../core/ast'
 import { sortTables } from './sort-tables'
 
 export function textToKnex(text: string): string {
@@ -13,12 +13,16 @@ export async function up(knex: Knex): Promise<void> {`
 
   table_list.forEach((table, i) => {
     if (i > 0) code += `\n`
-    const fields: Record<string, 1> = {}
+    const fields: Record<string, Field> = {}
+    table.field_list.forEach(field => (fields[field.name] = field))
+    if (fields.created_at && fields.updated_at) {
+      delete fields.created_at
+      delete fields.updated_at
+    }
     code += `
   if (!(await knex.schema.hasTable('${table.name}'))) {
     await knex.schema.createTable('${table.name}', table => {`
-    table.field_list.forEach(field => {
-      fields[field.name] = 1
+    Object.values(fields).forEach(field => {
       if (field.is_primary_key) {
         code += `
       table.increments('${field.name}')`
@@ -84,10 +88,7 @@ export async function up(knex: Knex): Promise<void> {`
         code += `.references('${ref.table}.${ref.field}')`
       }
     })
-    if (
-      (!fields.created_at && !fields.updated_at) ||
-      (fields.created_at && fields.updated_at)
-    ) {
+    if (!fields.created_at && !fields.updated_at) {
       code += `
       table.timestamps(false, true)`
     }
