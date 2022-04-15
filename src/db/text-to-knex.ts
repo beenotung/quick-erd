@@ -7,12 +7,12 @@ export function textToKnex(text: string): string {
   let code = `
 import { Knex } from 'knex'
 
-export async function up(knex: Knex): Promise<void> {
-`
+export async function up(knex: Knex): Promise<void> {`
 
   const table_list = sortTables(result.table_list)
 
-  table_list.forEach(table => {
+  table_list.forEach((table, i) => {
+    if (i > 0) code += `\n`
     const fields: Record<string, 1> = {}
     code += `
   if (!(await knex.schema.hasTable('${table.name}'))) {
@@ -77,8 +77,7 @@ export async function up(knex: Knex): Promise<void> {
     }
     code += `
     })
-  }
-`
+  }`
   })
 
   code += `
@@ -94,5 +93,5 @@ export async function down(knex: Knex): Promise<void> {`
   code += `
 }
 `
-  return code
+  return code.trim()
 }
