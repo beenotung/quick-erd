@@ -54,6 +54,10 @@ export async function up(knex: Knex): Promise<void> {`
           code += `
       table.${type}('${field.name}')`
         }
+
+        if (field.is_unsigned || field.references) {
+          code += `.unsigned()`
+        }
       }
 
       if (field.is_null) {
@@ -68,7 +72,7 @@ export async function up(knex: Knex): Promise<void> {`
 
       const ref = field.references
       if (ref) {
-        code += `.unsigned().references('${ref.table}.${ref.field}')`
+        code += `.references('${ref.table}.${ref.field}')`
       }
     })
     if (
