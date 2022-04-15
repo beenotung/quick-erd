@@ -36,6 +36,7 @@ export async function up(knex: Knex): Promise<void> {`
           .replace(/^enum/i, '')
           .replace(/^\(/, '[')
           .replace(/\)$/, ']')
+          .replace(/','/g, "', '")
 
         code += `
       table.enum('${field.name}', ${values})`
