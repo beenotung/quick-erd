@@ -45,7 +45,7 @@ export async function up(knex: Knex): Promise<void> {`
         let length = ''
 
         if (!length) {
-          let match = type.match(/^string\((\d+)\)/i)
+          const match = type.match(/^string\((\d+)\)/i)
           if (match) {
             length = match[1]
             type = 'string'
@@ -53,7 +53,7 @@ export async function up(knex: Knex): Promise<void> {`
         }
 
         if (!length) {
-          let match = type.match(/^int.*\((\d+)\)/i)
+          const match = type.match(/^int.*\((\d+)\)/i)
           if (match) {
             length = match[1]
             type = 'integer'
