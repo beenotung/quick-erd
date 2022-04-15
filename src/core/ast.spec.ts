@@ -107,4 +107,24 @@ username text
       expect(field_list[2].is_primary_key).to.be.false
     })
   })
+
+  it('should parse unique field', () => {
+    const text = `
+user
+----
+username text unique
+domain text
+`
+    const table = parseSingleTable(text)
+    const { field_list } = table
+    expect(field_list).to.have.lengthOf(2)
+
+    expect(field_list[0].name).to.equals('username')
+    expect(field_list[0].type).to.equals('text')
+    expect(field_list[0].is_unique).to.be.true
+
+    expect(field_list[1].name).to.equals('domain')
+    expect(field_list[1].type).to.equals('text')
+    expect(field_list[1].is_unique).to.be.false
+  })
 })

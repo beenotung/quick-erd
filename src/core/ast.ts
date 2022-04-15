@@ -60,6 +60,7 @@ class Parser implements ParseResult {
     const name = this.parseName()
     let type = defaultFieldType
     let is_null = false
+    let is_unique = false
     let is_primary_key = false
     let is_unsigned = false
     let references: ForeignKeyReference | undefined
@@ -69,6 +70,9 @@ class Parser implements ParseResult {
       switch (name.toUpperCase()) {
         case 'NULL':
           is_null = true
+          continue
+        case 'UNIQUE':
+          is_unique = true
           continue
         case 'UNSIGNED':
           is_unsigned = true
@@ -88,6 +92,7 @@ class Parser implements ParseResult {
       name,
       type,
       is_null,
+      is_unique,
       is_primary_key,
       is_unsigned,
       references,
@@ -185,6 +190,7 @@ export type Field = {
   name: string
   type: string
   is_primary_key: boolean
+  is_unique: boolean
   is_null: boolean
   is_unsigned: boolean
   references: ForeignKeyReference | undefined
