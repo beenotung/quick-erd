@@ -21,4 +21,17 @@ status enum('pending','approved','rejected')
       "status text not null check(status in ('pending','approved','rejected'))",
     )
   })
+  it('should support unique column', () => {
+    const text = `
+user
+----
+username text unique
+domain text
+`
+    const up = textToSqlite(text).up
+    expect(up).to.contains('username text not null')
+    expect(up).to.contains('domain text not null')
+    expect(up).to.contains('username text not null unique')
+    expect(up).not.to.contains('domain text not null unique')
+  })
 })

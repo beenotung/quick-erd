@@ -18,6 +18,7 @@ export function textToSqlite(text: string) {
         type: 'integer',
         is_primary_key: true,
         is_null: false,
+        is_unique: false,
         is_unsigned: false,
         references: undefined,
       })
@@ -62,6 +63,10 @@ create table if not exists ${table.name} (`
         up += ` null`
       } else {
         up += ` not null`
+      }
+
+      if (field.is_unique) {
+        up += ` unique`
       }
 
       if (enums) {
