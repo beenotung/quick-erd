@@ -37,8 +37,9 @@ application
 ----
 status enum('pending','approved','rejected')
 `
-    expect(textToKnex(text)).to.contains(
-      "table.enum('status', ['pending','approved','rejected'])",
+    const code = textToKnex(text)
+    expect(code).to.contains(
+      "table.enum('status', ['pending', 'approved', 'rejected'])",
     )
   })
 
