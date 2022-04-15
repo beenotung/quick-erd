@@ -62,6 +62,10 @@ export async function up(knex: Knex): Promise<void> {
         code += `.notNullable()`
       }
 
+      if (field.is_unique) {
+        code += `.unique()`
+      }
+
       const ref = field.references
       if (ref) {
         code += `.unsigned().references('${ref.table}.${ref.field}')`

@@ -41,4 +41,18 @@ status enum('pending','approved','rejected')
       "table.enum('status', ['pending','approved','rejected'])",
     )
   })
+
+  it('should support unique column', () => {
+    const text = `
+user
+----
+username text unique
+domain text
+`
+    const code = textToKnex(text)
+    expect(code).to.contains(`table.text('username').notNullable()`)
+    expect(code).to.contains(`table.text('domain').notNullable()`)
+    expect(code).to.contains(`table.text('username').notNullable().unique()`)
+    expect(code).not.to.contains(`table.text('domain').notNullable().unique()`)
+  })
 })
