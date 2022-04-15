@@ -45,6 +45,12 @@ export function parseCreateTable(sql: string): Field[] | null {
       const [before, after] = split(rest, lower, ' null ')
       rest = before + ' ' + after
     }
+    let is_unique = false
+    if (lower.includes(' unique ')) {
+      is_unique = true
+      const [before, after] = split(rest, lower, ' unique ')
+      rest = before + ' ' + after
+    }
     rest = rest.trim()
     const [name, rest1] = parseName(rest)
     rest = rest1.trim()
@@ -87,6 +93,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       type: type.toLowerCase(),
       is_primary_key,
       is_null,
+      is_unique,
       is_unsigned: false,
       references,
     }
