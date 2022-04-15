@@ -145,6 +145,9 @@ Warning: Comments are not preserved in the current version. If you want to resto
 
 ## Todo
 
+- to support composite primary keys
+- to support composite unique keys
+
 - update "auto place" algorithm to avoid relationship lines overlap the tables visually
 
 ## License

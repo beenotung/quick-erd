@@ -24,6 +24,7 @@ CREATE TABLE \`user\` (
       type: 'int(10)',
       is_primary_key: true,
       is_null: false,
+      is_unique: false,
       is_unsigned: true,
       references: undefined,
     }

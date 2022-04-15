@@ -19,6 +19,7 @@ user
 ----
 id int(10) unsigned PK
 username varchar(64) unique
+domain varchar(32)
 created_at datetime
 updated_at datetime
 

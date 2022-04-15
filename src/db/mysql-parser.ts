@@ -6,6 +6,7 @@ export function parseCreateTable(sql: string): Field[] {
   sql = sql.slice(startIdx + 1, endIdx).trim()
   const field_list: Field[] = []
   const primary_key_set = new Set<string>()
+  const unique_key_set = new Set<string[]>()
   const foreign_key_map = new Map<string, ForeignKeyReference>()
   for (;;) {
     const field = parseStatement(sql)
@@ -13,6 +14,8 @@ export function parseCreateTable(sql: string): Field[] {
     if (field.is_skip === false) {
       if (field.is_primary_key === true) {
         primary_key_set.add(field.name)
+      } else if (field.is_unique_key) {
+        unique_key_set.add(field.fields)
       } else if (field.is_foreign_key === true) {
         foreign_key_map.set(field.field, {
           type: '>-',
@@ -26,6 +29,7 @@ export function parseCreateTable(sql: string): Field[] {
           is_primary_key: field.is_primary_key,
           is_unsigned: field.unsigned,
           is_null: !field.not_null,
+          is_unique: false,
           references: undefined,
         })
       }
@@ -43,6 +47,13 @@ export function parseCreateTable(sql: string): Field[] {
     const field = field_list.find(field => field.name === name)
     if (field) {
       field.is_primary_key = true
+    }
+  }
+  for (const unique_fields of unique_key_set) {
+    for (const field of field_list) {
+      if (unique_fields.includes(field.name)) {
+        field.is_unique = true
+      }
     }
   }
   for (const [name, ref] of foreign_key_map.entries()) {
@@ -90,6 +101,14 @@ type Statement =
   | {
       is_skip: false
       is_primary_key: false
+      is_unique_key: true
+      fields: string[]
+      rest: string
+    }
+  | {
+      is_skip: false
+      is_primary_key: false
+      is_unique_key: false
       is_foreign_key: false
       name: string
       type: string
@@ -101,6 +120,7 @@ type Statement =
   | {
       is_skip: false
       is_primary_key: false
+      is_unique_key: false
       is_foreign_key: true
       field: string
       ref_table: string
@@ -120,6 +140,12 @@ function parseStatement(sql: string): Statement {
   const is_primary_key = sql.startsWith('PRIMARY KEY')
   if (is_primary_key) {
     return parsePrimaryKeyStatement(sql)
+  }
+
+  /* parse unique key */
+  const is_unique_key = sql.startsWith('UNIQUE KEY')
+  if (is_unique_key) {
+    return parseUniqueKeyStatement(sql)
   }
 
   /* parse foreign key constraint */
@@ -184,6 +210,7 @@ function parseColumnStatement(sql: string): Statement {
   return {
     is_skip: false,
     is_primary_key: false,
+    is_unique_key: false,
     is_foreign_key: false,
     name,
     type,
@@ -201,6 +228,29 @@ function parsePrimaryKeyStatement(sql: string): Statement {
     throw new Error(`unknown tokens after PRIMARY KEY: ${JSON.stringify(sql)}`)
   }
   return { is_skip: false, is_primary_key: true, name, rest: sql }
+}
+function parseUniqueKeyStatement(sql: string): Statement {
+  sql = sql.slice('UNIQUE KEY'.length).trim()
+
+  /* parse unique key name */
+  let result = parseName(sql)
+  sql = result.rest.trim()
+
+  /* parse column names */
+  // TODO parse multiple columns
+  result = parseNameInBracket(sql, 'UNIQUE KEY')
+  sql = result.rest.trim()
+  if (sql && !sql.startsWith(',')) {
+    throw new Error(`unknown tokens after UNIQUE KEY: ${JSON.stringify(sql)}`)
+  }
+  const fields: string[] = [result.name]
+  return {
+    is_skip: false,
+    is_primary_key: false,
+    is_unique_key: true,
+    fields,
+    rest: sql,
+  }
 }
 function parseConstraintStatement(sql: string): Statement {
   sql = sql.slice('CONSTRAINT'.length).trim()
@@ -241,6 +291,7 @@ function parseConstraintStatement(sql: string): Statement {
   return {
     is_skip: false,
     is_primary_key: false,
+    is_unique_key: false,
     is_foreign_key: true,
     field,
     ref_table,

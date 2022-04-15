@@ -17,6 +17,9 @@ export function fieldToString(field: Field): string {
   if (field.is_null) {
     text += ' NULL'
   }
+  if (field.is_unique) {
+    text += ' unique'
+  }
   if (field.is_primary_key) {
     text += ' PK'
   }
