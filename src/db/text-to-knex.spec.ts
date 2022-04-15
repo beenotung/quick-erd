@@ -42,6 +42,20 @@ status enum('pending','approved','rejected')
     )
   })
 
+  it('should support integer with specified length', () => {
+    const text = `
+rating
+------
+user_id int(10) unsigned FK >- user.id
+level int(11) null
+`
+    const code = textToKnex(text)
+    expect(code).to.contains(
+      `table.integer('user_id', 10).unsigned().notNullable().references('user.id')`,
+    )
+    expect(code).to.contains(`table.integer('level', 11).nullable()`)
+  })
+
   it('should support unique column', () => {
     const text = `
 user

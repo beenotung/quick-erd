@@ -39,12 +39,21 @@ export async function up(knex: Knex): Promise<void> {`
         type = type.replace(/^varchar/i, 'string')
 
         let length = ''
-        if (type.match(/^string/i)) {
-          length = type
-            .replace(/^string/i, '')
-            .replace(/^\(/, '')
-            .replace(/\)$/, '')
-          type = 'string'
+
+        if (!length) {
+          let match = type.match(/^string\((\d+)\)/i)
+          if (match) {
+            length = match[1]
+            type = 'string'
+          }
+        }
+
+        if (!length) {
+          let match = type.match(/^int.*\((\d+)\)/i)
+          if (match) {
+            length = match[1]
+            type = 'integer'
+          }
         }
 
         if (length) {
