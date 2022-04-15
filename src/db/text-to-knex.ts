@@ -71,7 +71,10 @@ export async function up(knex: Knex): Promise<void> {`
         code += `.unsigned().references('${ref.table}.${ref.field}')`
       }
     })
-    if (!fields.created_at && !fields.updated_at) {
+    if (
+      (!fields.created_at && !fields.updated_at) ||
+      (fields.created_at && fields.updated_at)
+    ) {
       code += `
       table.timestamps(false, true)`
     }
