@@ -18,7 +18,7 @@
 user
 ----
 id int(10) unsigned PK
-username varchar(64)
+username varchar(64) unique
 created_at datetime
 updated_at datetime
 
