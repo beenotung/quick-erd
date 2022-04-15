@@ -7,9 +7,11 @@ describe('mysql-parser TestSuit', () => {
 CREATE TABLE \`user\` (
   \`id\` int(10) unsigned NOT NULL AUTO_INCREMENT,
   \`username\` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  \`domain\` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
   \`created_at\` datetime NOT NULL DEFAULT current_timestamp(),
   \`updated_at\` datetime NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (\`id\`)
+  PRIMARY KEY (\`id\`),
+  UNIQUE KEY \`username\` (\`username\`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 `
 
@@ -33,10 +35,23 @@ CREATE TABLE \`user\` (
 
   it('should parse varchar', () => {
     expect(fields).deep.contains({
+      name: 'domain',
+      type: 'varchar(32)',
+      is_primary_key: false,
+      is_null: false,
+      is_unique: false,
+      is_unsigned: false,
+      references: undefined,
+    })
+  })
+
+  it('should parse unique column', () => {
+    expect(fields).deep.contains({
       name: 'username',
       type: 'varchar(64)',
       is_primary_key: false,
       is_null: false,
+      is_unique: true,
       is_unsigned: false,
       references: undefined,
     })
@@ -48,6 +63,7 @@ CREATE TABLE \`user\` (
       type: 'datetime',
       is_primary_key: false,
       is_null: false,
+      is_unique: false,
       is_unsigned: false,
       references: undefined,
     })
@@ -56,6 +72,7 @@ CREATE TABLE \`user\` (
       type: 'datetime',
       is_primary_key: false,
       is_null: false,
+      is_unique: false,
       is_unsigned: false,
       references: undefined,
     })
