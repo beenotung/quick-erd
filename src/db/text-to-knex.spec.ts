@@ -70,4 +70,14 @@ domain text
     expect(code).to.contains(`table.text('username').notNullable().unique()`)
     expect(code).not.to.contains(`table.text('domain').notNullable().unique()`)
   })
+
+  it("should translate 'blob' sqlite field to knex 'binary' column", () => {
+    const text = `
+content
+-------
+payload blob
+`
+    const code = textToKnex(text)
+    expect(code).to.contains(`table.binary('payload').notNullable()`)
+  })
 })

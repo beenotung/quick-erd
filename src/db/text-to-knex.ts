@@ -61,6 +61,10 @@ export async function up(knex: Knex): Promise<void> {`
           }
         }
 
+        if (type === 'blob') {
+          type = 'binary'
+        }
+
         if (length) {
           code += `
       table.${type}('${field.name}', ${length})`

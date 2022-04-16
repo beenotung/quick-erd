@@ -34,4 +34,13 @@ domain text
     expect(up).to.contains('username text not null unique')
     expect(up).not.to.contains('domain text not null unique')
   })
+  it('should support blob column', () => {
+    const text = `
+content
+----
+payload blob
+`
+    const up = textToSqlite(text).up
+    expect(up).to.contains('payload blob not null')
+  })
 })
