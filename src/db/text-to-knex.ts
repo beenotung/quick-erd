@@ -1,6 +1,11 @@
 import { parse, Field } from '../core/ast'
 import { sortTables } from './sort-tables'
 
+const type_alias: Record<string, string> = {
+  blob: 'binary',
+  int: 'integer',
+}
+
 export function textToKnex(text: string): string {
   const result = parse(text)
 
@@ -61,9 +66,7 @@ export async function up(knex: Knex): Promise<void> {`
           }
         }
 
-        if (type === 'blob') {
-          type = 'binary'
-        }
+        type = type_alias[type] || type
 
         if (length) {
           code += `

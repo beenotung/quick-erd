@@ -80,4 +80,14 @@ payload blob
     const code = textToKnex(text)
     expect(code).to.contains(`table.binary('payload').notNullable()`)
   })
+
+  it("should translate 'int' field type to knex 'integer' column", () => {
+    const text = `
+content
+-------
+size int
+`
+    const code = textToKnex(text)
+    expect(code).to.contains(`table.integer('size').notNullable()`)
+  })
 })
