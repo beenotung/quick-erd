@@ -90,4 +90,16 @@ size int
     const code = textToKnex(text)
     expect(code).to.contains(`table.integer('size').notNullable()`)
   })
+
+  it("should translate 'real' field type to knex 'float' column", () => {
+    const text = `
+point
+-------
+x real
+y real
+`
+    const code = textToKnex(text)
+    expect(code).to.contains(`table.float('x').notNullable()`)
+    expect(code).to.contains(`table.float('y').notNullable()`)
+  })
 })

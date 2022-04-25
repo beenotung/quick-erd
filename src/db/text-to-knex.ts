@@ -4,6 +4,7 @@ import { sortTables } from './sort-tables'
 const type_alias: Record<string, string> = {
   blob: 'binary',
   int: 'integer',
+  real: 'float',
 }
 
 export function textToKnex(text: string): string {
