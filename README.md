@@ -2,7 +2,8 @@
 
 quick and easy text-based ERD editor with drag and drop visualization
 
-[![npm Package Version](https://img.shields.io/npm/v/quick-erd.svg?maxAge=3600)](https://www.npmjs.com/package/quick-erd)
+[![npm Package Version](https://img.shields.io/npm/v/quick-erd)](https://www.npmjs.com/package/quick-erd)
+[![npm Package Version](https://img.shields.io/npm/dy/quick-erd)](https://www.npmtrends.com/quick-erd)
 
 ## Features
 
