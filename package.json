@@ -50,7 +50,8 @@
   "files": [
     "dist"
   ],
-  "dependencies": {
+  "dependencies": {},
+  "optionalDependencies": {
     "@types/better-sqlite3": "^7.4.1",
     "better-sqlite3": "^7.5.0",
     "dotenv": "^10.0.0",
