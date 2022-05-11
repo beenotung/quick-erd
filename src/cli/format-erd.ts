@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import fs from 'fs'
 import { parse } from '../core/ast'
 import { tablesToText } from '../core/table'

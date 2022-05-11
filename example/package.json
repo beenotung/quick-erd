@@ -14,7 +14,7 @@
     "mysql": "^2.18.1",
     "pg": "^8.7.3",
     "populate-env": "^2.0.0",
-    "quick-erd": "link:.."
+    "quick-erd": "file:.."
   },
   "devDependencies": {
     "gen-env": "^0.2.0"

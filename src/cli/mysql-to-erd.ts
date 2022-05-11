@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 process.env.DB_CLIENT = 'mysql'
 
 import { knex } from '../db/knex'

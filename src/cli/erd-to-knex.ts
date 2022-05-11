@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { textToKnex } from '../db/text-to-knex'
 
 function main() {
