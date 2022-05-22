@@ -7,14 +7,8 @@ const type_alias: Record<string, string> = {
   real: 'float',
 }
 
-export function toKnexCreateColumnCode(field: Field): string {
+export function toKnexCreateColumnTypeCode(field: Field): string {
   let code = ''
-  if (field.is_primary_key) {
-    code += `
-      table.increments('${field.name}')`
-    return code
-  }
-
   let type = field.type
 
   if (type.match(/^enum/i)) {
@@ -24,8 +18,7 @@ export function toKnexCreateColumnCode(field: Field): string {
       .replace(/\)$/, ']')
       .replace(/','/g, "', '")
 
-    code += `
-      table.enum('${field.name}', ${values})`
+    code += `.enum('${field.name}', ${values})`
   } else {
     type = type.replace(/^varchar/i, 'string')
 
@@ -50,17 +43,28 @@ export function toKnexCreateColumnCode(field: Field): string {
     type = type_alias[type] || type
 
     if (length) {
-      code += `
-      table.${type}('${field.name}', ${length})`
+      code += `.${type}('${field.name}', ${length})`
     } else {
-      code += `
-      table.${type}('${field.name}')`
+      code += `.${type}('${field.name}')`
     }
 
     if (field.is_unsigned || field.references) {
       code += `.unsigned()`
     }
   }
+
+  return code
+}
+
+export function toKnexCreateColumnCode(field: Field): string {
+  let code = `
+      table`
+  if (field.is_primary_key) {
+    code += `.increments('${field.name}')`
+    return code
+  }
+
+  code += toKnexCreateColumnTypeCode(field)
 
   if (field.is_null) {
     code += `.nullable()`

@@ -5,7 +5,7 @@ import Knex, { Knex as KnexType } from 'knex'
 import { join } from 'path'
 import { cwd } from 'process'
 import { inspect } from 'util'
-import { parse, ParseResult, Table } from '../core/ast'
+import { parse, ParseResult, Table, Field } from '../core/ast'
 import {
   addDependencies,
   readErdFromStdin,
@@ -15,6 +15,7 @@ import { dbFile } from '../db/sqlite'
 import { parseTableSchema } from '../db/sqlite-parser'
 import {
   toKnexCreateColumnCode,
+  toKnexCreateColumnTypeCode,
   toKnexCreateTableCode,
 } from '../db/text-to-knex'
 import { isObjectSample } from '../utils/object'
@@ -119,17 +120,40 @@ async function setupMigration(options: {
       const existing_field = existing_table.field_list.find(
         field => field.name === name,
       )
-      if (existing_field) {
-        if (isObjectSample(field, existing_field)) {
-          return
-        }
-        table_up_lines.push(toKnexCreateColumnCode(field) + `.alter()`)
-        table_down_lines.push(
-          toKnexCreateColumnCode(existing_field) + `.alter()`,
-        )
-      } else {
+      if (!existing_field) {
         table_up_lines.push(toKnexCreateColumnCode(field))
-        table_down_lines.unshift(`    table.dropColumn(${inspect(name)})`)
+        table_down_lines.unshift(`table.dropColumn(${inspect(name)})`)
+        return
+      }
+
+      if (
+        field.type !== existing_field.type ||
+        field.is_unsigned !== existing_field.is_unsigned
+      ) {
+        table_up_lines.push(alterType(field))
+        table_down_lines.unshift(alterType(existing_field))
+      }
+
+      if (field.is_primary_key !== existing_field.is_primary_key) {
+        table_up_lines.push(alterPrimaryKey(field))
+        table_down_lines.unshift(alterPrimaryKey(existing_field))
+      }
+
+      if (field.is_unique !== existing_field.is_unique) {
+        table_up_lines.push(alterUnique(field))
+        table_down_lines.unshift(alterUnique(existing_field))
+      }
+
+      if (field.is_null !== existing_field.is_null) {
+        table_up_lines.push(alterNullable(field))
+        table_down_lines.unshift(alterNullable(existing_field))
+      }
+
+      if (
+        !isObjectSample(field.references || {}, existing_field.references || {})
+      ) {
+        table_up_lines.push(alterForeignKey(field))
+        table_down_lines.unshift(alterForeignKey(existing_field))
       }
     })
 
@@ -182,13 +206,55 @@ ${down_lines.join('\n')}
   await knex.destroy()
 }
 
+function alterType(field: Field): string {
+  let code = 'table'
+  code += toKnexCreateColumnTypeCode(field)
+  if (field.is_null) {
+    code += '.nullable()'
+  } else {
+    code += '.notNullable()'
+  }
+  code += '.alter()'
+  return code
+}
+function alterPrimaryKey(field: Field): string {
+  if (field.is_unique) {
+    return `table.primary([${inspect(field.name)}])`
+  } else {
+    return `table.dropPrimary([${inspect(field.name)}])`
+  }
+}
+function alterUnique(field: Field): string {
+  if (field.is_unique) {
+    return `table.unique([${inspect(field.name)}])`
+  } else {
+    return `table.dropUnique([${inspect(field.name)}])`
+  }
+}
+function alterNullable(field: Field): string {
+  if (field.is_null) {
+    return `table.setNullable(${inspect(field.name)})`
+  } else {
+    return `table.dropNullable(${inspect(field.name)})`
+  }
+}
+function alterForeignKey(field: Field): string {
+  if (field.references) {
+    return `table.foreign(${inspect(field.name)}).references(${inspect(
+      field.references.table + '.' + field.references.field,
+    )})`
+  } else {
+    return `table.dropForeign(${inspect(field.name)})`
+  }
+}
+
 async function checkPendingMigrations(knex: KnexType) {
-  let files = readdirSync(migrations_dir)
+  const files = readdirSync(migrations_dir)
   if (files.length === 0) {
     return
   }
-  let status = await knex.migrate.status().catch(async e => {
-    let hasTable = await knex.schema.hasTable('knex_migrations')
+  const status = await knex.migrate.status().catch(async e => {
+    const hasTable = await knex.schema.hasTable('knex_migrations')
     if (!hasTable) {
       return -files.length
     }
