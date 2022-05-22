@@ -72,12 +72,14 @@ function setupKnex(dbTsFile: string) {
   if (existsSync(knexFile)) {
     return { knexFile, profile }
   }
-  const config = { development: profile }
+  const config = inspect({
+    development: profile,
+  }).replace(inspect(dbFile), 'dbFile')
   const code = `
 import type { Knex } from 'knex'
 import { dbFile } from '${importPath}'
 
-const config: { [key: string]: Knex.Config } = ${inspect(config)}
+const config: { [key: string]: Knex.Config } = ${config}
 
 module.exports = config;
 `
