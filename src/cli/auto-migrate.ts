@@ -91,18 +91,10 @@ async function setupMigration(options: {
   if (!existsSync(migrations_dir)) {
     mkdirSync(migrations_dir)
   }
-  const files = readdirSync(migrations_dir)
+
   const knex = Knex(options.profile)
-  if (files.length > 0) {
-    const status = await knex.migrate.status()
-    if (status !== 0) {
-      console.error('Error: not migrated to latest version.')
-      console.error(
-        "Please run 'npx knex migrate:latest' first, then re-run this auto-migrate command.",
-      )
-      process.exit(1)
-    }
-  }
+
+  await checkPendingMigrations(knex)
 
   console.log('Scanning existing database schema...')
   const rows: Array<{ name: string; sql: string; type: string }> =
@@ -188,6 +180,29 @@ ${down_lines.join('\n')}
   }
 
   await knex.destroy()
+}
+
+async function checkPendingMigrations(knex: KnexType) {
+  let files = readdirSync(migrations_dir)
+  if (files.length === 0) {
+    return
+  }
+  let status = await knex.migrate.status().catch(async e => {
+    let hasTable = await knex.schema.hasTable('knex_migrations')
+    if (!hasTable) {
+      return -files.length
+    }
+    throw e
+  })
+  if (status === 0) {
+    return
+  }
+
+  console.error('Error: not migrated to latest version.')
+  console.error(
+    "Please run 'npx knex migrate:latest' first, then re-run this auto-migrate command.",
+  )
+  process.exit(1)
 }
 
 function writeSrcFile(file: string, code: string) {
