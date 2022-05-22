@@ -66,6 +66,7 @@ Below are available commands in example.
 
 - `npx erd-to-knex < erd.txt > migrations/001-create-tables.ts`
 - `npx erd-to-sqlite < erd.txt > migrations/001-create-tables.sql`
+- `npx auto-migrate dev.sqlite3 < erd.txt`
 
 **To format erd file**:
 
@@ -130,6 +131,16 @@ mkdir -p migrations
 # read from erd.txt, save to migrations/000-create-tables.sql
 erd-to-sqlite < erd.txt > migrations/000-create-tables.sql
 ```
+
+##### Generate Incremental Knex Migration Script
+
+1. Run `npx auto-migrate dev.sqlite3 < erd.txt`
+
+This command auto setup sqlite3 and knex, then it generates incremental migration script for knex.
+
+If there are pending knex migrations not applied, it will show error message and stop running.
+
+Current implementation only supports sqlite; support to pg and mysql can be added in future version.
 
 ##### Format Diagram Text
 

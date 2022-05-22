@@ -1,4 +1,36 @@
-import { Field, ForeignKeyReference } from '../core/ast'
+import { Field, ForeignKeyReference, Table } from '../core/ast'
+
+type SchemaRow = {
+  name: string
+  sql: string
+  type: string
+}
+
+export function parseTableSchema(rows: SchemaRow[]): Table[] {
+  const table_rows: SchemaRow[] = rows.filter(row => row.type === 'table')
+  const index_rows: SchemaRow[] = rows.filter(row => row.type === 'index')
+
+  const table_list: Table[] = []
+
+  table_rows.forEach(row => {
+    const field_list = parseCreateTable(row.sql)
+    if (!field_list) {
+      throw new Error('Failed to parse table: ' + row.sql)
+    }
+    table_list.push({ name: row.name, field_list: field_list })
+  })
+
+  for (const index_row of index_rows) {
+    const index = parseCreateIndex(index_row.sql)
+    const table = table_list.find(table => table.name === index?.table)
+    const field = table?.field_list.find(field => field.name === index?.field)
+    if (index?.is_unique && field) {
+      field.is_unique = true
+    }
+  }
+
+  return table_list
+}
 
 export function parseCreateTable(sql: string): Field[] | null {
   const start = sql.indexOf('(')
@@ -99,6 +131,25 @@ export function parseCreateTable(sql: string): Field[] | null {
     }
   })
   return Object.values(field_dict)
+}
+
+type UniqueIndex = {
+  is_unique: true
+  table: string
+  field: string
+}
+function parseCreateIndex(sql: string): UniqueIndex | null {
+  // example: CREATE UNIQUE INDEX `user_username_unique` on `user` (`username`)
+  const match = sql.match(
+    /create unique index .* on \`?(.*?)\`? \(\`?(.*?)\`?\)/i,
+  )
+  if (!match) return null
+  const table = match[1]
+  const field = match[2]
+  if (field.includes(',')) {
+    return null
+  }
+  return { table, field, is_unique: true }
 }
 
 function firstIndexOf(string: string, patterns: string[], offset = 0): number {
