@@ -97,7 +97,7 @@ export function toKnexCreateTableCode(table: Table): string {
   Object.values(fields).forEach(field => {
     code += toKnexCreateColumnCode(field)
   })
-  if (!fields.created_at && !fields.updated_at) {
+  if (!fields.created_at && !fields.updated_at && !fields.timestamp) {
     code += `
       table.timestamps(false, true)`
   }
