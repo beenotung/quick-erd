@@ -1,6 +1,6 @@
 import { Field, ForeignKeyReference, Table } from '../core/ast'
 
-type SchemaRow = {
+export type SchemaRow = {
   name: string
   sql: string
   type: string

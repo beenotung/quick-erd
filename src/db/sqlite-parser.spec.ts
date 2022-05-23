@@ -1,6 +1,6 @@
-import { Field } from '../core/ast'
+import { Field, Table } from '../core/ast'
 import { expect } from 'chai'
-import { parseCreateTable } from './sqlite-parser'
+import { parseCreateTable, parseTableSchema, SchemaRow } from './sqlite-parser'
 
 describe('sqlite-parser TestSuit', () => {
   it('should parse plain columns', () => {
@@ -336,5 +336,52 @@ create table user (
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
+  })
+  it('should parse unique index', () => {
+    const rows: SchemaRow[] = [
+      {
+        type: 'table',
+        name: 'user',
+        sql: /* sql */ `
+CREATE TABLE \`user\` (
+  \`id\` integer not null primary key autoincrement
+, \`username\` text not null
+)
+`,
+      },
+      {
+        type: 'index',
+        name: '',
+        sql: /* sql */ `
+CREATE UNIQUE INDEX \`user_username_unique\` on \`user\` (\`username\`)
+`,
+      },
+    ]
+    const table_list: Table[] = [
+      {
+        name: 'user',
+        field_list: [
+          {
+            name: 'id',
+            type: 'integer',
+            is_null: false,
+            is_primary_key: true,
+            is_unique: false,
+            is_unsigned: false,
+            references: undefined,
+          },
+          {
+            name: 'username',
+            type: 'text',
+            is_null: false,
+            is_primary_key: false,
+            is_unique: true,
+            is_unsigned: false,
+            references: undefined,
+          },
+        ],
+      },
+    ]
+    expect(parseTableSchema(rows)).to.deep.equals(table_list)
   })
 })
