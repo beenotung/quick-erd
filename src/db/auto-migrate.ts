@@ -1,11 +1,12 @@
 import { existsSync, mkdirSync, readdirSync } from 'fs'
-import Knex, { Knex as KnexType } from 'knex'
+import { Knex as KnexType } from 'knex'
 import { join } from 'path'
-import { cwd } from 'process'
 import { inspect } from 'util'
 import { Field, ParseResult, Table } from '../core/ast'
-import { addDependencies, writeSrcFile as _writeSrcFile } from '../utils/file'
+import { addDependencies, writeSrcFile } from '../utils/file'
 import { isObjectSample } from '../utils/object'
+import { scanMysqlTableSchema } from './mysql-to-text'
+import { scanPGTableSchema } from './pg-to-text'
 import { parseTableSchema } from './sqlite-parser'
 import {
   toKnexCreateTableCode,
@@ -13,22 +14,22 @@ import {
   toKnexCreateColumnTypeCode,
 } from './text-to-knex'
 
-export function setupSqlite(options: { dbFile: string }): {
-  importPath: string
-} {
-  addDependencies('better-sqlite3-schema', '^2.3.3')
-  let dbTsFile = 'db.ts'
-  let importPath = './db'
-  if (existsSync('src')) {
-    dbTsFile = join('src', dbTsFile)
-    importPath = './src/db'
-  } else if (existsSync('server')) {
-    dbTsFile = join('server', dbTsFile)
-    importPath = './server/db'
+export function detectSrcDir() {
+  for (const dir of ['src', 'server', '.']) {
+    if (existsSync(dir)) {
+      return dir
+    }
   }
+  return '.'
+}
+
+export function setupSqlite(options: { dbFile: string; srcDir: string }) {
+  const dbTsFile = join(options.srcDir, 'db.ts')
   if (existsSync(dbTsFile)) {
-    return { importPath }
+    return
   }
+  addDependencies('better-sqlite3-schema', '^2.3.3')
+  addDependencies('@types/integer', '^4.0.1', 'dev')
   const code = `
 import { toSafeMode, newDB } from 'better-sqlite3-schema'
 
@@ -42,55 +43,105 @@ export let db = newDB({
 toSafeMode(db)
 `
   writeSrcFile(dbTsFile, code)
-  return { importPath }
+  return
 }
 
-export function setupKnex(options: { importPath: string; dbFile: string }) {
+export function setupEnvFile(options: { srcDir: string }) {
+  const file = join(options.srcDir, 'env.ts')
+  if (existsSync(file)) {
+    return
+  }
+  addDependencies('dotenv', '^16.0.1')
+  addDependencies('populate-env', '^2.0.0')
+  const code = `
+import { config } from 'dotenv'
+import populateEnv from 'populate-env'
+
+config()
+
+export const env = {
+  DB_HOST: 'optional',
+  DB_PORT: 1,
+  DB_NAME: '',
+  DB_USERNAME: '',
+  DB_PASSWORD: '',
+}
+
+populateEnv(env, { mode: 'halt' })
+
+env.DB_HOST = process.env.DB_HOST
+env.DB_PORT = +process.env.DB_PORT!
+`
+  writeSrcFile(file, code)
+}
+
+export function setupKnexFile(options: { srcDir: string; db_client: string }) {
+  const { srcDir, db_client } = options
+  const file = 'knexfile.ts'
+  if (existsSync(file)) {
+    return
+  }
   addDependencies('knex', '^2.0.0')
-  const knexFile = join(cwd(), 'knexfile.ts')
-  const profile = {
-    client: 'better-sqlite3',
+  let code: string
+  if (db_client.includes('sqlite')) {
+    code = `
+import type { Knex } from 'knex'
+import { dbFile } from './${srcDir}/db'
+
+const config: { [key: string]: Knex.Config } = {
+  development: {
+    client: ${inspect(db_client)},
     useNullAsDefault: true,
     connection: {
-      filename: options.dbFile,
+      filename: dbFile,
     },
   }
-  if (existsSync(knexFile)) {
-    return { knexFile, profile }
-  }
-  const config = inspect({
-    development: profile,
-  }).replace(inspect(options.dbFile), 'dbFile')
-  const code = `
-import type { Knex } from 'knex'
-import { dbFile } from '${options.importPath}'
-
-const config: { [key: string]: Knex.Config } = ${config}
+}
 
 module.exports = config;
 `
-  writeSrcFile(knexFile, code)
-  return { knexFile, profile }
+  } else {
+    code = `
+import type { Knex } from 'knex'
+import { env } from './${srcDir}/env'
+
+const config: { [key: string]: Knex.Config } = {
+  development: {
+    client: ${inspect(db_client)},
+    connection: {
+      database: env.DB_NAME,
+      user: env.DB_USERNAME,
+      password: env.DB_PASSWORD,
+      host: env.DB_HOST,
+      port: env.DB_PORT,
+      multipleStatements: true,
+    },
+  }
+}
+
+module.exports = config;
+`
+  }
+  writeSrcFile(file, code)
 }
 
 const migrations_dir = 'migrations'
 
 export async function setupKnexMigration(options: {
-  profile: KnexType.Config
+  knex: KnexType
+  db_client: string
   parseResult: ParseResult
 }) {
   if (!existsSync(migrations_dir)) {
     mkdirSync(migrations_dir)
   }
 
-  const knex = Knex(options.profile)
+  const { knex, db_client } = options
 
   await checkPendingMigrations(knex)
 
   log('Scanning existing database schema...')
-  const rows: Array<{ name: string; sql: string; type: string }> =
-    await knex.raw(/* sql */ `select name, sql, type from sqlite_master`)
-  const table_list: Table[] = parseTableSchema(rows)
+  const table_list: Table[] = await loadTableList(knex, db_client)
 
   const up_lines: string[] = []
   const down_lines: string[] = []
@@ -238,6 +289,27 @@ function alterForeignKey(field: Field): string {
   }
 }
 
+async function loadTableList(
+  knex: KnexType,
+  db_client: string,
+): Promise<Table[]> {
+  if (db_client.includes('sqlite')) {
+    const rows: Array<{ name: string; sql: string; type: string }> =
+      await knex.raw(/* sql */ `select name, sql, type from sqlite_master`)
+    return parseTableSchema(rows)
+  }
+
+  if (db_client === 'pg' || db_client.includes('postgres')) {
+    return await scanPGTableSchema(knex)
+  }
+
+  if (db_client.includes('mysql')) {
+    return await scanMysqlTableSchema(knex)
+  }
+
+  throw new Error('unknown db_client: ' + db_client)
+}
+
 async function checkPendingMigrations(knex: KnexType) {
   const files = readdirSync(migrations_dir)
   if (files.length === 0) {
@@ -259,11 +331,6 @@ async function checkPendingMigrations(knex: KnexType) {
     "Please run 'npx knex migrate:latest' first, then re-run this auto-migrate command.",
   )
   process.exit(1)
-}
-
-function writeSrcFile(file: string, code: string) {
-  console.error('saving to', file, '...')
-  _writeSrcFile(file, code)
 }
 
 const log = console.error.bind(console)

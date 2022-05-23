@@ -17,18 +17,25 @@ export function readErdFromStdin(cb: (text: string) => void) {
 }
 
 export function writeSrcFile(file: string, code: string) {
+  console.error('saving to', file, '...')
   code = code.trim() + '\n'
   writeFileSync(file, code)
 }
 
-export function addDependencies(name: string, version: string) {
+export function addDependencies(
+  name: string,
+  version: string,
+  mode?: 'prod' | 'dev',
+) {
   const file = 'package.json'
   const pkg = JSON.parse(readFileSync(file).toString())
-  pkg.dependencies = pkg.dependencies || {}
-  if (name in pkg.dependencies) {
+
+  const field = mode === 'dev' ? 'devDependencies' : 'dependencies'
+  pkg[field] = pkg[field] || {}
+  if (name in pkg[field]) {
     return
   }
-  pkg.dependencies[name] = version
+  pkg[field][name] = version
   const text = JSON.stringify(pkg, null, 2)
   writeSrcFile(file, text)
 }

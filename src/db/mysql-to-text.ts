@@ -1,8 +1,8 @@
+import { Knex } from 'knex'
 import { Table } from '../core/ast'
-import { knex } from './knex'
 import { parseCreateTable } from './mysql-parser'
 
-export async function scanMysqlTableSchema(): Promise<Table[]> {
+export async function scanMysqlTableSchema(knex: Knex): Promise<Table[]> {
   const table_list: Table[] = []
 
   const [rows, fields] = await knex.raw(`show tables`)

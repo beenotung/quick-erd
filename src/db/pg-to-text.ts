@@ -1,5 +1,5 @@
+import { Knex } from 'knex'
 import { Table } from '../core/ast'
-import { knex } from './knex'
 
 function toDataType(type: string): string {
   if (type.includes('character varying')) {
@@ -11,7 +11,7 @@ function toDataType(type: string): string {
   return type
 }
 
-export async function scanPGTableSchema(): Promise<Table[]> {
+export async function scanPGTableSchema(knex: Knex): Promise<Table[]> {
   const table_list: Table[] = []
   const table_rows = await knex
     .select('tablename')
