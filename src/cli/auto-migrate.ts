@@ -28,19 +28,24 @@ async function main() {
   console.log('Reading erd from stdin...')
   const erd = await new Promise<string>(resolve => readErdFromStdin(resolve))
   const parseResult = parse(erd)
-  const dbTsFile = setupSqlite()
-  const { profile } = setupKnex(dbTsFile)
+  const { importPath } = setupSqlite()
+  const { profile } = setupKnex(importPath)
   await setupMigration({ profile, parseResult })
 }
 
-function setupSqlite(): string {
+function setupSqlite(): { importPath: string } {
   addDependencies('better-sqlite3-schema', '^2.3.3')
   let dbTsFile = 'db.ts'
+  let importPath = './db'
   if (existsSync('src')) {
     dbTsFile = join('src', dbTsFile)
+    importPath = './src/db'
+  } else if (existsSync('server')) {
+    dbTsFile = join('server', dbTsFile)
+    importPath = './server/db'
   }
   if (existsSync(dbTsFile)) {
-    return dbTsFile
+    return { importPath }
   }
   const code = `
 import { toSafeMode, newDB } from 'better-sqlite3-schema'
@@ -55,13 +60,12 @@ export let db = newDB({
 toSafeMode(db)
 `
   writeSrcFile(dbTsFile, code)
-  return dbTsFile
+  return { importPath }
 }
 
-function setupKnex(dbTsFile: string) {
+function setupKnex(importPath: string) {
   addDependencies('knex', '^2.0.0')
   const knexFile = join(cwd(), 'knexfile.ts')
-  const importPath = dbTsFile.includes('src') ? './src/db' : './db'
   const profile = {
     client: 'better-sqlite3',
     useNullAsDefault: true,
