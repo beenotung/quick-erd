@@ -1,6 +1,9 @@
 import { readFileSync, writeFileSync } from 'fs'
 
 export function readErdFromStdin(cb: (text: string) => void) {
+  if (process.stdin.isTTY) {
+    console.error('Reading erd from stdin... (Please pipe erd text to stdin)')
+  }
   let text = ''
   process.stdin
     .on('data', chunk => (text += chunk))
