@@ -4,10 +4,12 @@ import populateEnv from 'populate-env'
 config()
 
 export const env = {
-  DB_HOST: '',
+  DB_HOST: 'optional',
   DB_NAME: '',
   DB_USERNAME: '',
   DB_PASSWORD: '',
 }
 
 populateEnv(env, { mode: 'halt' })
+
+env.DB_HOST = process.env.DB_HOST!
