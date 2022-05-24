@@ -239,7 +239,7 @@ function parseUniqueKeyStatement(sql: string): Statement {
   /* parse column names */
   // TODO parse multiple columns
   result = parseNameInBracket(sql, 'UNIQUE KEY')
-  sql = result.rest.trim()
+  sql = result.rest.replace(/using hash/i, '').trim()
   if (sql && !sql.startsWith(',')) {
     throw new Error(`unknown tokens after UNIQUE KEY: ${JSON.stringify(sql)}`)
   }
