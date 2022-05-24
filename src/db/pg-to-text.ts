@@ -8,8 +8,8 @@ type ColumnRow = {
 
 function toDataType(column_row: ColumnRow): string {
   if (column_row.data_type.includes('character varying')) {
-    if(column_row.character_maximum_length){
-      return `varchar(${column_row.character_maximum_length })`
+    if (column_row.character_maximum_length) {
+      return `varchar(${column_row.character_maximum_length})`
     }
     return 'string'
   }
