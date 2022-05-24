@@ -62,10 +62,15 @@ Below are available commands in example.
 - `npx mysql-to-erd > erd.txt`
 - `npx sqlite-to-erd dev.sqlite3 > erd.txt`
 
-**To generate database migration script from erd file**:
+**To generate initial database migration script from erd file**:
 
 - `npx erd-to-knex < erd.txt > migrations/001-create-tables.ts`
 - `npx erd-to-sqlite < erd.txt > migrations/001-create-tables.sql`
+
+**To generate incremental database migration script from erd file and live database**:
+
+- `npx auto-migrate pg < erd.txt`
+- `npx auto-migrate mysql < erd.txt`
 - `npx auto-migrate dev.sqlite3 < erd.txt`
 
 **To format erd file**:
@@ -136,11 +141,15 @@ erd-to-sqlite < erd.txt > migrations/000-create-tables.sql
 
 1. Run `npx auto-migrate dev.sqlite3 < erd.txt`
 
-This command auto setup sqlite3 and knex, then it generates incremental migration script for knex.
+   or `npx auto-migrate mysql < erd.txt`
+
+   or `npx auto-migrate pg < erd.txt`
+
+This command auto setup knex, then it generates incremental migration script for knex.
+
+For sqlite database, it also auto setup `db.ts` with `better-sqlite3` connection using given database filename.
 
 If there are pending knex migrations not applied, it will show error message and stop running.
-
-Current implementation only supports sqlite; support to pg and mysql can be added in future version.
 
 ##### Format Diagram Text
 
