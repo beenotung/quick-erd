@@ -7,6 +7,7 @@ import { addDependencies, writeSrcFile } from '../utils/file'
 import { isObjectSample } from '../utils/object'
 import { scanMysqlTableSchema } from './mysql-to-text'
 import { scanPGTableSchema } from './pg-to-text'
+import { sortTables } from './sort-tables'
 import { parseTableSchema } from './sqlite-parser'
 import {
   toKnexCreateTableCode,
@@ -146,7 +147,7 @@ export async function setupKnexMigration(options: {
   const up_lines: string[] = []
   const down_lines: string[] = []
 
-  options.parseResult.table_list.forEach(table => {
+  sortTables(options.parseResult.table_list).forEach(table => {
     const { name, field_list } = table
     const existing_table = table_list.find(table => table.name === name)
     if (!existing_table) {
