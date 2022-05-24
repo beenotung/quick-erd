@@ -43,4 +43,17 @@ module.exports = {
   },
 }
 
-module.exports.development = module.exports.mysql
+switch (env.DB_CLIENT) {
+  case 'sqlite':
+    module.exports.development = module.exports.sqlite
+    break
+  case 'mysql':
+    module.exports.development = module.exports.mysql
+    break
+  case 'pg':
+  case 'postgresql':
+    module.exports.development = module.exports.pg
+    break
+  default:
+    throw new Error('Unknown DB_CLIENT:' + env.DB_CLIENT)
+}
