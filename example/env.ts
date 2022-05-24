@@ -4,7 +4,6 @@ import populateEnv from 'populate-env'
 config()
 
 export const env = {
-  DB_HOST: 'optional',
   DB_CLIENT: 'better-sqlite3',
   DB_NAME: '',
   DB_USERNAME: '',
@@ -12,5 +11,3 @@ export const env = {
 }
 
 populateEnv(env, { mode: 'halt' })
-
-env.DB_HOST = process.env.DB_HOST!
