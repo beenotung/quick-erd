@@ -1,14 +1,22 @@
 import { Knex } from 'knex'
 import { Table } from '../core/ast'
 
-function toDataType(type: string): string {
-  if (type.includes('character varying')) {
+type ColumnRow = {
+  data_type: string
+  character_maximum_length: string
+}
+
+function toDataType(column_row: ColumnRow): string {
+  if (column_row.data_type.includes('character varying')) {
+    if(column_row.character_maximum_length){
+      return `varchar(${column_row.character_maximum_length })`
+    }
     return 'string'
   }
-  if (type.includes('timestamp')) {
+  if (column_row.data_type.includes('timestamp')) {
     return 'timestamp'
   }
-  return type
+  return column_row.data_type
 }
 
 export async function scanPGTableSchema(knex: Knex): Promise<Table[]> {
@@ -26,10 +34,19 @@ export async function scanPGTableSchema(knex: Knex): Promise<Table[]> {
       continue
     }
     table_list.push(table)
-    const column_rows = await knex
-      .select('column_name', 'data_type', 'is_nullable')
-      .from('information_schema.columns')
-      .where({ table_name: table.name })
+    const result = await knex.raw(
+      /* sql */ `
+select
+  column_name
+, data_type
+, character_maximum_length
+, is_nullable
+from information_schema.columns
+where table_name = ?
+`,
+      [table.name],
+    )
+    const column_rows = result.rows
     for (const column_row of column_rows) {
       let result = await knex.raw(
         /* sql */
@@ -74,7 +91,7 @@ WHERE tc.constraint_type = 'UNIQUE'
         [table.name, column_row.column_name],
       )
       const unique_row = result.rows[0]
-      const type = toDataType(column_row.data_type)
+      const type = toDataType(column_row)
       table.field_list.push({
         name: column_row.column_name,
         type,
