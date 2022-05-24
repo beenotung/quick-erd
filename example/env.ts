@@ -1,5 +1,5 @@
-import populateEnv from 'populate-env'
 import { config } from 'dotenv'
+import populateEnv from 'populate-env'
 
 config()
 
