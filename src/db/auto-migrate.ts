@@ -83,11 +83,15 @@ export function setupKnexFile(options: { srcDir: string; db_client: string }) {
     return
   }
   addDependencies('knex', '^2.0.0')
+  let importDir = srcDir
+  if (!importDir.startsWith('.')) {
+    importDir = './' + srcDir
+  }
   let code: string
   if (db_client.includes('sqlite')) {
     code = `
 import type { Knex } from 'knex'
-import { dbFile } from './${srcDir}/db'
+import { dbFile } from '${importDir}/db'
 
 const config: { [key: string]: Knex.Config } = {
   development: {
