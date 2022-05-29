@@ -8,7 +8,7 @@ import {
   setupKnexMigration,
   setupSqlite,
 } from '../db/auto-migrate'
-import { loadKnex } from '../db/knex'
+import { loadKnex, loadSqliteKnex } from '../db/knex'
 
 /* eslint-disable no-console */
 
@@ -23,6 +23,7 @@ async function main() {
   const parseResult = parse(erd)
   const srcDir = detectSrcDir()
   let db_client: string
+  let dbFile: string | undefined
   switch (dbFile_or_client) {
     case 'mysql':
     case 'pg':
@@ -31,12 +32,12 @@ async function main() {
       break
     default: {
       db_client = 'better-sqlite3'
-      const dbFile = dbFile_or_client
+      dbFile = dbFile_or_client
       setupSqlite({ srcDir, dbFile })
     }
   }
   setupKnexFile({ srcDir, db_client })
-  const knex = loadKnex(db_client)
+  const knex = dbFile ? loadSqliteKnex(dbFile) : loadKnex(db_client)
   await setupKnexMigration({ knex, parseResult, db_client })
 }
 
