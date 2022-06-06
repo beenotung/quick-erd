@@ -196,7 +196,8 @@ export async function setupKnexMigration(options: {
       }
 
       if (
-        !isObjectSample(field.references || {}, existing_field.references || {})
+        field.references?.table !== existing_field.references?.table ||
+        field.references?.field !== existing_field.references?.field
       ) {
         table_up_lines.push(alterForeignKey(field))
         table_down_lines.unshift(alterForeignKey(existing_field))
