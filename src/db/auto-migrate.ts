@@ -249,9 +249,9 @@ export function generateAutoMigrate(options: {
           field.references.field !== existing_field.references.field)
       ) {
         table_up_lines.push(dropForeignKey(existing_field))
-        table_down_lines.push(addForeignKey(existing_field))
         table_up_lines.push(addForeignKey(field))
         table_down_lines.push(dropForeignKey(field))
+        table_down_lines.push(addForeignKey(existing_field))
       }
     })
 
