@@ -236,12 +236,12 @@ export function generateAutoMigrate(options: {
       // add foreign key
       if (field.references && !existing_field.references) {
         table_up_lines.push(addForeignKey(field))
-        table_down_lines.push(dropForeignKey(field))
+        table_down_lines.unshift(dropForeignKey(field))
       }
       // drop foreign key
       else if (!field.references && existing_field.references) {
         table_up_lines.push(dropForeignKey(existing_field))
-        table_down_lines.push(addForeignKey(existing_field))
+        table_down_lines.unshift(addForeignKey(existing_field))
       }
       // change foreign key
       else if (
@@ -251,9 +251,9 @@ export function generateAutoMigrate(options: {
           field.references.field !== existing_field.references.field)
       ) {
         table_up_lines.push(dropForeignKey(existing_field))
+        table_down_lines.unshift(addForeignKey(existing_field))
         table_up_lines.push(addForeignKey(field))
-        table_down_lines.push(dropForeignKey(field))
-        table_down_lines.push(addForeignKey(existing_field))
+        table_down_lines.unshift(dropForeignKey(field))
       }
     })
 
