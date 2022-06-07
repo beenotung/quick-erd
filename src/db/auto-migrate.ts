@@ -1,3 +1,4 @@
+import { ForeignKeyReference } from './../core/ast'
 import { existsSync, mkdirSync, readdirSync } from 'fs'
 import { Knex as KnexType } from 'knex'
 import { join } from 'path'
@@ -145,14 +146,50 @@ export async function setupKnexMigration(options: {
   await checkPendingMigrations(knex)
 
   log('Scanning existing database schema...')
-  const table_list: Table[] = await loadTableList(knex, db_client)
+  const existing_table_list: Table[] = await loadTableList(knex, db_client)
 
+  const { up_lines, down_lines } = generateAutoMigrate({
+    existing_table_list,
+    parsed_table_list: options.parseResult.table_list,
+  })
+
+  if (up_lines.length === 0 && down_lines.length === 0) {
+    log('No migration is needed.')
+  } else {
+    const code = `
+import { Knex } from "knex";
+
+
+export async function up(knex: Knex): Promise<void> {
+${up_lines.join('\n')}
+}
+
+
+export async function down(knex: Knex): Promise<void> {
+${down_lines.join('\n')}
+}
+`
+
+    let file = await knex.migrate.make('auto-migrate', { extension: 'ts' })
+    file = file.replace(join(process.cwd(), migrations_dir), migrations_dir)
+    writeSrcFile(file, code)
+  }
+
+  await knex.destroy()
+}
+
+export function generateAutoMigrate(options: {
+  existing_table_list: Table[]
+  parsed_table_list: Table[]
+}) {
   const up_lines: string[] = []
   const down_lines: string[] = []
 
-  sortTables(options.parseResult.table_list).forEach(table => {
+  sortTables(options.parsed_table_list).forEach(table => {
     const { name, field_list } = table
-    const existing_table = table_list.find(table => table.name === name)
+    const existing_table = options.existing_table_list.find(
+      table => table.name === name,
+    )
     if (!existing_table) {
       up_lines.push(toKnexCreateTableCode(table))
       down_lines.unshift(`  await knex.schema.dropTableIfExists('${name}')`)
@@ -194,12 +231,27 @@ export async function setupKnexMigration(options: {
         table_down_lines.unshift(alterNullable(existing_field))
       }
 
-      if (
-        field.references?.table !== existing_field.references?.table ||
-        field.references?.field !== existing_field.references?.field
+      // add foreign key
+      if (field.references && !existing_field.references) {
+        table_up_lines.push(addForeignKey(field))
+        table_down_lines.push(dropForeignKey(field))
+      }
+      // drop foreign key
+      else if (!field.references && existing_field.references) {
+        table_up_lines.push(dropForeignKey(existing_field))
+        table_down_lines.push(addForeignKey(existing_field))
+      }
+      // change foreign key
+      else if (
+        field.references &&
+        existing_field.references &&
+        (field.references.table !== existing_field.references.table ||
+          field.references.field !== existing_field.references.field)
       ) {
-        table_up_lines.push(alterForeignKey(field))
-        table_down_lines.unshift(alterForeignKey(existing_field))
+        table_up_lines.push(dropForeignKey(existing_field))
+        table_down_lines.push(addForeignKey(existing_field))
+        table_up_lines.push(addForeignKey(field))
+        table_down_lines.push(dropForeignKey(field))
       }
     })
 
@@ -227,29 +279,7 @@ ${mergeLines(table_down_lines)}
     }
   })
 
-  if (up_lines.length > 0 && down_lines.length > 0) {
-    const code = `
-import { Knex } from "knex";
-
-
-export async function up(knex: Knex): Promise<void> {
-${up_lines.join('\n')}
-}
-
-
-export async function down(knex: Knex): Promise<void> {
-${down_lines.join('\n')}
-}
-`
-
-    let file = await knex.migrate.make('auto-migrate', { extension: 'ts' })
-    file = file.replace(join(process.cwd(), migrations_dir), migrations_dir)
-    writeSrcFile(file, code)
-  } else {
-    log('No migration is needed.')
-  }
-
-  await knex.destroy()
+  return { up_lines, down_lines }
 }
 
 function alterType(field: Field): string {
@@ -284,14 +314,16 @@ function alterNullable(field: Field): string {
     return `table.dropNullable(${inspect(field.name)})`
   }
 }
-function alterForeignKey(field: Field): string {
-  if (field.references) {
-    return `table.foreign(${inspect(field.name)}).references(${inspect(
-      field.references.table + '.' + field.references.field,
-    )})`
-  } else {
-    return `table.dropForeign(${inspect(field.name)})`
+function addForeignKey(field: Field): string {
+  if (!field.references) {
+    return ''
   }
+  return `table.foreign(${inspect(field.name)}).references(${inspect(
+    field.references.table + '.' + field.references.field,
+  )})`
+}
+function dropForeignKey(field: Field): string {
+  return `table.dropForeign(${inspect(field.name)})`
 }
 
 async function loadTableList(
