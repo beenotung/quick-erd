@@ -7,7 +7,7 @@ describe('auto-migrate TestSuit', () => {
     let down_lines: string
 
     before(() => {
-      let existing_table_list: Table[] = [
+      const existing_table_list: Table[] = [
         {
           name: 'content',
           field_list: [
@@ -23,7 +23,7 @@ describe('auto-migrate TestSuit', () => {
           ],
         },
       ]
-      let parsed_table_list: Table[] = [
+      const parsed_table_list: Table[] = [
         {
           name: 'content',
           field_list: [
@@ -39,7 +39,7 @@ describe('auto-migrate TestSuit', () => {
           ],
         },
       ]
-      let result = generateAutoMigrate({
+      const result = generateAutoMigrate({
         existing_table_list,
         parsed_table_list,
       })
@@ -64,15 +64,15 @@ describe('auto-migrate TestSuit', () => {
       )
     })
     it('should remove old foreign key before add new foreign key in up function', () => {
-      let dropIndex = up_lines.indexOf('dropForeign')
-      let addIndex = up_lines.indexOf("references('user.id')")
+      const dropIndex = up_lines.indexOf('dropForeign')
+      const addIndex = up_lines.indexOf("references('user.id')")
       expect(dropIndex).not.to.equals(-1)
       expect(addIndex).not.to.equals(-1)
       expect(dropIndex).to.be.lessThan(addIndex)
     })
     it('should remove new foreign key before restore old foreign key in down function', () => {
-      let dropIndex = down_lines.indexOf('dropForeign')
-      let addIndex = down_lines.indexOf("references('author.id')")
+      const dropIndex = down_lines.indexOf('dropForeign')
+      const addIndex = down_lines.indexOf("references('author.id')")
       expect(dropIndex).not.to.equals(-1)
       expect(addIndex).not.to.equals(-1)
       expect(dropIndex).to.be.lessThan(addIndex)
@@ -83,7 +83,7 @@ describe('auto-migrate TestSuit', () => {
     let down_lines: string
 
     before(() => {
-      let username: Field = {
+      const username: Field = {
         name: 'username',
         type: 'text',
         is_primary_key: false,
@@ -92,7 +92,7 @@ describe('auto-migrate TestSuit', () => {
         is_unsigned: false,
         references: undefined,
       }
-      let score: Field = {
+      const score: Field = {
         name: 'score',
         type: 'integer',
         is_primary_key: false,
@@ -101,19 +101,19 @@ describe('auto-migrate TestSuit', () => {
         is_unsigned: false,
         references: undefined,
       }
-      let existing_table_list: Table[] = [
+      const existing_table_list: Table[] = [
         {
           name: 'content',
           field_list: [username, score],
         },
       ]
-      let parsed_table_list: Table[] = [
+      const parsed_table_list: Table[] = [
         {
           name: 'content',
           field_list: [username],
         },
       ]
-      let result = generateAutoMigrate({
+      const result = generateAutoMigrate({
         existing_table_list,
         parsed_table_list,
       })
