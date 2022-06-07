@@ -1,4 +1,3 @@
-import { ForeignKeyReference } from './../core/ast'
 import { existsSync, mkdirSync, readdirSync } from 'fs'
 import { Knex as KnexType } from 'knex'
 import { join } from 'path'
