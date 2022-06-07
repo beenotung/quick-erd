@@ -202,6 +202,8 @@ export function generateAutoMigrate(options: {
       const existing_field = existing_table.field_list.find(
         field => field.name === name,
       )
+
+      // detect new columns
       if (!existing_field) {
         table_up_lines.push(toKnexCreateColumnCode(field))
         table_down_lines.unshift(`table.dropColumn(${inspect(name)})`)
@@ -253,6 +255,16 @@ export function generateAutoMigrate(options: {
         table_down_lines.push(dropForeignKey(field))
         table_down_lines.push(addForeignKey(existing_field))
       }
+    })
+
+    // detected removed columns
+    existing_table.field_list.forEach(existing_field => {
+      const { name } = existing_field
+      if (table.field_list.some(field => field.name === name)) {
+        return
+      }
+      table_up_lines.push(`table.dropColumn(${inspect(name)})`)
+      table_down_lines.unshift(toKnexCreateColumnCode(existing_field))
     })
 
     function mergeLines(lines: string[]): string {
