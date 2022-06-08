@@ -1,3 +1,4 @@
+import { inspect } from 'util'
 import { parse } from '../core/ast'
 import { sortTables } from './sort-tables'
 
@@ -5,54 +6,71 @@ export function textToSqliteProxy(text: string): string {
   const result = parse(text)
   const table_list = sortTables(result.table_list)
 
-  let code = `
+  let tableTypes = ''
+  let proxyFields = ''
+  let schemaFields = ''
+
+  table_list.forEach(table => {
+    const typeName = toTypeName(table.name)
+    let virtualFields = ''
+
+    tableTypes += `
+export type ${typeName} = {`
+
+    table.field_list.forEach(field => {
+      const type = toTsType(field.type)
+      const nullable = field.is_primary_key || field.is_null ? '?' : ''
+      tableTypes += `
+  ${field.name}${nullable}: ${type}`
+
+      if (field.references) {
+        const typeName = toTypeName(field.references.table)
+        let name = field.name.replace(/_id$/, '')
+        tableTypes += `
+  ${name}?: ${typeName}`
+
+        name = inspect(name)
+        const refField = inspect(field.references.field)
+        const table = inspect(field.references.table)
+        virtualFields += `
+    [${name}, { field: ${refField}, table: ${table} }],`
+      }
+    })
+
+    tableTypes += `
+}
+`
+
+    proxyFields += `
+  ${table.name}: ${typeName}[],`
+
+    if (virtualFields) {
+      schemaFields += `
+  ${table.name}: [
+    /* foreign references */${virtualFields}
+  ],`
+    } else {
+      schemaFields += `
+  ${table.name}: [],`
+    }
+  })
+
+  const code = `
 import { proxySchema } from 'better-sqlite3-proxy'
 import { db } from './db'
-`
 
-  table_list.forEach(table => {
-    let typeName = toTypeName(table.name)
-    code += `
-export type ${typeName} = {`
-    table.field_list.forEach(field => {
-      let type = toTsType(field.type)
-      let nullable = field.is_primary_key || field.is_null ? '?' : ''
-      code += `
-  ${field.name}${nullable}: ${type}`
-    })
-    code += `
+${tableTypes}
+
+export type DBProxy = {
+${proxyFields}
 }
-`
-  })
 
-  code += `
-export type DBProxy = {`
-  table_list.forEach(table => {
-    let typeName = toTypeName(table.name)
-    code += `
-  ${table.name}: ${typeName}[],`
-  })
-  code += `
-}
-`
-
-  code += `
-export let proxy = proxySchema<DBProxy>(db, {`
-  table_list.forEach(table => {
-    code += `
-  ${table.name}: [],`
-    // TODO auto setup foreign key references
-    //   code += `
-    // ${table.name}: [
-    //   /*  */
-    //   ['1',{ field: '', table: '' }],
-    // ],`
-  })
-  code += `
+export let proxy = proxySchema<DBProxy>(db, {
+${schemaFields}
 })
 `
 
-  return code
+  return code.replace(/{\n\n/g, '{\n')
 }
 
 function toTypeName(name: string): string {
