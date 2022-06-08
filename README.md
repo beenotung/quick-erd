@@ -73,6 +73,10 @@ Below are available commands in example.
 - `npx auto-migrate mysql < erd.txt`
 - `npx auto-migrate dev.sqlite3 < erd.txt`
 
+**To generate types and proxy schema for better-sqlite3-proxy**:
+
+- `npx erd-to-proxy < erd.txt > proxy.ts`
+
 **To format erd file**:
 
 - `npx format-erd erd.txt`
@@ -151,7 +155,15 @@ For sqlite database, it also auto setup `db.ts` with `better-sqlite3` connection
 
 If there are pending knex migrations not applied, it will show error message and stop running.
 
-##### Format Diagram Text
+#### Generate types and proxy schema for better-sqlite3-proxy
+
+1. Run `npx erd-to-proxy < erd.txt > proxy.ts`
+
+This command generate the typescript types of each table and the schema for `proxySchema()` in [better-sqlite3-proxy](https://github.com/beenotung/better-sqlite3-proxy)
+
+The relation fields are also included based on the foreign key references.
+
+#### Format Diagram Text
 
 To "prettify" the erd, run: `format-erd erd.txt`
 
