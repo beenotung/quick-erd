@@ -94,6 +94,11 @@ export function parseCreateTable(sql: string): Field[] | null {
       const [type2, rest2] = parseName(rest)
       type = type2
       rest = rest2.trim()
+      const num = rest.match(/^(\d+\))/)
+      if (num) {
+        type += '(' + num[1]
+        rest = rest.slice(num[1].length)
+      }
       lower = rest.toLowerCase()
     }
     let is_primary_key = false
