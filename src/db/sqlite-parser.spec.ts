@@ -384,4 +384,45 @@ CREATE UNIQUE INDEX \`user_username_unique\` on \`user\` (\`username\`)
     ]
     expect(parseTableSchema(rows)).to.deep.equals(table_list)
   })
+
+  it.only('should parse enum', () => {
+    const rows: SchemaRow[] = [
+      {
+        type: 'table',
+        name: 'thread',
+        sql: /* sql */ `
+CREATE TABLE \`thread\` (
+  \`id\` integer not null primary key autoincrement
+, \`status\` text check (\`status\` in ('active', 'pending')) not null
+)
+`,
+      },
+    ]
+    const table_list: Table[] = [
+      {
+        name: 'thread',
+        field_list: [
+          {
+            name: 'id',
+            type: 'integer',
+            is_null: false,
+            is_primary_key: true,
+            is_unique: false,
+            is_unsigned: false,
+            references: undefined,
+          },
+          {
+            name: 'status',
+            type: "enum('active', 'pending')",
+            is_null: false,
+            is_primary_key: false,
+            is_unique: false,
+            is_unsigned: false,
+            references: undefined,
+          },
+        ],
+      },
+    ]
+    expect(parseTableSchema(rows)).to.deep.equals(table_list)
+  })
 })

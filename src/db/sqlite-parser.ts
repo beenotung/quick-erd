@@ -39,7 +39,7 @@ export function parseCreateTable(sql: string): Field[] | null {
   if (end === -1) return null
   sql = sql.substring(start + 1, end)
   const field_dict: Record<string, Field> = {}
-  sql.split(',').forEach(part => {
+  parseCreateColumns(sql).forEach(part => {
     let rest = part.trim()
     let lower = rest.toLowerCase()
     if (lower.startsWith('primary key')) {
@@ -120,6 +120,16 @@ export function parseCreateTable(sql: string): Field[] | null {
       rest = before + after
       lower = rest.toLowerCase()
     }
+    if (lower.match(/check.*in.*/)) {
+      let match = lower.match(/check(.*)/)?.[1].trim() || ''
+      if (match.startsWith('(') && match.endsWith(')')) {
+        match = match.slice(1, match.length - 1)
+      }
+      const matches = match.match(/`?(.*?)`?\s*in.*\((.*)\)/)
+      if (matches?.[1] === name) {
+        type = 'enum(' + matches[2] + ')'
+      }
+    }
     field_dict[name] = {
       name,
       type: type.toLowerCase(),
@@ -131,6 +141,36 @@ export function parseCreateTable(sql: string): Field[] | null {
     }
   })
   return Object.values(field_dict)
+}
+
+function parseCreateColumns(sql: string): string[] {
+  const columns: string[] = []
+  let buffer = ''
+  let level = 0
+  sql.split('').forEach(c => {
+    switch (c) {
+      case '(':
+        level++
+        buffer += c
+        break
+      case ')':
+        level--
+        buffer += c
+        break
+      case ',':
+        if (level === 0) {
+          columns.push(buffer)
+          buffer = ''
+        } else {
+          buffer += c
+        }
+        break
+      default:
+        buffer += c
+    }
+  })
+  columns.push(buffer)
+  return columns.map(column => column.trim()).filter(column => column)
 }
 
 type UniqueIndex = {
