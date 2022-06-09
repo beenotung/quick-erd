@@ -4,8 +4,9 @@ import { sortTables } from './sort-tables'
 const type_alias: Record<string, string> = {
   blob: 'binary',
   int: 'integer',
-  real: 'float',
 }
+
+const specific_types = ['real']
 
 export function toKnexCreateColumnTypeCode(field: Field): string {
   let code = ''
@@ -42,7 +43,9 @@ export function toKnexCreateColumnTypeCode(field: Field): string {
 
     type = type_alias[type] || type
 
-    if (length) {
+    if (specific_types.includes(type)) {
+      code += `.specificType('${field.name}', '${type}')`
+    } else if (length) {
       code += `.${type}('${field.name}', ${length})`
     } else {
       code += `.${type}('${field.name}')`
