@@ -259,7 +259,11 @@ export function generateAutoMigrate(options: {
     // detected removed columns
     existing_table.field_list.forEach(existing_field => {
       const { name } = existing_field
-      if (table.field_list.some(field => field.name === name)) {
+      if (
+        name === 'created_at' ||
+        name === 'updated_at' ||
+        table.field_list.some(field => field.name === name)
+      ) {
         return
       }
       table_up_lines.push(`table.dropColumn(${inspect(name)})`)
