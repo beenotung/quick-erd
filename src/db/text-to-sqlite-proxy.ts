@@ -30,7 +30,7 @@ export type ${typeName} = {`
   ${name}?: ${typeName}`
 
         name = inspect(name)
-        const refField = inspect(field.references.field)
+        const refField = inspect(field.name)
         const table = inspect(field.references.table)
         virtualFields += `
     [${name}, { field: ${refField}, table: ${table} }],`
