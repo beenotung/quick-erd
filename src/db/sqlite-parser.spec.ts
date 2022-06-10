@@ -385,7 +385,7 @@ CREATE UNIQUE INDEX \`user_username_unique\` on \`user\` (\`username\`)
     expect(parseTableSchema(rows)).to.deep.equals(table_list)
   })
 
-  it.only('should parse enum', () => {
+  it('should parse enum', () => {
     const rows: SchemaRow[] = [
       {
         type: 'table',
