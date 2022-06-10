@@ -33,7 +33,7 @@ export type ${typeName} = {`
         const refField = inspect(field.name)
         const table = inspect(field.references.table)
         virtualFields += `
-    [${name}, { field: ${refField}, table: ${table} }],`
+      [${name}, { field: ${refField}, table: ${table} }],`
       }
     })
 
@@ -46,12 +46,12 @@ export type ${typeName} = {`
 
     if (virtualFields) {
       schemaFields += `
-  ${table.name}: [
-    /* foreign references */${virtualFields}
-  ],`
+    ${table.name}: [
+      /* foreign references */${virtualFields}
+    ],`
     } else {
       schemaFields += `
-  ${table.name}: [],`
+    ${table.name}: [],`
     }
   })
 
@@ -65,12 +65,15 @@ export type DBProxy = {
 ${proxyFields}
 }
 
-export let proxy = proxySchema<DBProxy>(db, {
+export let proxy = proxySchema<DBProxy>({
+  db,
+  tableFields: {
 ${schemaFields}
+  },
 })
 `
 
-  return code.replace(/{\n\n/g, '{\n')
+  return code.replace(/{\n\n/g, '{\n').trim()
 }
 
 function toTypeName(name: string): string {
