@@ -41,7 +41,26 @@ export function tablesToText(tables: Table[]) {
 }
 
 export function printTables(tables: Table[]) {
+  tables = skipTimestamps(tables)
   const text = tablesToText(tables)
   // eslint-disable-next-line no-console
   console.log(text)
+}
+
+const skip_tables = [
+  'knex_migrations',
+  'knex_migrations_lock',
+  'sqlite_sequence',
+]
+const skip_fields = ['created_at', 'updated_at']
+
+function skipTimestamps(tables: Table[]): Table[] {
+  return tables
+    .filter(table => !skip_tables.includes(table.name))
+    .map(table => ({
+      ...table,
+      field_list: table.field_list.filter(
+        field => !skip_fields.includes(field.name),
+      ),
+    }))
 }
