@@ -21,7 +21,7 @@ export type ${typeName} = {`
       const type = toTsType(field.type)
       if (field.is_primary_key || field.is_null) {
         tableTypes += `
-  ${field.name}?: ${type} | null`
+  ${field.name}: ${type} | null`
       } else {
         tableTypes += `
   ${field.name}: ${type}`
