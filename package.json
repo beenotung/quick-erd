@@ -1,6 +1,8 @@
 {
   "name": "quick-erd",
   "version": "3.0.2",
+  "type": "commonjs",
+  "sideEffects": false,
   "description": "quick and easy text-based ERD",
   "keywords": [
     "erd",
@@ -12,8 +14,6 @@
   "license": "BSD-2-Clause",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "sideEffects": false,
-  "type": "commonjs",
   "bin": {
     "auto-migrate": "./dist/cli/auto-migrate.js",
     "pg-to-erd": "./dist/cli/pg-to-erd.js",
@@ -24,6 +24,9 @@
     "erd-to-proxy": "./dist/cli/erd-to-proxy.js",
     "erd-to-knex": "./dist/cli/erd-to-knex.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "npm run type:module && snowpack dev",
     "upload": "run-s clean build:client surge:all",
@@ -49,9 +52,6 @@
     "report": "run-s report:update report:open",
     "prepublishOnly": "run-s test build"
   },
-  "files": [
-    "dist"
-  ],
   "dependencies": {},
   "optionalDependencies": {
     "@types/better-sqlite3": "^7.4.1",
