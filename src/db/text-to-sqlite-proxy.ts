@@ -19,7 +19,10 @@ export type ${typeName} = {`
 
     table.field_list.forEach(field => {
       const type = toTsType(field.type)
-      if (field.is_primary_key || field.is_null) {
+      if (field.is_primary_key) {
+        tableTypes += `
+  ${field.name}?: ${type} | null`
+      } else if (field.is_null) {
         tableTypes += `
   ${field.name}: ${type} | null`
       } else {
