@@ -19,9 +19,13 @@ export type ${typeName} = {`
 
     table.field_list.forEach(field => {
       const type = toTsType(field.type)
-      const nullable = field.is_primary_key || field.is_null ? '?' : ''
-      tableTypes += `
-  ${field.name}${nullable}: ${type}`
+      if (field.is_primary_key || field.is_null) {
+        tableTypes += `
+  ${field.name}?: ${type} | null`
+      } else {
+        tableTypes += `
+  ${field.name}: ${type}`
+      }
 
       if (field.references) {
         const typeName = toTypeName(field.references.table)
