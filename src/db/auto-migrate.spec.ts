@@ -124,7 +124,7 @@ describe('auto-migrate TestSuit', () => {
     it('should remove extra column in up function', () => {
       expect(up_lines).to.contains("dropColumn('score')")
     })
-    it('should restore extra column in downy function', () => {
+    it('should restore extra column in down function', () => {
       expect(down_lines).to.contains("integer('score')")
     })
   })
