@@ -72,6 +72,7 @@ Below are available commands in example.
 - `npx auto-migrate pg < erd.txt`
 - `npx auto-migrate mysql < erd.txt`
 - `npx auto-migrate dev.sqlite3 < erd.txt`
+- `npx auto-migrate --rename pg < erd.txt`
 
 **To generate types and proxy schema for better-sqlite3-proxy**:
 
@@ -149,9 +150,13 @@ erd-to-sqlite < erd.txt > migrations/000-create-tables.sql
 
    or `npx auto-migrate pg < erd.txt`
 
+   or `npx auto-migrate --rename pg < erd.txt`
+
 This command auto setup knex, then it generates incremental migration script for knex.
 
 For sqlite database, it also auto setup `db.ts` with `better-sqlite3` connection using given database filename.
+
+The `--rename` or `-r` flag enable column rename detection.
 
 If there are pending knex migrations not applied, it will show error message and stop running.
 

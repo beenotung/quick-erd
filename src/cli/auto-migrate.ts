@@ -12,7 +12,16 @@ import { loadKnex, loadSqliteKnex } from '../db/knex'
 
 /* eslint-disable no-console */
 
-const dbFile_or_client = process.argv[2]
+let dbFile_or_client = ''
+let detect_rename = false
+for (let i = 2; i < process.argv.length; i++) {
+  const arg = process.argv[i]
+  if (arg === '--rename' || arg === '-r') {
+    detect_rename = true
+    continue
+  }
+  dbFile_or_client = arg
+}
 if (!dbFile_or_client) {
   console.error('missing database client or sqlite filename in argument')
   process.exit(1)
@@ -38,7 +47,12 @@ async function main() {
   }
   setupKnexFile({ srcDir, db_client })
   const knex = dbFile ? loadSqliteKnex(dbFile) : loadKnex(db_client)
-  await setupKnexMigration({ knex, parseResult, db_client })
+  await setupKnexMigration({
+    knex,
+    parseResult,
+    db_client,
+    detect_rename,
+  })
 }
 
 main()

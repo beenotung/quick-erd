@@ -1,3 +1,4 @@
+import { closest } from 'fastest-levenshtein'
 import { existsSync, mkdirSync, readdirSync } from 'fs'
 import { Knex as KnexType } from 'knex'
 import { join } from 'path'
@@ -136,6 +137,7 @@ export async function setupKnexMigration(options: {
   knex: KnexType
   db_client: string
   parseResult: ParseResult
+  detect_rename: boolean
 }) {
   if (!existsSync(migrations_dir)) {
     mkdirSync(migrations_dir)
@@ -151,6 +153,7 @@ export async function setupKnexMigration(options: {
   const { up_lines, down_lines } = generateAutoMigrate({
     existing_table_list,
     parsed_table_list: options.parseResult.table_list,
+    detect_rename: options.detect_rename,
   })
 
   if (up_lines.length === 0 && down_lines.length === 0) {
@@ -181,6 +184,7 @@ ${down_lines.join('\n')}
 export function generateAutoMigrate(options: {
   existing_table_list: Table[]
   parsed_table_list: Table[]
+  detect_rename: boolean
 }) {
   const up_lines: string[] = []
   const down_lines: string[] = []
@@ -197,19 +201,9 @@ export function generateAutoMigrate(options: {
     }
     const table_up_lines: string[] = []
     const table_down_lines: string[] = []
-    field_list.forEach(field => {
-      const { name } = field
-      const existing_field = existing_table.field_list.find(
-        field => field.name === name,
-      )
-
-      // detect new columns
-      if (!existing_field) {
-        table_up_lines.push(toKnexCreateColumnCode(field))
-        table_down_lines.unshift(`table.dropColumn(${inspect(name)})`)
-        return
-      }
-
+    const new_columns: Field[] = []
+    const removed_columns: Field[] = []
+    function compareColumn(field: Field, existing_field: Field) {
       if (
         field.type !== existing_field.type ||
         field.is_unsigned !== existing_field.is_unsigned
@@ -255,6 +249,19 @@ export function generateAutoMigrate(options: {
         table_up_lines.push(addForeignKey(field))
         table_down_lines.unshift(dropForeignKey(field))
       }
+    }
+    field_list.forEach(field => {
+      const { name } = field
+      const existing_field = existing_table.field_list.find(
+        field => field.name === name,
+      )
+
+      // detect new columns
+      if (!existing_field) {
+        new_columns.push(field)
+        return
+      }
+      compareColumn(field, existing_field)
     })
 
     // detected removed columns
@@ -267,6 +274,47 @@ export function generateAutoMigrate(options: {
       ) {
         return
       }
+      removed_columns.push(existing_field)
+    })
+
+    if (
+      options.detect_rename &&
+      new_columns.length === removed_columns.length
+    ) {
+      for (let i = 0; i < new_columns.length; i++) {
+        const field = new_columns[i]
+        const new_field_name = field.name
+        const existing_field_name = closest(
+          field.name,
+          removed_columns.map(existing_field => existing_field.name),
+        )
+        const j = removed_columns.findIndex(
+          existing_field => existing_field.name === existing_field_name,
+        )
+        const existing_field = removed_columns[j]
+
+        compareColumn({ ...field, name: existing_field_name }, existing_field)
+
+        table_up_lines.push(renameColumn(existing_field_name, new_field_name))
+        table_down_lines.unshift(
+          renameColumn(new_field_name, existing_field_name),
+        )
+
+        new_columns.splice(i, 1)
+        removed_columns.splice(j, 1)
+        i--
+      }
+    }
+
+    // add new columns
+    new_columns.forEach(field => {
+      table_up_lines.push(toKnexCreateColumnCode(field))
+      table_down_lines.unshift(`table.dropColumn(${inspect(name)})`)
+    })
+
+    // drop removed columns
+    removed_columns.forEach(existing_field => {
+      const { name } = existing_field
       table_up_lines.push(`table.dropColumn(${inspect(name)})`)
       table_down_lines.unshift(toKnexCreateColumnCode(existing_field))
     })
@@ -340,6 +388,9 @@ function addForeignKey(field: Field): string {
 }
 function dropForeignKey(field: Field): string {
   return `table.dropForeign(${inspect(field.name)})`
+}
+function renameColumn(from: string, to: string): string {
+  return `table.renameColumn(${inspect(from)}, ${inspect(to)})`
 }
 
 async function loadTableList(

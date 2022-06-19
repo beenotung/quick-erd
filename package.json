@@ -60,7 +60,9 @@
     "report": "run-s report:update report:open",
     "prepublishOnly": "run-s test build"
   },
-  "dependencies": {},
+  "dependencies": {
+    "fastest-levenshtein": "^1.0.12"
+  },
   "optionalDependencies": {
     "@types/better-sqlite3": "^7.4.1",
     "better-sqlite3": "^7.5.0",

@@ -42,6 +42,7 @@ describe('auto-migrate TestSuit', () => {
       const result = generateAutoMigrate({
         existing_table_list,
         parsed_table_list,
+        detect_rename: false,
       })
       up_lines = result.up_lines.join('\n')
       down_lines = result.down_lines.join('\n')
@@ -116,6 +117,7 @@ describe('auto-migrate TestSuit', () => {
       const result = generateAutoMigrate({
         existing_table_list,
         parsed_table_list,
+        detect_rename: false,
       })
       up_lines = result.up_lines.join('\n')
       down_lines = result.down_lines.join('\n')
@@ -126,6 +128,131 @@ describe('auto-migrate TestSuit', () => {
     })
     it('should restore extra column in down function', () => {
       expect(down_lines).to.contains("integer('score')")
+    })
+  })
+  context('auto rename column', () => {
+    let up_lines: string
+    let down_lines: string
+
+    before(() => {
+      const segment_id: Field = {
+        name: 'segment_id',
+        type: 'integer',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        references: undefined,
+      }
+      const bus_segment_id: Field = {
+        ...segment_id,
+        name: 'bus_segment_id',
+      }
+      const user_id: Field = {
+        ...segment_id,
+        name: 'user_id',
+      }
+      const author_id: Field = {
+        ...segment_id,
+        name: 'author_id',
+      }
+
+      const existing_table_list: Table[] = [
+        {
+          name: 'busline',
+          field_list: [segment_id, user_id],
+        },
+      ]
+      const parsed_table_list: Table[] = [
+        {
+          name: 'busline',
+          field_list: [bus_segment_id, author_id],
+        },
+      ]
+      const result = generateAutoMigrate({
+        existing_table_list,
+        parsed_table_list,
+        detect_rename: true,
+      })
+      up_lines = result.up_lines.join('\n')
+      down_lines = result.down_lines.join('\n')
+    })
+
+    it('should rename column in up function', () => {
+      expect(up_lines).to.contains(
+        "renameColumn('segment_id', 'bus_segment_id')",
+      )
+      expect(up_lines).to.contains("renameColumn('user_id', 'author_id')")
+    })
+    it('should restore column name in down function', () => {
+      expect(down_lines).to.contains(
+        "renameColumn('bus_segment_id', 'segment_id')",
+      )
+      expect(down_lines).to.contains("renameColumn('author_id', 'user_id')")
+    })
+  })
+  context('auto rename column + change reference table', () => {
+    let up_lines: string
+    let down_lines: string
+
+    before(() => {
+      const segment_id: Field = {
+        name: 'segment_id',
+        type: 'integer',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        references: { table: 'segment', field: 'id', type: '>-' },
+      }
+      const bus_segment_id: Field = {
+        ...segment_id,
+        name: 'bus_segment_id',
+        references: { table: 'bus_segment', field: 'id', type: '>-' },
+      }
+
+      const existing_table_list: Table[] = [
+        {
+          name: 'busline',
+          field_list: [segment_id],
+        },
+      ]
+      const parsed_table_list: Table[] = [
+        {
+          name: 'busline',
+          field_list: [bus_segment_id],
+        },
+      ]
+      const result = generateAutoMigrate({
+        existing_table_list,
+        parsed_table_list,
+        detect_rename: true,
+      })
+      up_lines = result.up_lines.join('\n')
+      down_lines = result.down_lines.join('\n')
+    })
+
+    it('should rename column after other operations in up function', () => {
+      const dropForeign = "table.dropForeign('segment_id')"
+      const renameColumn = "renameColumn('segment_id', 'bus_segment_id')"
+
+      expect(up_lines).to.contains(dropForeign)
+      expect(up_lines).to.contains(renameColumn)
+
+      expect(up_lines.indexOf(dropForeign)).to.be.lessThan(
+        up_lines.indexOf(renameColumn),
+      )
+    })
+    it('should restore column name before other operations in down function', () => {
+      const renameColumn = "renameColumn('bus_segment_id', 'segment_id')"
+      const dropForeign = "table.dropForeign('segment_id')"
+
+      expect(down_lines).to.contains(renameColumn)
+      expect(down_lines).to.contains(dropForeign)
+
+      expect(up_lines.indexOf(dropForeign)).to.be.greaterThan(
+        up_lines.indexOf(renameColumn),
+      )
     })
   })
 })
