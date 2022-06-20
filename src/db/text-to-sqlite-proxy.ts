@@ -49,7 +49,7 @@ export type ${typeName} = {`
 `
 
     proxyFields += `
-  ${table.name}: ${typeName}[],`
+  ${table.name}: ${typeName}[]`
 
     if (virtualFields) {
       schemaFields += `
