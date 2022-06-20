@@ -79,6 +79,58 @@ describe('auto-migrate TestSuit', () => {
       expect(dropIndex).to.be.lessThan(addIndex)
     })
   })
+  context('auto add column', () => {
+    let up_lines: string
+    let down_lines: string
+
+    before(() => {
+      const username: Field = {
+        name: 'username',
+        type: 'text',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        references: undefined,
+      }
+      const score: Field = {
+        name: 'score',
+        type: 'integer',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        references: undefined,
+      }
+      const existing_table_list: Table[] = [
+        {
+          name: 'content',
+          field_list: [username],
+        },
+      ]
+      const parsed_table_list: Table[] = [
+        {
+          name: 'content',
+          field_list: [username, score],
+        },
+      ]
+      const result = generateAutoMigrate({
+        existing_table_list,
+        parsed_table_list,
+        detect_rename: false,
+      })
+      up_lines = result.up_lines.join('\n')
+      down_lines = result.down_lines.join('\n')
+    })
+
+    it('should add new column in up function', () => {
+      expect(up_lines).to.contains("integer('score')")
+    })
+
+    it('should remove new column in down function', () => {
+      expect(down_lines).to.contains("dropColumn('score')")
+    })
+  })
   context('auto remove column', () => {
     let up_lines: string
     let down_lines: string

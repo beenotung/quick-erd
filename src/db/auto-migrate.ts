@@ -308,6 +308,7 @@ export function generateAutoMigrate(options: {
 
     // add new columns
     new_columns.forEach(field => {
+      const { name } = field
       table_up_lines.push(toKnexCreateColumnCode(field))
       table_down_lines.unshift(`table.dropColumn(${inspect(name)})`)
     })
