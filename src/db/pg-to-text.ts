@@ -13,6 +13,9 @@ function toDataType(column_row: ColumnRow): string {
     }
     return 'string'
   }
+  if (column_row.data_type.match(/double precision/i)) {
+    return 'double'
+  }
   if (column_row.data_type.includes('timestamp')) {
     return 'timestamp'
   }
