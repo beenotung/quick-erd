@@ -154,6 +154,7 @@ export async function setupKnexMigration(options: {
     existing_table_list,
     parsed_table_list: options.parseResult.table_list,
     detect_rename: options.detect_rename,
+    db_client: options.db_client,
   })
 
   if (up_lines.length === 0 && down_lines.length === 0) {
@@ -185,7 +186,9 @@ export function generateAutoMigrate(options: {
   existing_table_list: Table[]
   parsed_table_list: Table[]
   detect_rename: boolean
+  db_client: string
 }) {
+  const support_timestamp = !options.db_client.includes('sqlite')
   const up_lines: string[] = []
   const down_lines: string[] = []
 
@@ -204,6 +207,15 @@ export function generateAutoMigrate(options: {
     const new_columns: Field[] = []
     const removed_columns: Field[] = []
     function compareColumn(field: Field, existing_field: Field) {
+      if (
+        !support_timestamp &&
+        field.type === 'timestamp' &&
+        existing_field.type === 'datetime'
+      ) {
+        // avoid non-effective migration
+        // knex translates 'timestamp' into 'datetime' for sqlite db when running schema query builder
+        field.type = 'datetime'
+      }
       if (
         field.type !== existing_field.type ||
         field.is_unsigned !== existing_field.is_unsigned
