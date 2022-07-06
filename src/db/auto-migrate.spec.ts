@@ -43,6 +43,7 @@ describe('auto-migrate TestSuit', () => {
         existing_table_list,
         parsed_table_list,
         detect_rename: false,
+        db_client: 'mock',
       })
       up_lines = result.up_lines.join('\n')
       down_lines = result.down_lines.join('\n')
@@ -118,6 +119,7 @@ describe('auto-migrate TestSuit', () => {
         existing_table_list,
         parsed_table_list,
         detect_rename: false,
+        db_client: 'mock',
       })
       up_lines = result.up_lines.join('\n')
       down_lines = result.down_lines.join('\n')
@@ -170,6 +172,7 @@ describe('auto-migrate TestSuit', () => {
         existing_table_list,
         parsed_table_list,
         detect_rename: false,
+        db_client: 'mock',
       })
       up_lines = result.up_lines.join('\n')
       down_lines = result.down_lines.join('\n')
@@ -225,6 +228,7 @@ describe('auto-migrate TestSuit', () => {
         existing_table_list,
         parsed_table_list,
         detect_rename: true,
+        db_client: 'mock',
       })
       up_lines = result.up_lines.join('\n')
       down_lines = result.down_lines.join('\n')
@@ -279,6 +283,7 @@ describe('auto-migrate TestSuit', () => {
         existing_table_list,
         parsed_table_list,
         detect_rename: true,
+        db_client: 'mock',
       })
       up_lines = result.up_lines.join('\n')
       down_lines = result.down_lines.join('\n')
