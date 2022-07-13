@@ -2,7 +2,13 @@ import { inspect } from 'util'
 import { parse } from '../core/ast'
 import { sortTables } from './sort-tables'
 
-export function textToSqliteProxy(text: string): string {
+export function textToSqliteProxy(
+  text: string,
+  options?: {
+    mode?: 'factory' | 'singleton' // default as singleton
+  },
+): string {
+  const mode = options?.mode || 'singleton'
   const result = parse(text)
   const table_list = sortTables(result.table_list)
 
@@ -62,16 +68,31 @@ export type ${typeName} = {`
     }
   })
 
-  const code = `
+  let code = ''
+
+  if (mode === 'singleton') {
+    code += `
 import { proxySchema } from 'better-sqlite3-proxy'
 import { db } from './db'
+`
+  } else if (mode === 'factory') {
+    code += `
+import { proxySchema, ProxySchemaOptions } from 'better-sqlite3-proxy'
+`
+  } else {
+    throw new TypeError('unknown mode: ' + mode)
+  }
 
+  code += `
 ${tableTypes}
 
 export type DBProxy = {
 ${proxyFields}
 }
+`
 
+  if (mode === 'singleton') {
+    code += `
 export let proxy = proxySchema<DBProxy>({
   db,
   tableFields: {
@@ -79,8 +100,29 @@ ${schemaFields}
   },
 })
 `
+  } else if (mode === 'factory') {
+    code += `
+export let tableFields: ProxySchemaOptions<DBProxy>['tableFields'] = {
+${schemaFields}
+}
 
-  return code.replace(/{\n\n/g, '{\n').trim()
+export function createProxy(
+  options: Omit<ProxySchemaOptions<DBProxy>, 'tableFields'>,
+) {
+  return proxySchema<DBProxy>({
+    tableFields,
+    ...options,
+  })
+}
+`
+  } else {
+    throw new TypeError('unknown mode: ' + mode)
+  }
+
+  return code
+    .replace(/{\n\n/g, '{\n')
+    .replace(/\n\n\n/g, '\n\n')
+    .trim()
 }
 
 function toTypeName(name: string): string {
