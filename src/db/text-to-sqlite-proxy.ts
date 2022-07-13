@@ -115,5 +115,8 @@ function toTsType(type: string): string {
   if (type.match(/^date/i) || type.match(/^time/i)) {
     return 'string'
   }
+  if (type.match(/^blob/i)) {
+    return 'Buffer'
+  }
   return 'string // ' + type
 }
