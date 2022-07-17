@@ -77,6 +77,7 @@ Below are available commands in example.
 **To generate types and proxy schema for better-sqlite3-proxy**:
 
 - `npx erd-to-proxy < erd.txt > proxy.ts`
+- `npx erd-to-proxy --factory < erd.txt > proxy.ts`
 
 **To format erd file**:
 
@@ -167,6 +168,9 @@ If there are pending knex migrations not applied, it will show error message and
 This command generate the typescript types of each table and the schema for `proxySchema()` in [better-sqlite3-proxy](https://github.com/beenotung/better-sqlite3-proxy)
 
 The relation fields are also included based on the foreign key references.
+
+The default behaviour is to generate a proxy as singleton.
+If a factory function is preferred, you can pass `--factory` in the argument, e.g. `npx erd-to-proxy --factory < erd.txt > proxy.ts`
 
 #### Format Diagram Text
 
