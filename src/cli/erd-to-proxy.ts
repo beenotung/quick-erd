@@ -4,7 +4,7 @@ import { readErdFromStdin } from '../utils/file'
 
 function main() {
   let mode: 'factory' | 'singleton' | undefined
-  let arg = process.argv[2]
+  const arg = process.argv[2]
   switch (arg) {
     case undefined:
       break
