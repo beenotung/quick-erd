@@ -51,6 +51,7 @@ where table_name = ?
     )
     const column_rows = result.rows
     for (const column_row of column_rows) {
+      /* check foreign key */
       let result = await knex.raw(
         /* sql */
         `
@@ -74,6 +75,7 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
       )
       const fk_row = result.rows[0]
 
+      /* check unique */
       result = await knex.raw(
         /* sql */ `
 SELECT
