@@ -73,7 +73,7 @@ export type ${typeName} = {`
   if (mode === 'singleton') {
     code += `
 import { proxySchema } from 'better-sqlite3-proxy'
-import { db } from './db'
+import { db } from './db.js'
 `
   } else if (mode === 'factory') {
     code += `
