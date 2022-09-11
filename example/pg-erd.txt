@@ -1,0 +1,12 @@
+user
+-
+id pk
+username text unique null
+password_hash varchar(60)
+email varchar(255) null
+
+post
+-
+id pk
+user_id FK >- user.id
+status enum('active','recall')
