@@ -22,6 +22,23 @@ function toDataType(column_row: ColumnRow): string {
   return column_row.data_type
 }
 
+function parseEnum(
+  column_name: string,
+  // e.g. ((status = ANY (ARRAY['active'::text, 'recall'::text])))
+  check_clause: string,
+): string | null {
+  const matches = check_clause
+    ?.replace(column_name, 'column_name')
+    .match(/\(\(column_name = ANY \(ARRAY\[(.*)\]\)\)\)/)
+  if (!matches) return null
+  const values: string[] = matches[1].split(',').map(value => {
+    value = value.trim()
+    value = value.match(/('.*')::text/)?.[1] || value
+    return value
+  })
+  return `enum(${values})`
+}
+
 export async function scanPGTableSchema(knex: Knex): Promise<Table[]> {
   const table_list: Table[] = []
   const table_rows = await knex
@@ -96,7 +113,26 @@ WHERE tc.constraint_type = 'UNIQUE'
         [table.name, column_row.column_name],
       )
       const unique_row = result.rows[0]
-      const type = toDataType(column_row)
+
+      let type = toDataType(column_row)
+
+      /* check enum */
+      if (type === 'text') {
+        result = await knex.raw(
+          /* sql */ `
+SELECT check_clause
+FROM information_schema.check_constraints
+WHERE constraint_name = ?
+;
+`,
+          `${table.name}_${column_row.column_name}_check`,
+        )
+        const check_clause = result.rows[0]?.check_clause
+        if (check_clause) {
+          type = parseEnum(column_row.column_name, check_clause) || type
+        }
+      }
+
       table.field_list.push({
         name: column_row.column_name,
         type,
