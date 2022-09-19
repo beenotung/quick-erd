@@ -28,14 +28,25 @@ export function addDependencies(
   mode?: 'prod' | 'dev',
 ) {
   const file = 'package.json'
-  const pkg = JSON.parse(readFileSync(file).toString())
+  const pkg: PackageJSON = JSON.parse(readFileSync(file).toString())
 
   const field = mode === 'dev' ? 'devDependencies' : 'dependencies'
-  pkg[field] = pkg[field] || {}
-  if (name in pkg[field]) {
+  const deps = (pkg[field] = pkg[field] || {})
+  if (name in deps) {
     return
   }
-  pkg[field][name] = version
+  deps[name] = version
   const text = JSON.stringify(pkg, null, 2)
   writeSrcFile(file, text)
+}
+
+export function readPackageJSON(file: string) {
+  const pkg: PackageJSON = JSON.parse(readFileSync(file).toString())
+  return pkg
+}
+
+export type PackageJSON = {
+  type?: 'commonjs' | 'module'
+  devDependencies?: Record<string, string>
+  dependencies?: Record<string, string>
 }

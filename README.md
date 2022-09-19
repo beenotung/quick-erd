@@ -169,8 +169,31 @@ This command generate the typescript types of each table and the schema for `pro
 
 The relation fields are also included based on the foreign key references.
 
-The default behaviour is to generate a proxy as singleton.
+**Additional arguments**:
+
+- export format:
+
+  - `--factory`
+  - `--singleton` (default)
+
+- import format:
+  - `--commonjs` or `--cjs` (default)
+  - `--module` or `--esm`
+
+_Export Format_:
+
+The default behaviour is to generate a proxy as singleton with commonjs format.
+
 If a factory function is preferred, you can pass `--factory` in the argument, e.g. `npx erd-to-proxy --factory < erd.txt > proxy.ts`
+
+_Import Format_:
+
+In commonjs mode, the import path of local typescript files should not include `.js` extension;
+In esm module, the import path of local files should include `.js` extension.
+
+In the generated proxy file, it needs to import the local file `db.ts`. This tool will try to read the `type` field in `package.json` to determine the import format, and fallback to use "commonjs" format if undetermined.
+
+If esm format is preferred but undetected, you can pass `--esm` in the argument, e.g. `npx erd-to-proxy --esm < erd.txt > proxy.ts`
 
 #### Format Diagram Text
 

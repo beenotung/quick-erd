@@ -6,9 +6,11 @@ export function textToSqliteProxy(
   text: string,
   options?: {
     mode?: 'factory' | 'singleton' // default as singleton
+    type?: 'commonjs' | 'module'
   },
 ): string {
   const mode = options?.mode || 'singleton'
+  const type = options?.type || 'commonjs'
   const result = parse(text)
   const table_list = sortTables(result.table_list)
 
@@ -71,9 +73,10 @@ export type ${typeName} = {`
   let code = ''
 
   if (mode === 'singleton') {
+    const importPath = type === 'commonjs' ? './db' : './db.js'
     code += `
 import { proxySchema } from 'better-sqlite3-proxy'
-import { db } from './db.js'
+import { db } from '${importPath}'
 `
   } else if (mode === 'factory') {
     code += `
