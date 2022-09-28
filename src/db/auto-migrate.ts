@@ -29,9 +29,9 @@ export function setupSqlite(options: { dbFile: string; srcDir: string }) {
   if (existsSync(dbTsFile)) {
     return
   }
-  addDependencies('better-sqlite3-schema', '^2.3.3')
+  addDependencies('better-sqlite3-schema', '^2.3.5')
   addDependencies('@types/integer', '^4.0.1', 'dev')
-  addDependencies('better-sqlite3-proxy', '^1.4.1')
+  addDependencies('better-sqlite3-proxy', '^1.5.0')
   const code = `
 import { toSafeMode, newDB } from 'better-sqlite3-schema'
 
@@ -83,7 +83,7 @@ export function setupKnexFile(options: { srcDir: string; db_client: string }) {
   if (existsSync(file)) {
     return
   }
-  addDependencies('knex', '^2.0.0')
+  addDependencies('knex', '^2.3.0')
   let importDir = srcDir
   if (!importDir.startsWith('.')) {
     importDir = './' + srcDir
