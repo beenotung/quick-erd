@@ -127,4 +127,38 @@ domain text
     expect(field_list[1].type).to.equals('text')
     expect(field_list[1].is_unique).to.be.false
   })
+
+  describe('foreign key reference', () => {
+    it('should parse explicit reference with table and field', () => {
+      const text = `
+post
+----
+user_id fk >- user.id
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+
+      expect(field_list[0].name).to.equals('user_id')
+      expect(field_list[0].references).not.undefined
+      expect(field_list[0].references.table).to.equals('user')
+      expect(field_list[0].references.field).to.equals('id')
+      expect(field_list[0].references.type).to.equals('>-')
+    })
+
+    it('should parse explicit reference without table name nor field', () => {
+      const text = `
+post
+----
+user_id fk
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+
+      expect(field_list[0].name).to.equals('user_id')
+      expect(field_list[0].references).not.undefined
+      expect(field_list[0].references.table).to.equals('user')
+      expect(field_list[0].references.field).to.equals('id')
+      expect(field_list[0].references.type).to.equals('>-')
+    })
+  })
 })

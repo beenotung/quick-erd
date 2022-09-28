@@ -57,7 +57,7 @@ class Parser implements ParseResult {
     return { name, field_list }
   }
   parseField(): Field {
-    const name = this.parseName()
+    const field_name = this.parseName()
     let type = defaultFieldType
     let is_null = false
     let is_unique = false
@@ -81,7 +81,7 @@ class Parser implements ParseResult {
           is_primary_key = true
           continue
         case 'FK':
-          references = this.parseForeignKeyReference()
+          references = this.parseForeignKeyReference(field_name)
           continue
         default:
           type = name
@@ -89,7 +89,7 @@ class Parser implements ParseResult {
     }
     this.skipLine()
     return {
-      name,
+      name: field_name,
       type,
       is_null,
       is_unique,
@@ -143,7 +143,14 @@ class Parser implements ParseResult {
     this.line_list[0] = line
     return type
   }
-  parseForeignKeyReference(): ForeignKeyReference {
+  parseForeignKeyReference(ref_field_name: string): ForeignKeyReference {
+    if (ref_field_name.endsWith('_id') && this.peekLine() === '') {
+      return {
+        table: ref_field_name.replace(/_id$/, ''),
+        field: 'id',
+        type: '>-',
+      }
+    }
     const type = this.parseRelationType()
     const table = this.parseName()
     let line = this.peekLine()

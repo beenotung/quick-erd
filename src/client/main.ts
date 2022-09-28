@@ -138,7 +138,7 @@ username varchar(64)
 post
 ----
 id pk
-user_id fk >- user.id
+author_id fk >- user.id
 content text
 status enum('active','pending')
 
@@ -146,9 +146,11 @@ status enum('active','pending')
 reply
 -----
 id pk
-post_id fk >- post.id
-user_id fk >- user.id # inline comment
-reply_id null fk >- reply.id
+# column "{table}_id" ends with "fk" will be interpreted as implicitly referencing to
+# "{table}.id" with ">-" relationship
+post_id fk # e.g. post_id references to post.id
+user_id fk
+reply_id null fk # it's fine to include other modifiers in the middle
 content text
 `.trim()
   parseInput()
