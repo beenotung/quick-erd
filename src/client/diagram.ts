@@ -4,6 +4,7 @@ import {
   RelationType,
   Table,
 } from '../core/ast'
+import { InputController } from './input'
 import { StoredValue } from './storage'
 const { random, floor, abs, sign } = Math
 
@@ -42,6 +43,7 @@ export class DiagramController {
   constructor(
     public div: HTMLDivElement,
     public fontSizeSpan: HTMLSpanElement,
+    public inputController: InputController,
   ) {
     this.div.addEventListener('mousemove', ev => {
       if (this.onMouseMove) {
@@ -486,6 +488,12 @@ class TableController {
 </div>
 `
     this.tbody = this.div.querySelector('tbody') as HTMLTableSectionElement
+    this.div
+      .querySelector('.table-title')
+      ?.addEventListener('contextmenu', event => {
+        event.preventDefault()
+        this.diagram.inputController.selectTable(data.name)
+      })
   }
 
   getFieldElement(field: string) {
@@ -526,6 +534,10 @@ class TableController {
         if (!tr) {
           tr = document.createElement('tr')
           tr.dataset.tableField = name
+          tr.addEventListener('contextmenu', event => {
+            event.preventDefault()
+            this.diagram.inputController.selectField(data.name, name)
+          })
           this.fieldMap.set(name, tr)
         }
 
