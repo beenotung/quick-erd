@@ -102,4 +102,16 @@ y real
     expect(code).to.contains(`table.specificType('x', 'real').notNullable()`)
     expect(code).to.contains(`table.specificType('y', 'real').notNullable()`)
   })
+
+  it("should support 'char' field type", () => {
+    const text = `
+user
+----
+password_hash char(60)
+`
+    const code = textToKnex(text)
+    expect(code).to.contains(
+      `table.specificType('password_hash', 'char(60)').notNullable()`,
+    )
+  })
 })

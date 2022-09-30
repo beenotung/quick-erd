@@ -43,7 +43,7 @@ export function toKnexCreateColumnTypeCode(field: Field): string {
 
     type = type_alias[type] || type
 
-    if (specific_types.includes(type)) {
+    if (specific_types.includes(type) || type.match(/^char\(\d+\)$/i)) {
       code += `.specificType('${field.name}', '${type}')`
     } else if (length) {
       code += `.${type}('${field.name}', ${length})`
