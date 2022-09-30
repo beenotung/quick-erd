@@ -13,6 +13,12 @@ function toDataType(column_row: ColumnRow): string {
     }
     return 'string'
   }
+  if (column_row.data_type.includes('character')) {
+    if (column_row.character_maximum_length) {
+      return `char(${column_row.character_maximum_length})`
+    }
+    return 'string'
+  }
   if (column_row.data_type.match(/double precision/i)) {
     return 'double'
   }
