@@ -3,12 +3,18 @@ import { makeGuide } from '../core/guide'
 import { tablesToText } from '../core/table'
 import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
+import { InputController } from './input'
 import { normalize } from './normalize'
 const input = document.querySelector('#editor textarea') as HTMLTextAreaElement
 const fontSize = document.querySelector('#font-size') as HTMLSpanElement
 const diagram = document.querySelector('#diagram') as HTMLDivElement
 
-const diagramController = new DiagramController(diagram, fontSize)
+const inputController = new InputController(input)
+const diagramController = new DiagramController(
+  diagram,
+  fontSize,
+  inputController,
+)
 
 input.value = localStorage.getItem('input') || input.value
 input.style.width = localStorage.getItem('input_width') || ''
