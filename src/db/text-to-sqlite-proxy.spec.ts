@@ -13,4 +13,15 @@ title text
     const code = textToSqliteProxy(text)
     expect(code).to.contains(`['user', { field: 'user_id', table: 'user' }]`)
   })
+
+  it('should use reference table name as virtual field name if referring from primary key', () => {
+    const text = `
+profile
+-
+id pk fk - user.id
+nickname text
+`
+    const code = textToSqliteProxy(text)
+    expect(code).to.contains(`['user', { field: 'id', table: 'user' }]`)
+  })
 })

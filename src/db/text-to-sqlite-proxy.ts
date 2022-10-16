@@ -41,6 +41,9 @@ export type ${typeName} = {`
       if (field.references) {
         const typeName = toTypeName(field.references.table)
         let name = field.name.replace(/_id$/, '')
+        if (name === 'id') {
+          name = field.references.table
+        }
         tableTypes += `
   ${name}?: ${typeName}`
 
