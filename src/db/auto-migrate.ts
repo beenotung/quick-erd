@@ -523,7 +523,7 @@ async function checkPendingMigrations(knex: KnexType) {
 
 const log = console.error.bind(console)
 
-let quotes = ['"', "'", '`']
+const quotes = ['"', "'", '`']
 function wrapSqliteName(name: string) {
   for (const quote of quotes) {
     if (name.startsWith(quote) && name.endsWith(quote)) {
