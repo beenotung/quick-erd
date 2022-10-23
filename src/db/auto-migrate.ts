@@ -14,6 +14,7 @@ import {
   toKnexCreateColumnCode,
   toKnexCreateColumnTypeCode,
 } from './text-to-knex'
+import { toSqliteColumnSql } from './text-to-sqlite'
 
 export function detectSrcDir() {
   for (const dir of ['src', 'server', '.']) {
@@ -188,7 +189,8 @@ export function generateAutoMigrate(options: {
   detect_rename: boolean
   db_client: string
 }) {
-  const support_timestamp = !options.db_client.includes('sqlite')
+  const is_sqlite = options.db_client.includes('sqlite')
+  const support_timestamp = !is_sqlite
   const up_lines: string[] = []
   const down_lines: string[] = []
 
@@ -204,6 +206,8 @@ export function generateAutoMigrate(options: {
     }
     const table_up_lines: string[] = []
     const table_down_lines: string[] = []
+    const raw_up_lines: string[] = []
+    const raw_down_lines: string[] = []
     const new_columns: Field[] = []
     const removed_columns: Field[] = []
     function compareColumn(field: Field, existing_field: Field) {
@@ -318,18 +322,83 @@ export function generateAutoMigrate(options: {
       }
     }
 
+    function addDropColumn(
+      field: Field,
+      options: {
+        table_add_lines: string[]
+        table_drop_lines: string[]
+        raw_add_lines: string[]
+        raw_drop_lines: string[]
+      },
+    ) {
+      if (is_sqlite) {
+        /* sqlite version */
+        const table = wrapSqliteName(name)
+        const col = wrapSqliteName(field.name)
+
+        const { references, is_unique } = field
+        const quoted_field = { ...field, name: col, is_unique: false }
+
+        if (references) {
+          quoted_field.references = {
+            type: references.type,
+            table: wrapSqliteName(references.table),
+            field: wrapSqliteName(references.field),
+          }
+        }
+
+        const body = toSqliteColumnSql(quoted_field)
+        options.raw_add_lines.push(
+          `  await knex.raw(${inspect(
+            `alter table ${table} add column ${body}`,
+          )})`,
+        )
+        options.raw_drop_lines.unshift(
+          `  await knex.raw(${inspect(
+            `alter table ${table} drop column ${col}`,
+          )})`,
+        )
+
+        if (is_unique) {
+          options.raw_add_lines.push(
+            `  await knex.schema.alterTable(${table}, table => table.unique([${col}]))`,
+          )
+          options.raw_drop_lines.unshift(
+            `  await knex.schema.alterTable(${table}, table => table.dropUnique([${col}]))`,
+          )
+        }
+      } else {
+        /* knex version */
+        const name = inspect(field.name)
+        options.table_add_lines.push(toKnexCreateColumnCode(field))
+        options.table_drop_lines.unshift(`table.dropColumn(${name})`)
+      }
+    }
+
     // add new columns
     new_columns.forEach(field => {
-      const { name } = field
-      table_up_lines.push(toKnexCreateColumnCode(field))
-      table_down_lines.unshift(`table.dropColumn(${inspect(name)})`)
+      addDropColumn(field, {
+        table_add_lines: table_up_lines,
+        table_drop_lines: table_down_lines,
+        raw_add_lines: raw_up_lines,
+        raw_drop_lines: raw_down_lines,
+      })
     })
 
     // drop removed columns
     removed_columns.forEach(existing_field => {
-      const { name } = existing_field
-      table_up_lines.push(`table.dropColumn(${inspect(name)})`)
-      table_down_lines.unshift(toKnexCreateColumnCode(existing_field))
+      addDropColumn(existing_field, {
+        table_drop_lines: table_up_lines,
+        table_add_lines: table_down_lines,
+        raw_drop_lines: raw_up_lines,
+        raw_add_lines: raw_down_lines,
+      })
+      if (is_sqlite) {
+      } else {
+        const name = inspect(existing_field.name)
+        table_up_lines.push(`table.dropColumn(${name})`)
+        table_down_lines.unshift(toKnexCreateColumnCode(existing_field))
+      }
     })
 
     function mergeLines(lines: string[]): string {
@@ -346,6 +415,7 @@ ${mergeLines(table_up_lines)}
   })`,
       )
     }
+    up_lines.push(...raw_up_lines)
 
     if (table_down_lines.length > 0) {
       down_lines.unshift(
@@ -354,6 +424,7 @@ ${mergeLines(table_down_lines)}
   })`,
       )
     }
+    down_lines.unshift(...raw_down_lines)
   })
 
   return { up_lines, down_lines }
@@ -451,3 +522,14 @@ async function checkPendingMigrations(knex: KnexType) {
 }
 
 const log = console.error.bind(console)
+
+let quotes = ['"', "'", '`']
+function wrapSqliteName(name: string) {
+  for (const quote of quotes) {
+    if (name.startsWith(quote) && name.endsWith(quote)) {
+      name = name.slice(1, name.length - 1)
+      break
+    }
+  }
+  return '`' + name + '`'
+}

@@ -312,4 +312,65 @@ describe('auto-migrate TestSuit', () => {
       )
     })
   })
+  context('add column for sqlite', () => {
+    it('should inline foreign key reference', () => {
+      const field: Field = {
+        name: 'user_id',
+        type: 'integer',
+        is_primary_key: false,
+        is_null: true,
+        is_unique: false,
+        is_unsigned: false,
+        references: { table: 'user', field: 'id', type: '>-' },
+      }
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'better-sqlite3',
+        existing_table_list: [{ name: 'post', field_list: [] }],
+        parsed_table_list: [{ name: 'post', field_list: [field] }],
+        detect_rename: false,
+      })
+
+      expect(up_lines).to.have.lengthOf(1)
+      expect(up_lines[0].trim()).to.equals(
+        "await knex.raw('alter table `post` add column `user_id` integer null references `user`(`id`)')",
+      )
+
+      expect(down_lines).to.have.lengthOf(1)
+      expect(down_lines[0].trim()).to.equals(
+        "await knex.raw('alter table `post` drop column `user_id`')",
+      )
+    })
+    it('should add unique index with knex', () => {
+      const field: Field = {
+        name: 'name',
+        type: 'text',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: true,
+        is_unsigned: false,
+        references: undefined,
+      }
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'better-sqlite3',
+        existing_table_list: [{ name: 'tag', field_list: [] }],
+        parsed_table_list: [{ name: 'tag', field_list: [field] }],
+        detect_rename: false,
+      })
+      expect(up_lines).to.have.lengthOf(2)
+      expect(up_lines[0].trim()).to.equals(
+        "await knex.raw('alter table `tag` add column `name` text not null')",
+      )
+      expect(up_lines[1].trim()).to.equals(
+        'await knex.schema.alterTable(`tag`, table => table.unique([`name`]))',
+      )
+
+      expect(down_lines).to.have.lengthOf(2)
+      expect(down_lines[0].trim()).to.equals(
+        'await knex.schema.alterTable(`tag`, table => table.dropUnique([`name`]))',
+      )
+      expect(down_lines[1].trim()).to.equals(
+        "await knex.raw('alter table `tag` drop column `name`')",
+      )
+    })
+  })
 })

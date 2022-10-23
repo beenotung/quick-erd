@@ -1,4 +1,4 @@
-import { parse } from '../core/ast'
+import { Field, parse } from '../core/ast'
 import { sortTables } from './sort-tables'
 
 export function textToSqlite(text: string) {
@@ -40,43 +40,7 @@ create table if not exists ${table.name} (`
 , `
       }
 
-      if (field.is_primary_key) {
-        up += `${field.name} integer primary key`
-        return
-      }
-
-      let type = field.type
-
-      if (type.match(/^varchar/i) || type.match(/^string/i)) {
-        type = 'text'
-      }
-
-      let enums = ''
-      if (type.match(/^enum/i)) {
-        enums = type.replace(/^enum/i, '')
-        type = 'text'
-      }
-
-      up += `${field.name} ${type}`
-
-      if (field.is_null) {
-        up += ` null`
-      } else {
-        up += ` not null`
-      }
-
-      if (field.is_unique) {
-        up += ` unique`
-      }
-
-      if (enums) {
-        up += ` check(${field.name} in ${enums})`
-      }
-
-      const ref = field.references
-      if (ref) {
-        up += ` references ${ref.table}(${ref.field})`
-      }
+      up += toSqliteColumnSql(field)
     })
 
     if (!fieldNames.created_at && !fieldNames.updated_at) {
@@ -104,4 +68,44 @@ drop table if exists ${table.name};
     .trim()
 
   return { up, down }
+}
+
+export function toSqliteColumnSql(field: Field): string {
+  if (field.is_primary_key) {
+    return `${field.name} integer primary key`
+  }
+  let type = field.type
+
+  if (type.match(/^varchar/i) || type.match(/^string/i)) {
+    type = 'text'
+  }
+
+  let enums = ''
+  if (type.match(/^enum/i)) {
+    enums = type.replace(/^enum/i, '')
+    type = 'text'
+  }
+
+  let sql = `${field.name} ${type}`
+
+  if (field.is_null) {
+    sql += ` null`
+  } else {
+    sql += ` not null`
+  }
+
+  if (field.is_unique) {
+    sql += ` unique`
+  }
+
+  if (enums) {
+    sql += ` check(${field.name} in ${enums})`
+  }
+
+  const ref = field.references
+  if (ref) {
+    sql += ` references ${ref.table}(${ref.field})`
+  }
+
+  return sql
 }
