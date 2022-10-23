@@ -393,12 +393,6 @@ export function generateAutoMigrate(options: {
         raw_drop_lines: raw_up_lines,
         raw_add_lines: raw_down_lines,
       })
-      if (is_sqlite) {
-      } else {
-        const name = inspect(existing_field.name)
-        table_up_lines.push(`table.dropColumn(${name})`)
-        table_down_lines.unshift(toKnexCreateColumnCode(existing_field))
-      }
     })
 
     function mergeLines(lines: string[]): string {
