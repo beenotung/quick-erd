@@ -9,10 +9,11 @@ import {
   setupSqlite,
 } from '../db/auto-migrate'
 import { loadKnex, loadSqliteKnex } from '../db/knex'
+import { env } from '../db/env'
 
 /* eslint-disable no-console */
 
-let dbFile_or_client = ''
+let dbFile_or_client = env.DB_CLIENT || ''
 let detect_rename = false
 for (let i = 2; i < process.argv.length; i++) {
   const arg = process.argv[i]
@@ -23,7 +24,11 @@ for (let i = 2; i < process.argv.length; i++) {
   dbFile_or_client = arg
 }
 if (!dbFile_or_client) {
-  console.error('missing database client or sqlite filename in argument')
+  console.error('Error: missing argument')
+  console.error('Either provice sqlite filename in argument')
+  console.error(
+    'Or provide database client in argument or DB_CLIENT environment variable',
+  )
   process.exit(1)
 }
 

@@ -1,8 +1,5 @@
-import { config } from 'dotenv'
 import Knex from 'knex'
-
-config()
-const env = process.env
+import { env } from './env'
 
 export function loadSqliteKnex(dbFile: string) {
   const knex = Knex({
