@@ -13,9 +13,9 @@ export function loadSqliteKnex(dbFile: string) {
 }
 
 export function loadKnex(client = env.DB_CLIENT || 'pg') {
-  const database = env.DB_NAME
-  const user = env.DB_USERNAME || env.DB_USER
-  const password = env.DB_PASSWORD || env.DB_PASS
+  const database = env.DB_NAME || env.POSTGRES_DB
+  const user = env.DB_USERNAME || env.DB_USER || env.POSTGRES_USER
+  const password = env.DB_PASSWORD || env.DB_PASS || env.POSTGRES_PASSWORD
 
   if (!database && !user) {
     console.error('Missing database credential in env.')
@@ -24,10 +24,11 @@ export function loadKnex(client = env.DB_CLIENT || 'pg') {
 Template for .env file:
 
 DB_CLIENT=better-sqlite3|pg|mysql
-DB_HOST=
-DB_NAME=
-DB_USERNAME=
-DB_PASSWORD=
+DB_HOST=(optional)
+DB_PORT=(optional)
+DB_NAME=(or POSTGRES_DB)
+DB_USERNAME=(or DB_USER or POSTGRES_USER)
+DB_PASSWORD=(or DB_PASS or POSTGRES_PASSWORD)
 `)
     process.exit(1)
   }
@@ -37,6 +38,7 @@ DB_PASSWORD=
     connection: {
       database,
       host: env.DB_HOST,
+      port: +env.DB_PORT! || undefined,
       user,
       password,
       multipleStatements: true,
