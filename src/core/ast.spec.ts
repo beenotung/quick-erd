@@ -145,6 +145,22 @@ user_id fk >- user.id
       expect(field_list[0].references.type).to.equals('>-')
     })
 
+    it('should parse explicit reference without stating primary key', () => {
+      const text = `
+post
+----
+author_id fk >- user
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+
+      expect(field_list[0].name).to.equals('author_id')
+      expect(field_list[0].references).not.undefined
+      expect(field_list[0].references.table).to.equals('user')
+      expect(field_list[0].references.field).to.equals('id')
+      expect(field_list[0].references.type).to.equals('>-')
+    })
+
     it('should parse explicit reference without table name nor field', () => {
       const text = `
 post

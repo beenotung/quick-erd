@@ -154,12 +154,15 @@ class Parser implements ParseResult {
     const type = this.parseRelationType()
     const table = this.parseName()
     let line = this.peekLine()
-    if (!line.startsWith('.')) {
+    let field: string
+    if (line == '') {
+      field = 'id'
+    } else if (line.startsWith('.')) {
+      this.line_list[0] = line.slice(1)
+      field = this.parseName()
+    } else {
       throw new ParseForeignKeyReferenceError(line)
     }
-    line = line.substr(1)
-    this.line_list[0] = line
-    const field = this.parseName()
     return { type, table, field }
   }
 }
