@@ -153,7 +153,7 @@ class Parser implements ParseResult {
     }
     const type = this.parseRelationType()
     const table = this.parseName()
-    let line = this.peekLine()
+    const line = this.peekLine()
     let field: string
     if (line == '') {
       field = 'id'
