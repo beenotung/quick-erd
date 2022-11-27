@@ -433,8 +433,8 @@ ${mergeLines(table_down_lines)}
 }
 
 function alterSqliteEnum(table: Table, field: Field): string {
-  let values = field.type.replace(/enum/i, '')
-  let code = `
+  const values = field.type.replace(/enum/i, '')
+  const code = `
   const rows = await knex.select('id', '${field.name}').from('${table.name}')
   await knex.raw('alter table \`${table.name}\` drop column \`${field.name}\`')
   await knex.raw("alter table \`${table.name}\` add column \`${field.name}\` text check (\`${field.name}\` in ${values})")
