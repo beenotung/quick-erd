@@ -224,8 +224,16 @@ export function generateAutoMigrate(options: {
         field.type !== existing_field.type ||
         field.is_unsigned !== existing_field.is_unsigned
       ) {
-        table_up_lines.push(alterType(field))
-        table_down_lines.unshift(alterType(existing_field))
+        if (is_sqlite && field.type.match(/^enum/i)) {
+          raw_up_lines.push(alterSqliteEnum(table, field))
+        } else {
+          table_up_lines.push(alterType(field))
+        }
+        if (is_sqlite && existing_field.type.match(/^enum/i)) {
+          raw_down_lines.unshift(alterSqliteEnum(table, existing_field))
+        } else {
+          table_down_lines.unshift(alterType(existing_field))
+        }
       }
 
       if (field.is_primary_key !== existing_field.is_primary_key) {
@@ -424,6 +432,21 @@ ${mergeLines(table_down_lines)}
   return { up_lines, down_lines }
 }
 
+function alterSqliteEnum(table: Table, field: Field): string {
+  let values = field.type.replace(/enum/i, '')
+  let code = `
+  const rows = await knex.select('id', '${field.name}').from('${table.name}')
+  await knex.raw('alter table \`${table.name}\` drop column \`${field.name}\`')
+  await knex.raw("alter table \`${table.name}\` add column \`${field.name}\` text check (\`${field.name}\` in ${values})")
+  for (let row of rows) {
+    await knex('${table.name}').update({ ${field.name}: row.${field.name} }).where({ id: row.id })
+  }
+  await knex.schema.alterTable('${table.name}', table => {
+    table.dropNullable('${field.name}')
+  })
+`
+  return '  ' + code.trim()
+}
 function alterType(field: Field): string {
   let code = 'table'
   code += toKnexCreateColumnTypeCode(field)
