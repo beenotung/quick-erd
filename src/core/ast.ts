@@ -1,3 +1,5 @@
+import { formatEnum } from './enum'
+
 export function parse(input: string): ParseResult {
   const parser = new Parser()
   parser.parse(input)
@@ -130,6 +132,9 @@ class Parser implements ParseResult {
     const name = match[0]
     line = line.replace(name, '').trim()
     this.line_list[0] = line
+    if (name.match(/^enum/i)) {
+      return formatEnum(name)
+    }
     return name
   }
   parseRelationType(): RelationType {

@@ -1,4 +1,5 @@
 import { Field, Table } from './ast'
+import { formatEnum } from './enum'
 import { makeGuide } from './guide'
 
 export function tableToString(table: Table): string {
@@ -10,7 +11,11 @@ ${table.field_list.map(fieldToString).join('\n')}
 }
 
 export function fieldToString(field: Field): string {
-  let text = `${field.name} ${field.type}`
+  let type = field.type
+  if (type.match(/^enum/i)) {
+    type = formatEnum(type)
+  }
+  let text = `${field.name} ${type}`
   if (field.is_unsigned) {
     text += ` unsigned`
   }
