@@ -413,7 +413,7 @@ CREATE TABLE \`thread\` (
           },
           {
             name: 'status',
-            type: "enum('active', 'pending')",
+            type: "enum('active','pending')",
             is_null: false,
             is_primary_key: false,
             is_unique: false,
