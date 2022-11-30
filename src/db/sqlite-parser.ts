@@ -1,4 +1,5 @@
 import { Field, ForeignKeyReference, Table } from '../core/ast'
+import { formatEnum } from '../core/enum'
 
 export type SchemaRow = {
   name: string
@@ -133,6 +134,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       const matches = match.match(/`?(.*?)`?\s*in.*\((.*)\)/)
       if (matches?.[1] === name) {
         type = 'enum(' + matches[2] + ')'
+        type = formatEnum(type)
       }
     }
     field_dict[name] = {
