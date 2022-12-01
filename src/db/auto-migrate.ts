@@ -224,14 +224,15 @@ export function generateAutoMigrate(options: {
         field.type !== existing_field.type ||
         field.is_unsigned !== existing_field.is_unsigned
       ) {
-        if (is_sqlite && field.type.match(/^enum/i)) {
+        if (
+          is_sqlite &&
+          field.type.match(/^enum/i) &&
+          existing_field.type.match(/^enum/i)
+        ) {
           raw_up_lines.push(alterSqliteEnum(table, field))
-        } else {
-          table_up_lines.push(alterType(field))
-        }
-        if (is_sqlite && existing_field.type.match(/^enum/i)) {
           raw_down_lines.unshift(alterSqliteEnum(table, existing_field))
         } else {
+          table_up_lines.push(alterType(field))
           table_down_lines.unshift(alterType(existing_field))
         }
       }
