@@ -1,0 +1,10 @@
+user
+----
+id pk
+role enum(admin, guest, moderator)
+
+acl
+-----
+id pk
+role text
+permission enum(create, read, update, delete, share)
