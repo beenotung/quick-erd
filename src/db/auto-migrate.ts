@@ -36,9 +36,9 @@ export function setupSqlite(options: { dbFile: string; srcDir: string }) {
   const code = `
 import { toSafeMode, newDB } from 'better-sqlite3-schema'
 
-export let dbFile = ${inspect(options.dbFile)}
+export const dbFile = ${inspect(options.dbFile)}
 
-export let db = newDB({
+export const db = newDB({
   path: dbFile,
   migrate: false,
 })
