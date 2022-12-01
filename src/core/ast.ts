@@ -125,7 +125,7 @@ class Parser implements ParseResult {
   }
   parseType(): string | undefined {
     let line = this.peekLine()
-    const match = line.match(/[a-zA-Z0-9_(),"']+/)
+    const match = line.match(/\w+\(.*?\)/) || line.match(/[a-zA-Z0-9_(),"']+/)
     if (!match) {
       return
     }

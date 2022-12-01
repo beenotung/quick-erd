@@ -177,4 +177,108 @@ user_id fk
       expect(field_list[0].references.type).to.equals('>-')
     })
   })
+
+  describe('enum column type', () => {
+    it('should parse enum with wrapping single quote', () => {
+      const text = `
+acl
+---
+permission enum('create','read','update','delete')
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+      expect(field_list).to.have.lengthOf(1)
+
+      expect(field_list[0].name).to.equals('permission')
+      expect(field_list[0].type).to.equals(
+        "enum('create','read','update','delete')",
+      )
+    })
+
+    it('should parse enum without wrapping single quote', () => {
+      const text = `
+acl
+---
+permission enum(create,read,update,delete)
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+      expect(field_list).to.have.lengthOf(1)
+
+      expect(field_list[0].name).to.equals('permission')
+      expect(field_list[0].type).to.equals(
+        "enum('create','read','update','delete')",
+      )
+    })
+
+    it('should parse enum with spaces between commas', () => {
+      const text = `
+acl
+---
+role text
+permission enum(create, read, update, delete)
+something_after text
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+      expect(field_list).to.have.lengthOf(3)
+
+      expect(field_list[0].name).to.equals('role')
+      expect(field_list[0].type).to.equals('text')
+
+      expect(field_list[1].name).to.equals('permission')
+      expect(field_list[1].type).to.equals(
+        "enum('create','read','update','delete')",
+      )
+
+      expect(field_list[2].name).to.equals('something_after')
+      expect(field_list[2].type).to.equals('text')
+    })
+
+    it('should preserve spaces in enum values with wrapping single quote', () => {
+      const text = `
+clothes
+-------
+id
+size enum('small size','large size','XL size')
+name text
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+      expect(field_list).to.have.lengthOf(3)
+
+      expect(field_list[0].name).to.equals('id')
+
+      expect(field_list[1].name).to.equals('size')
+      expect(field_list[1].type).to.equals(
+        "enum('small size','large size','XL size')",
+      )
+
+      expect(field_list[2].name).to.equals('name')
+      expect(field_list[2].type).to.equals('text')
+    })
+
+    it('should preserve spaces in enum values without wrapping single quote', () => {
+      const text = `
+clothes
+-------
+id
+size Enum(small size,large size,XL size)
+name text
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+      expect(field_list).to.have.lengthOf(3)
+
+      expect(field_list[0].name).to.equals('id')
+
+      expect(field_list[1].name).to.equals('size')
+      expect(field_list[1].type).to.equals(
+        "Enum('small size','large size','XL size')",
+      )
+
+      expect(field_list[2].name).to.equals('name')
+      expect(field_list[2].type).to.equals('text')
+    })
+  })
 })
