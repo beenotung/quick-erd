@@ -304,6 +304,7 @@ export class DiagramController {
 
   applyFontSize() {
     localStorage.setItem('zoom', this.fontSize.toString())
+    this.inputController.setZoom(this.fontSize)
     this.fontSizeSpan.textContent = (this.fontSize * 100).toFixed(0) + '%'
     this.div.style.fontSize = this.fontSize + 'em'
     this.barRadius = this.calcBarRadius()
@@ -347,6 +348,14 @@ export class DiagramController {
     this.tablesContainer.exportJSON(json)
     this.tableMap.forEach(table => {
       table.exportJSON(json)
+    })
+  }
+  exportMeta() {
+    let zoom = this.fontSize.toFixed(3)
+    let lines: string[] = [`# zoom: ${zoom}`]
+    lines.push(this.tablesContainer.exportView())
+    this.tableMap.forEach(table => {
+      lines.push(table.exportPosition())
     })
   }
 }
@@ -409,6 +418,10 @@ export class TablesContainer {
     this.diagram.tableMap.forEach(tableController =>
       tableController.renderLinesTransform(diagramRect),
     )
+    this.diagram.inputController.setViewPosition({
+      x: this.translateX,
+      y: this.translateY,
+    })
   }
 
   resetView() {
@@ -420,6 +433,12 @@ export class TablesContainer {
   exportJSON(json: any) {
     json['view:x'] = this.translateX
     json['view:y'] = this.translateY
+  }
+
+  exportView() {
+    let x = this.translateX.toFixed(0)
+    let y = this.translateY.toFixed(0)
+    return `# view: (${x}, ${y})`
   }
 }
 
@@ -567,9 +586,8 @@ class TableController {
     const x = this.translateX.toString()
     const y = this.translateY.toString()
     this.div.style.transform = `translate(${x}px,${y}px)`
-    localStorage.setItem(`${this.data.name}-x`, x)
-    localStorage.setItem(`${this.data.name}-y`, y)
     this.onMoveListenerSet.forEach(fn => fn(diagramRect))
+    this.saveTransform()
   }
 
   quickRenderTransform(diagramRect: Rect) {
@@ -580,10 +598,12 @@ class TableController {
   }
 
   saveTransform() {
-    const x = this.translateX.toString()
-    const y = this.translateY.toString()
-    localStorage.setItem(`${this.data.name}-x`, x)
-    localStorage.setItem(`${this.data.name}-y`, y)
+    const { name } = this.data
+    const x = this.translateX
+    const y = this.translateY
+    localStorage.setItem(`${name}-x`, x.toString())
+    localStorage.setItem(`${name}-y`, y.toString())
+    this.diagram.inputController.setTablePosition(name, { x, y })
   }
 
   renderLinesTransform(diagramRect: Rect) {
@@ -669,6 +689,13 @@ class TableController {
     const name = this.data.name
     json[name + '-x'] = this.translateX
     json[name + '-y'] = this.translateY
+  }
+
+  exportPosition() {
+    let { name } = this.data
+    let x = this.translateX.toFixed(0)
+    let y = this.translateY.toFixed(0)
+    return `# ${name} (${x}, ${y})`
   }
 }
 

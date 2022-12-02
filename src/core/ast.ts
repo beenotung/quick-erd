@@ -8,11 +8,15 @@ export function parse(input: string): ParseResult {
 
 export type ParseResult = {
   table_list: Table[]
+  zoom?: number
+  view?: { x: number; y: number }
 }
 
 class Parser implements ParseResult {
   table_list: Table[] = []
   line_list: string[] = []
+  zoom?: number
+  view?: { x: number; y: number }
   parse(input: string) {
     input.split('\n').forEach(line => {
       line = line
@@ -27,6 +31,25 @@ class Parser implements ParseResult {
     while (this.hasTable()) {
       this.table_list.push(this.parseTable())
     }
+    this.parseMeta(input)
+    console.log(this)
+  }
+  parseMeta(input: string) {
+    // FIXME support floating number and negative number
+    let zoom = +input.match(/# zoom: (\d)+/)?.[1]!
+    if (zoom) this.zoom = zoom
+
+    let view = input.match(/# view: \((\d+), (\d+)\)/)
+    if (view) this.view = { x: +view[1], y: +view[2] }
+
+    input.match(/# (\w+) \((\d+), (\d+)\)/g)?.forEach(line => {
+      let match = line.match(/# (\w+) \((\d+), (\d+)\)/) || []
+      let name = match[1]
+      let x = +match[2]
+      let y = +match[3]
+      let table = this.table_list.find(table => table.name == name)
+      if (table) table.position = { x, y }
+    })
   }
   peekLine(): string {
     if (this.line_list.length === 0) {
@@ -199,6 +222,7 @@ function parseAll<T>(fn: () => T): T[] {
 export type Table = {
   name: string
   field_list: Field[]
+  position?: { x: number; y: number }
 }
 
 export type Field = {
