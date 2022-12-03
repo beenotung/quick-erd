@@ -35,21 +35,35 @@ export class InputController {
     if (this.isEmpty()) return
     let { input } = this
     let value = input.value
-    let { selectionStart, selectionEnd, selectionDirection } = input
     if (value.match(regex)) {
-      input.value = value.replace(regex, line)
+      value = value.replace(regex, line)
     } else {
       value = value.trim()
       if (!value.split('\n').pop()?.startsWith('# ')) {
         value += '\r\n'
       }
       value += '\r\n' + line
-      input.value = value
     }
-    localStorage.setItem('input', this.input.value)
+    this.setValue(value)
+  }
+
+  private setValue(value: string) {
+    let { input } = this
+    let { selectionStart, selectionEnd, selectionDirection } = input
+    input.value = value
+    localStorage.setItem('input', value)
     input.selectionStart = selectionStart
     input.selectionEnd = selectionEnd
     input.selectionDirection = selectionDirection
+  }
+
+  removeTable(name: string) {
+    let value = this.input.value
+    let regex = new RegExp(`\r?\n# ${name} \\([0-9-]+, [0-9-]+\\)`)
+    let newValue = value.replace(regex, '')
+    if (value != newValue) {
+      this.setValue(newValue.trim())
+    }
   }
 
   selectTable(table: string) {

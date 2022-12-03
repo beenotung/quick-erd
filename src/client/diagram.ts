@@ -142,12 +142,23 @@ export class DiagramController {
     controller.renderTransform(diagramRect)
   }
 
-  render({ table_list }: ParseResult) {
+  render({ table_list, view, zoom }: ParseResult) {
     // show or hide placeholder message
     if (table_list.length === 0) {
       this.message.style.display = 'inline-block'
     } else {
       this.message.style.display = 'none'
+    }
+
+    if (view) {
+      this.tablesContainer.translateX = view.x
+      this.tablesContainer.translateY = view.y
+      this.tablesContainer.renderTransform('skip_storage')
+    }
+
+    if (zoom) {
+      this.fontSize = zoom
+      this.applyFontSize('skip_storage')
     }
 
     const newTableMap = new Map(table_list.map(table => [table.name, table]))
@@ -302,9 +313,11 @@ export class DiagramController {
     })
   }
 
-  applyFontSize() {
-    localStorage.setItem('zoom', this.fontSize.toString())
-    this.inputController.setZoom(this.fontSize)
+  applyFontSize(mode?: 'skip_storage') {
+    if (mode !== 'skip_storage') {
+      localStorage.setItem('zoom', this.fontSize.toString())
+      this.inputController.setZoom(this.fontSize)
+    }
     this.fontSizeSpan.textContent = (this.fontSize * 100).toFixed(0) + '%'
     this.div.style.fontSize = this.fontSize + 'em'
     this.barRadius = this.calcBarRadius()
@@ -404,20 +417,22 @@ export class TablesContainer {
     this.div.appendChild(node)
   }
 
-  renderTransform() {
+  renderTransform(mode?: 'skip_storage') {
     const x = this.translateX.toString()
     const y = this.translateY.toString()
+    if (mode != 'skip_storage') {
+      localStorage.setItem(`view:x`, x)
+      localStorage.setItem(`view:y`, y)
+      this.diagram.inputController.setViewPosition({
+        x: this.translateX,
+        y: this.translateY,
+      })
+    }
     this.div.style.transform = `translate(${x}px,${y}px)`
-    localStorage.setItem(`view:x`, x)
-    localStorage.setItem(`view:y`, y)
     const diagramRect = this.diagram.getDiagramRect()
     this.diagram.tableMap.forEach(tableController =>
       tableController.renderLinesTransform(diagramRect),
     )
-    this.diagram.inputController.setViewPosition({
-      x: this.translateX,
-      y: this.translateY,
-    })
   }
 
   resetView() {
@@ -561,6 +576,16 @@ class TableController {
         this.tbody.appendChild(tr)
       },
     )
+
+    // apply position from erd text
+    if (
+      data.position &&
+      (data.position.x != this.translateX || data.position.y != this.translateY)
+    ) {
+      this.translateX = data.position.x
+      this.translateY = data.position.y
+      this.renderTransform(this.diagram.getDiagramRect())
+    }
   }
 
   rerenderColumns() {
@@ -673,6 +698,7 @@ class TableController {
       localStorage.removeItem(`${this.data.name}-x`)
       localStorage.removeItem(`${this.data.name}-y`)
     }
+    this.diagram.inputController.removeTable(this.data.name)
   }
 
   exportJSON(json: any) {

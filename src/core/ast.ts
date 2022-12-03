@@ -35,14 +35,14 @@ class Parser implements ParseResult {
     console.log(this)
   }
   parseMeta(input: string) {
-    let zoom = +input.match(/# zoom: ([0-9-.])+/)?.[1]!
+    let zoom = +input.match(/# zoom: ([0-9-.]+)/)?.[1]!
     if (zoom) this.zoom = zoom
 
-    let view = input.match(/# view: \((\d+), (\d+)\)/)
+    let view = input.match(/# view: \(([0-9-.]+), ([0-9-.]+)\)/)
     if (view) this.view = { x: +view[1], y: +view[2] }
 
-    input.match(/# (\w+) \((\d+), (\d+)\)/g)?.forEach(line => {
-      let match = line.match(/# (\w+) \((\d+), (\d+)\)/) || []
+    input.match(/# (\w+) \(([0-9-.]+), ([0-9-.]+)\)/g)?.forEach(line => {
+      let match = line.match(/# (\w+) \(([0-9-.]+), ([0-9-.]+)\)/) || []
       let name = match[1]
       let x = +match[2]
       let y = +match[3]
