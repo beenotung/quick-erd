@@ -350,14 +350,6 @@ export class DiagramController {
       table.exportJSON(json)
     })
   }
-  exportMeta() {
-    let zoom = this.fontSize.toFixed(3)
-    let lines: string[] = [`# zoom: ${zoom}`]
-    lines.push(this.tablesContainer.exportView())
-    this.tableMap.forEach(table => {
-      lines.push(table.exportPosition())
-    })
-  }
 }
 
 export class TablesContainer {
@@ -433,12 +425,6 @@ export class TablesContainer {
   exportJSON(json: any) {
     json['view:x'] = this.translateX
     json['view:y'] = this.translateY
-  }
-
-  exportView() {
-    let x = this.translateX.toFixed(0)
-    let y = this.translateY.toFixed(0)
-    return `# view: (${x}, ${y})`
   }
 }
 
@@ -689,13 +675,6 @@ class TableController {
     const name = this.data.name
     json[name + '-x'] = this.translateX
     json[name + '-y'] = this.translateY
-  }
-
-  exportPosition() {
-    let { name } = this.data
-    let x = this.translateX.toFixed(0)
-    let y = this.translateY.toFixed(0)
-    return `# ${name} (${x}, ${y})`
   }
 }
 
