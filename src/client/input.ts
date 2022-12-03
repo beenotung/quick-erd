@@ -16,17 +16,40 @@ export class InputController {
   setTablePosition(name: string, position: { x: number; y: number }) {
     let x = position.x.toFixed(0)
     let y = position.y.toFixed(0)
-    // FIXME fix the regex
-    let regex = new RegExp(`# ${name} \([0-9-]+, [0-9-]+\)`)
+    let regex = new RegExp(`# ${name} \\([0-9-]+, [0-9-]+\\)`)
     let line = `# ${name} (${x}, ${y})`
     this.updateLine(regex, line)
   }
 
+  private isEmpty() {
+    for (let line of this.input.value.split('\n')) {
+      line = line.trim()
+      if (line && !line.trim().startsWith('# ')) {
+        return false
+      }
+    }
+    return true
+  }
+
   private updateLine(regex: RegExp, line: string) {
-    let value = this.input.value
-    this.input.value = value.match(regex)
-      ? value.replace(regex, line)
-      : value.trim() + '\r\n' + line
+    if (this.isEmpty()) return
+    let { input } = this
+    let value = input.value
+    let { selectionStart, selectionEnd, selectionDirection } = input
+    if (value.match(regex)) {
+      input.value = value.replace(regex, line)
+    } else {
+      value = value.trim()
+      if (!value.split('\n').pop()?.startsWith('# ')) {
+        value += '\r\n'
+      }
+      value += '\r\n' + line
+      input.value = value
+    }
+    localStorage.setItem('input', this.input.value)
+    input.selectionStart = selectionStart
+    input.selectionEnd = selectionEnd
+    input.selectionDirection = selectionDirection
   }
 
   selectTable(table: string) {

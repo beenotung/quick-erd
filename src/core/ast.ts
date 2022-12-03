@@ -35,8 +35,7 @@ class Parser implements ParseResult {
     console.log(this)
   }
   parseMeta(input: string) {
-    // FIXME support floating number and negative number
-    let zoom = +input.match(/# zoom: (\d)+/)?.[1]!
+    let zoom = +input.match(/# zoom: ([0-9-.])+/)?.[1]!
     if (zoom) this.zoom = zoom
 
     let view = input.match(/# view: \((\d+), (\d+)\)/)

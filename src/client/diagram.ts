@@ -359,6 +359,10 @@ export class TablesContainer {
 
   constructor(public diagram: DiagramController, public div: HTMLDivElement) {
     this.div.style.transform = `translate(${this.translateX}px,${this.translateY}px)`
+    this.diagram.inputController.setViewPosition({
+      x: this.translateX,
+      y: this.translateY,
+    })
 
     let isMouseDown = false
     let startX = 0
