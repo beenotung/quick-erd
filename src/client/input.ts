@@ -1,24 +1,23 @@
+import {
+  tableNameToLine,
+  tableNameToRegex,
+  viewLineRegex,
+  viewToLine,
+  zoomLineRegex,
+  zoomToLine,
+} from '../core/meta'
+
 export class InputController {
   constructor(public input: HTMLTextAreaElement) {}
 
   setZoom(zoom: number) {
-    let line = `# zoom: ${zoom.toFixed(3)}`
-    let regex = /# zoom: [0-9.]+/
-    this.updateLine(regex, line)
+    this.updateLine(zoomLineRegex, zoomToLine(zoom))
   }
-  setViewPosition(position: { x: number; y: number }) {
-    let x = position.x.toFixed(0)
-    let y = position.y.toFixed(0)
-    let regex = /# view: \([0-9-]+, [0-9-]+\)/
-    let line = `# view: (${x}, ${y})`
-    this.updateLine(regex, line)
+  setViewPosition(view: { x: number; y: number }) {
+    this.updateLine(viewLineRegex, viewToLine(view))
   }
   setTablePosition(name: string, position: { x: number; y: number }) {
-    let x = position.x.toFixed(0)
-    let y = position.y.toFixed(0)
-    let regex = new RegExp(`# ${name} \\([0-9-]+, [0-9-]+\\)`)
-    let line = `# ${name} (${x}, ${y})`
-    this.updateLine(regex, line)
+    this.updateLine(tableNameToRegex(name), tableNameToLine(name, position))
   }
 
   private isEmpty() {

@@ -1,4 +1,11 @@
 import { formatEnum } from './enum'
+import {
+  Position,
+  tableNameRegex,
+  tableNameRegex_g,
+  viewPositionRegex,
+  zoomValueRegex,
+} from './meta'
 
 export function parse(input: string): ParseResult {
   const parser = new Parser()
@@ -9,14 +16,14 @@ export function parse(input: string): ParseResult {
 export type ParseResult = {
   table_list: Table[]
   zoom?: number
-  view?: { x: number; y: number }
+  view?: Position
 }
 
 class Parser implements ParseResult {
   table_list: Table[] = []
   line_list: string[] = []
   zoom?: number
-  view?: { x: number; y: number }
+  view?: Position
   parse(input: string) {
     input.split('\n').forEach(line => {
       line = line
@@ -32,17 +39,16 @@ class Parser implements ParseResult {
       this.table_list.push(this.parseTable())
     }
     this.parseMeta(input)
-    console.log(this)
   }
   parseMeta(input: string) {
-    let zoom = +input.match(/# zoom: ([0-9-.]+)/)?.[1]!
+    let zoom = +input.match(zoomValueRegex)?.[1]!
     if (zoom) this.zoom = zoom
 
-    let view = input.match(/# view: \(([0-9-.]+), ([0-9-.]+)\)/)
+    let view = input.match(viewPositionRegex)
     if (view) this.view = { x: +view[1], y: +view[2] }
 
-    input.match(/# (\w+) \(([0-9-.]+), ([0-9-.]+)\)/g)?.forEach(line => {
-      let match = line.match(/# (\w+) \(([0-9-.]+), ([0-9-.]+)\)/) || []
+    input.match(tableNameRegex_g)?.forEach(line => {
+      let match = line.match(tableNameRegex) || []
       let name = match[1]
       let x = +match[2]
       let y = +match[3]

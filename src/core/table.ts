@@ -1,8 +1,8 @@
-import { Field, Table } from './ast'
+import { Field, ParseResult, Table } from './ast'
 import { formatEnum } from './enum'
 import { makeGuide } from './guide'
 
-export function tableToString(table: Table): string {
+function tableToString(table: Table): string {
   return `
 ${table.name}
 ${'-'.repeat(table.name.length)}
@@ -10,7 +10,7 @@ ${table.field_list.map(fieldToString).join('\n')}
 `
 }
 
-export function fieldToString(field: Field): string {
+function fieldToString(field: Field): string {
   let type = field.type
   if (type.match(/^enum/i)) {
     type = formatEnum(type)
@@ -42,6 +42,12 @@ export function tablesToText(tables: Table[]) {
       .trim() +
     '\n\n\n' +
     tables.map(tableToString).join('\n').trim()
+  return text
+}
+
+export function astToText(ast: ParseResult) {
+  let text = tablesToText(ast.table_list)
+
   return text
 }
 
