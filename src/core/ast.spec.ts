@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import { parse } from './ast'
+import { expectObjectKeys } from '../../test/utils'
 
 describe('ast TestSuit', () => {
   function parseSingleTable(text: string) {
@@ -301,17 +302,17 @@ name text
 `
     let ast = parse(text)
 
-    expect(ast).keys('zoom', 'view')
+    expectObjectKeys(ast, ['zoom', 'view'])
     expect(ast.zoom).to.equals(0.89)
     expect(ast.view).to.deep.equals({ x: 94, y: 292 })
 
     expect(ast.table_list).to.have.lengthOf(2)
 
-    expect(ast.table_list[0]).keys('name', 'position')
+    expectObjectKeys(ast.table_list[0], ['name', 'position'])
     expect(ast.table_list[0].name).to.equals('user')
     expect(ast.table_list[0].position).to.deep.equals({ x: 821, y: 369 })
 
-    expect(ast.table_list[1]).keys('name', 'position')
+    expectObjectKeys(ast.table_list[1], ['name', 'position'])
     expect(ast.table_list[1].name).to.equals('room')
     expect(ast.table_list[1].position).to.deep.equals({ x: 65, y: 708 })
   })
