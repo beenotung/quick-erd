@@ -1,6 +1,6 @@
 import { parse } from '../core/ast'
 import { makeGuide } from '../core/guide'
-import { tablesToText } from '../core/table'
+import { astToText } from '../core/table'
 import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
 import { InputController } from './input'
@@ -166,7 +166,7 @@ document.querySelector('#format')?.addEventListener('click', format)
 
 function format() {
   const result = parse(input.value)
-  input.value = tablesToText(result.table_list) + '\n'
+  input.value = astToText(result) + '\n'
 }
 
 document.querySelector('#normalize')?.addEventListener('click', showNormalize)

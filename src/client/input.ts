@@ -39,9 +39,9 @@ export class InputController {
     } else {
       value = value.trim()
       if (!value.split('\n').pop()?.startsWith('# ')) {
-        value += '\r\n'
+        value += '\n\n'
       }
-      value += '\r\n' + line
+      value += '\n' + line
     }
     this.setValue(value)
   }
@@ -58,7 +58,9 @@ export class InputController {
 
   removeTable(name: string) {
     let value = this.input.value
-    let regex = new RegExp(`\r?\n# ${name} \\([0-9-]+, [0-9-]+\\)`)
+    let regex =
+      // new RegExp(`\r?\n# ${name} \\([0-9-]+, [0-9-]+\\)`)
+      new RegExp('\\r?\\n' + tableNameToRegex(name).toString().slice(1, -1))
     let newValue = value.replace(regex, '')
     if (value != newValue) {
       this.setValue(newValue.trim())

@@ -1,6 +1,7 @@
 import { Field, ParseResult, Table } from './ast'
 import { formatEnum } from './enum'
 import { makeGuide } from './guide'
+import { tableNameToLine, viewToLine, zoomToLine } from './meta'
 
 function tableToString(table: Table): string {
   return `
@@ -35,25 +36,37 @@ function fieldToString(field: Field): string {
   return text
 }
 
-export function tablesToText(tables: Table[]) {
-  const text =
-    makeGuide('https://erd.surge.sh or https://quick-erd.surge.sh')
-      .replace(' or ', '\n# or ')
-      .trim() +
-    '\n\n\n' +
-    tables.map(tableToString).join('\n').trim()
-  return text
-}
+export function astToText(ast: ParseResult): string {
+  let text = ''
 
-export function astToText(ast: ParseResult) {
-  let text = tablesToText(ast.table_list)
+  text += makeGuide(
+    'https://erd.surge.sh or https://quick-erd.surge.sh',
+  ).replace(' or ', '\n# or ')
 
-  return text
+  for (let table of ast.table_list) {
+    text += '\n\n\n' + tableToString(table).trim()
+  }
+
+  text += '\n\n'
+
+  if (ast.zoom) {
+    text += '\n' + zoomToLine(ast.zoom)
+  }
+  if (ast.view) {
+    text += '\n' + viewToLine(ast.view)
+  }
+  for (let table of ast.table_list) {
+    if (table.position) {
+      text += '\n' + tableNameToLine(table.name, table.position)
+    }
+  }
+
+  return text.trim()
 }
 
 export function printTables(tables: Table[]) {
   tables = skipTimestamps(tables)
-  const text = tablesToText(tables)
+  const text = astToText({ table_list: tables })
   // eslint-disable-next-line no-console
   console.log(text)
 }
