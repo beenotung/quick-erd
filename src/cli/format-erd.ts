@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from 'fs'
 import { parse } from '../core/ast'
-import { tablesToText } from '../core/table'
+import { astToText } from '../core/table'
 
 function parseArgs() {
   let inFile: string | null = null
@@ -45,7 +45,7 @@ function main() {
     })
   }
 
-  const newText = tablesToText(result.table_list) + '\n'
+  const newText = astToText(result) + '\n'
 
   if (newText === text) {
     // eslint-disable-next-line no-console

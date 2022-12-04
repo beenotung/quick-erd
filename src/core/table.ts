@@ -43,7 +43,7 @@ export function astToText(ast: ParseResult): string {
     'https://erd.surge.sh or https://quick-erd.surge.sh',
   ).replace(' or ', '\n# or ')
 
-  for (let table of ast.table_list) {
+  for (const table of ast.table_list) {
     text += '\n\n\n' + tableToString(table).trim()
   }
 
@@ -55,7 +55,7 @@ export function astToText(ast: ParseResult): string {
   if (ast.view) {
     text += '\n' + viewToLine(ast.view)
   }
-  for (let table of ast.table_list) {
+  for (const table of ast.table_list) {
     if (table.position) {
       text += '\n' + tableNameToLine(table.name, table.position)
     }

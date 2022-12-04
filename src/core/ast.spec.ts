@@ -300,7 +300,7 @@ name text
 # user (821, 369)
 # room (65, 708)
 `
-    let ast = parse(text)
+    const ast = parse(text)
 
     expectObjectKeys(ast, ['zoom', 'view'])
     expect(ast.zoom).to.equals(0.89)

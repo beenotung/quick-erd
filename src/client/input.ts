@@ -32,7 +32,7 @@ export class InputController {
 
   private updateLine(regex: RegExp, line: string) {
     if (this.isEmpty()) return
-    let { input } = this
+    const { input } = this
     let value = input.value
     if (value.match(regex)) {
       value = value.replace(regex, line)
@@ -47,8 +47,8 @@ export class InputController {
   }
 
   private setValue(value: string) {
-    let { input } = this
-    let { selectionStart, selectionEnd, selectionDirection } = input
+    const { input } = this
+    const { selectionStart, selectionEnd, selectionDirection } = input
     input.value = value
     localStorage.setItem('input', value)
     input.selectionStart = selectionStart
@@ -57,11 +57,11 @@ export class InputController {
   }
 
   removeTable(name: string) {
-    let value = this.input.value
-    let regex =
+    const value = this.input.value
+    const regex =
       // new RegExp(`\r?\n# ${name} \\([0-9-]+, [0-9-]+\\)`)
       new RegExp('\\r?\\n' + tableNameToRegex(name).toString().slice(1, -1))
-    let newValue = value.replace(regex, '')
+    const newValue = value.replace(regex, '')
     if (value != newValue) {
       this.setValue(newValue.trim())
     }

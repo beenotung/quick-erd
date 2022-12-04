@@ -38,6 +38,7 @@ DB_PASSWORD=(or DB_PASS or POSTGRES_PASSWORD)
     connection: {
       database,
       host: env.DB_HOST,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       port: +env.DB_PORT! || undefined,
       user,
       password,

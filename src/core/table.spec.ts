@@ -15,7 +15,7 @@ user_id fk
 # view: (12, 34)
 # post (56, 78)
 `
-  let ast = parse(text)
+  const ast = parse(text)
   formattedText = astToText(ast)
 })
 
@@ -28,12 +28,14 @@ it('should default column type of integer', () => {
 })
 
 it('should default id column to be primary key', () => {
-  let line = formattedText.split('\n').find(line => line.startsWith('id '))
+  const line = formattedText.split('\n').find(line => line.startsWith('id '))
   expect(line).contain(' PK')
 })
 
 it('should auto fill reference table and column to fk column according to the column name', () => {
-  let line = formattedText.split('\n').find(line => line.startsWith('user_id '))
+  const line = formattedText
+    .split('\n')
+    .find(line => line.startsWith('user_id '))
   expect(line).contain('FK >- user.id')
 })
 

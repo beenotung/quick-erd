@@ -41,18 +41,19 @@ class Parser implements ParseResult {
     this.parseMeta(input)
   }
   parseMeta(input: string) {
-    let zoom = +input.match(zoomValueRegex)?.[1]!
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
+    const zoom = +input.match(zoomValueRegex)?.[1]!
     if (zoom) this.zoom = zoom
 
-    let view = input.match(viewPositionRegex)
+    const view = input.match(viewPositionRegex)
     if (view) this.view = { x: +view[1], y: +view[2] }
 
     input.match(tableNameRegex_g)?.forEach(line => {
-      let match = line.match(tableNameRegex) || []
-      let name = match[1]
-      let x = +match[2]
-      let y = +match[3]
-      let table = this.table_list.find(table => table.name == name)
+      const match = line.match(tableNameRegex) || []
+      const name = match[1]
+      const x = +match[2]
+      const y = +match[3]
+      const table = this.table_list.find(table => table.name == name)
       if (table) table.position = { x, y }
     })
   }
