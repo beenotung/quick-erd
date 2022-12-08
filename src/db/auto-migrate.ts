@@ -231,6 +231,9 @@ export function generateAutoMigrate(options: {
         ) {
           raw_up_lines.push(alterSqliteEnum(table, field))
           raw_down_lines.unshift(alterSqliteEnum(table, existing_field))
+        } else if (is_sqlite) {
+          raw_up_lines.push(alterSqliteField(table, field))
+          raw_down_lines.unshift(alterSqliteField(table, existing_field))
         } else {
           table_up_lines.push(alterType(field))
           table_down_lines.unshift(alterType(existing_field))
@@ -433,6 +436,23 @@ ${mergeLines(table_down_lines)}
   return { up_lines, down_lines }
 }
 
+function alterSqliteField(table: Table, field: Field): string {
+  if (!field.is_null) {
+    throw new Error(
+      `alter non-nullable column (${table.name}.${field.name}) is not supported in sqlite`,
+    )
+  }
+  let code = `
+  {
+    const rows = await knex.select('id', '${field.name}').from('${table.name}')
+    await knex.raw('alter table \`${table.name}\` drop column \`${field.name}\`')
+    await knex.raw("alter table \`${table.name}\` add column \`${field.name}\` ${field.type}")
+    for (let row of rows) {
+      await knex('${table.name}').update({ ${field.name}: row.${field.name} }).where({ id: row.id })
+    }
+  }`
+  return '  ' + code.trim()
+}
 function alterSqliteEnum(table: Table, field: Field): string {
   if (!field.is_null) {
     throw new Error(
