@@ -442,7 +442,7 @@ function alterSqliteField(table: Table, field: Field): string {
       `alter non-nullable column (${table.name}.${field.name}) is not supported in sqlite`,
     )
   }
-  let code = `
+  const code = `
   {
     const rows = await knex.select('id', '${field.name}').from('${table.name}')
     await knex.raw('alter table \`${table.name}\` drop column \`${field.name}\`')
@@ -460,7 +460,7 @@ function alterSqliteEnum(table: Table, field: Field): string {
     )
   }
   const values = field.type.replace(/enum/i, '')
-  let code = `
+  const code = `
   {
     const rows = await knex.select('id', '${field.name}').from('${table.name}')
     await knex.raw('alter table \`${table.name}\` drop column \`${field.name}\`')
