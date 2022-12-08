@@ -434,18 +434,21 @@ ${mergeLines(table_down_lines)}
 }
 
 function alterSqliteEnum(table: Table, field: Field): string {
-  const values = field.type.replace(/enum/i, '')
-  const code = `
-  const rows = await knex.select('id', '${field.name}').from('${table.name}')
-  await knex.raw('alter table \`${table.name}\` drop column \`${field.name}\`')
-  await knex.raw("alter table \`${table.name}\` add column \`${field.name}\` text check (\`${field.name}\` in ${values})")
-  for (let row of rows) {
-    await knex('${table.name}').update({ ${field.name}: row.${field.name} }).where({ id: row.id })
+  if (!field.is_null) {
+    throw new Error(
+      `alter non-nullable column (${table.name}.${field.name}) is not supported in sqlite`,
+    )
   }
-  await knex.schema.alterTable('${table.name}', table => {
-    table.dropNullable('${field.name}')
-  })
-`
+  const values = field.type.replace(/enum/i, '')
+  let code = `
+  {
+    const rows = await knex.select('id', '${field.name}').from('${table.name}')
+    await knex.raw('alter table \`${table.name}\` drop column \`${field.name}\`')
+    await knex.raw("alter table \`${table.name}\` add column \`${field.name}\` text check (\`${field.name}\` in ${values})")
+    for (let row of rows) {
+      await knex('${table.name}').update({ ${field.name}: row.${field.name} }).where({ id: row.id })
+    }
+  }`
   return '  ' + code.trim()
 }
 function alterType(field: Field): string {
