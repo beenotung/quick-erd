@@ -25,6 +25,7 @@ quick and easy text-based ERD editor with drag and drop visualization
   - [x] auto avoid table overlapping visually
   - [x] import/export diagram with drag position and zoom level
   - [x] right-click on diagram to select table/column in editor
+  - [x] auto-complete when creating new table
 
 ## Usage
 

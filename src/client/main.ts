@@ -23,9 +23,33 @@ window.addEventListener('storage', () => {
   input.value = localStorage.getItem('input') || input.value
 })
 
-input.addEventListener('input', () => {
+input.addEventListener('input', event => {
   localStorage.setItem('input', input.value)
+  checkNewTable(event as InputEvent)
 })
+
+function checkNewTable(event: InputEvent) {
+  if (!(event.inputType == 'insertText' && event.data == '-')) return
+  if (input.selectionStart != input.selectionEnd) return
+
+  let index = input.selectionStart
+
+  let before = input.value.slice(0, index)
+  if (!before.endsWith('\n-')) return
+
+  let after = input.value.slice(index)
+
+  let tableName = before.split('\n').slice(-2)[0]
+  if (!tableName) return
+
+  let mid = '-'.repeat(tableName.length - 1) + '\nid\n'
+
+  input.value = before + mid + after
+  index += mid.length
+
+  input.selectionStart = index
+  input.selectionEnd = index
+}
 
 try {
   new MutationObserver(() => {
