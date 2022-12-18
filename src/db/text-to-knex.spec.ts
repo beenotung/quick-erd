@@ -31,6 +31,17 @@ username string
     })
   })
 
+  it('should convert char to specificType', () => {
+    const text = `
+user
+----
+password_hash char(60)
+`
+    expect(textToKnex(text)).to.contains(
+      "table.specificType('password_hash', 'char(60)')",
+    )
+  })
+
   it('should support inline enum as column type', () => {
     const text = `
 application

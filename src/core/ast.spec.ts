@@ -24,6 +24,20 @@ username varchar(32)
     expect(field_list[1].type).to.equals('varchar(32)')
   })
 
+  it('should parse char', () => {
+    const text = `
+user
+----
+id pk
+username char(32)
+`
+    const table = parseSingleTable(text)
+    const field_list = table.field_list
+    expect(field_list).to.have.lengthOf(2)
+    expect(field_list[1].name).to.equals('username')
+    expect(field_list[1].type).to.equals('char(32)')
+  })
+
   it('should parse datetime', () => {
     const text = `
 user
