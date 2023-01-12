@@ -34,15 +34,15 @@ function checkNewTable(event: InputEvent) {
 
   let index = input.selectionStart
 
-  let before = input.value.slice(0, index)
+  const before = input.value.slice(0, index)
   if (!before.endsWith('\n-')) return
 
-  let after = input.value.slice(index)
+  const after = input.value.slice(index)
 
-  let tableName = before.split('\n').slice(-2)[0]
+  const tableName = before.split('\n').slice(-2)[0]
   if (!tableName) return
 
-  let mid = '-'.repeat(tableName.length - 1) + '\nid\n'
+  const mid = '-'.repeat(tableName.length - 1) + '\nid\n'
 
   input.value = before + mid + after
   index += mid.length
