@@ -211,6 +211,14 @@ export function generateAutoMigrate(options: {
     const new_columns: Field[] = []
     const removed_columns: Field[] = []
     function compareColumn(field: Field, existing_field: Field) {
+      // don't distinct datetime timestamp
+      if (field.type === 'datetime' && existing_field.type == 'timestamp') {
+        field.type = existing_field.type
+      }
+      if (existing_field.type === 'datetime' && field.type == 'timestamp') {
+        field.type = existing_field.type
+      }
+
       if (
         !support_timestamp &&
         field.type === 'timestamp' &&
