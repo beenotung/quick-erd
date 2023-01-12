@@ -25,6 +25,9 @@ function toDataType(column_row: ColumnRow): string {
   if (column_row.data_type.match(/timestamp/i)) {
     return 'timestamp'
   }
+  if (column_row.data_type.match(/time without time zone/i)) {
+    return 'time'
+  }
   return column_row.data_type
 }
 
