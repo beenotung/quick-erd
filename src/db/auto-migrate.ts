@@ -190,7 +190,6 @@ export function generateAutoMigrate(options: {
   db_client: string
 }) {
   const is_sqlite = options.db_client.includes('sqlite')
-  const support_timestamp = !is_sqlite
   const up_lines: string[] = []
   const down_lines: string[] = []
 
@@ -211,23 +210,16 @@ export function generateAutoMigrate(options: {
     const new_columns: Field[] = []
     const removed_columns: Field[] = []
     function compareColumn(field: Field, existing_field: Field) {
+      // avoid non-effective migration
       // don't distinct datetime timestamp
-      if (field.type === 'datetime' && existing_field.type == 'timestamp') {
-        field.type = existing_field.type
-      }
-      if (existing_field.type === 'datetime' && field.type == 'timestamp') {
+      // knex translates 'timestamp' into 'datetime' for sqlite db when running schema query builder
+      if (
+        (field.type === 'datetime' && existing_field.type == 'timestamp') ||
+        (existing_field.type === 'datetime' && field.type == 'timestamp')
+      ) {
         field.type = existing_field.type
       }
 
-      if (
-        !support_timestamp &&
-        field.type === 'timestamp' &&
-        existing_field.type === 'datetime'
-      ) {
-        // avoid non-effective migration
-        // knex translates 'timestamp' into 'datetime' for sqlite db when running schema query builder
-        field.type = 'datetime'
-      }
       if (
         field.type !== existing_field.type ||
         field.is_unsigned !== existing_field.is_unsigned
