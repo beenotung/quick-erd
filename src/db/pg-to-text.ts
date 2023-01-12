@@ -7,13 +7,13 @@ type ColumnRow = {
 }
 
 function toDataType(column_row: ColumnRow): string {
-  if (column_row.data_type.includes('character varying')) {
+  if (column_row.data_type.match(/character varying/i)) {
     if (column_row.character_maximum_length) {
       return `varchar(${column_row.character_maximum_length})`
     }
     return 'string'
   }
-  if (column_row.data_type.includes('character')) {
+  if (column_row.data_type.match(/character/i)) {
     if (column_row.character_maximum_length) {
       return `char(${column_row.character_maximum_length})`
     }
@@ -22,7 +22,7 @@ function toDataType(column_row: ColumnRow): string {
   if (column_row.data_type.match(/double precision/i)) {
     return 'double'
   }
-  if (column_row.data_type.includes('timestamp')) {
+  if (column_row.data_type.match(/timestamp/i)) {
     return 'timestamp'
   }
   return column_row.data_type
