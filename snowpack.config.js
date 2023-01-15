@@ -7,6 +7,7 @@ export default {
     /* ... */
     'src/client': '/',
     'src/core': '/core',
+    'lib/ionicons': '/icons',
   },
   plugins: [
     /* ... */
