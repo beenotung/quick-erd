@@ -154,7 +154,11 @@ class Parser implements ParseResult {
   }
   parseType(): string | undefined {
     let line = this.peekLine()
-    const match = line.match(/\w+\(.*?\)/) || line.match(/[a-zA-Z0-9_(),"']+/)
+    let match = line.match(/^not null\s*/i)
+    if (match) {
+      line = line.slice(match[0].length)
+    }
+    match = line.match(/\w+\(.*?\)/) || line.match(/[a-zA-Z0-9_(),"']+/)
     if (!match) {
       return
     }

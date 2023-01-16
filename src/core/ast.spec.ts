@@ -330,4 +330,22 @@ name text
     expect(ast.table_list[1].name).to.equals('room')
     expect(ast.table_list[1].position).to.deep.equals({ x: 65, y: 708 })
   })
+
+  it('should not treat not null as column type', () => {
+    const text = `
+user
+----
+id
+username text not null
+`
+    const table = parseSingleTable(text)
+    const { field_list } = table
+    expect(field_list).to.have.lengthOf(2)
+
+    expect(field_list[0].name).to.equals('id')
+
+    expect(field_list[1].name).to.equals('username')
+    expect(field_list[1].type).to.equals('text')
+    expect(field_list[1].is_null).to.be.false
+  })
 })
