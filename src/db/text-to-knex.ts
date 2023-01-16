@@ -2,6 +2,7 @@ import { parse, Field, Table } from '../core/ast'
 import { sortTables } from './sort-tables'
 
 const type_alias: Record<string, string> = {
+  bool: 'boolean',
   blob: 'binary',
   int: 'integer',
 }
@@ -39,7 +40,7 @@ export function toKnexCreateColumnTypeCode(field: Field): string {
       }
     }
 
-    type = type_alias[type] || type
+    type = type_alias[type.toLowerCase()] || type
 
     if (type && type[0] == type[0].toUpperCase()) {
       type = type.toLowerCase()

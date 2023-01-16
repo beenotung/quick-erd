@@ -136,4 +136,16 @@ is_staff BOOLEAN
     expect(textToKnex(text)).to.contains("table.boolean('is_admin')")
     expect(textToKnex(text)).to.contains("table.boolean('is_staff')")
   })
+
+  it("should translate 'bool' field type to knex 'boolean' column", () => {
+    const text = `
+user
+----
+is_admin bool
+is_staff BOOL
+`
+    const code = textToKnex(text)
+    expect(code).to.contains(`table.boolean('is_admin')`)
+    expect(code).to.contains(`table.boolean('is_staff')`)
+  })
 })
