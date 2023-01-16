@@ -6,8 +6,6 @@ const type_alias: Record<string, string> = {
   int: 'integer',
 }
 
-const specific_types = ['real']
-
 export function toKnexCreateColumnTypeCode(field: Field): string {
   let code = ''
   let type = field.type
@@ -43,7 +41,11 @@ export function toKnexCreateColumnTypeCode(field: Field): string {
 
     type = type_alias[type] || type
 
-    if (specific_types.includes(type) || type.match(/^char\(\d+\)$/i)) {
+    if (type && type[0] == type[0].toUpperCase()) {
+      type = type.toLowerCase()
+    }
+
+    if (type.match(/^real$/i) || type.match(/^char\(\d+\)$/i)) {
       code += `.specificType('${field.name}', '${type}')`
     } else if (length) {
       code += `.${type}('${field.name}', ${length})`

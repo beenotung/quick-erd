@@ -125,4 +125,15 @@ password_hash char(60)
       `table.specificType('password_hash', 'char(60)').notNullable()`,
     )
   })
+
+  it('should convert field type to lower case', () => {
+    const text = `
+user
+----
+is_admin Boolean
+is_staff BOOLEAN
+`
+    expect(textToKnex(text)).to.contains("table.boolean('is_admin')")
+    expect(textToKnex(text)).to.contains("table.boolean('is_staff')")
+  })
 })
