@@ -543,15 +543,37 @@ class TableController {
 
     // add new fields or update existing fields
     data.field_list.forEach(
-      ({ name, type, is_null, is_primary_key, references }) => {
+      ({ name, type, is_null, is_primary_key, references, is_unique }) => {
         const tags: string[] = []
+        const icons: string[] = []
         if (is_primary_key) {
-          tags.push('PK')
+          tags.push('<span title="primary key">PK</span>')
+          icons.push(
+            `<img title="primary key" class="icon" src="/icons/key-outline.svg">`,
+          )
         }
         if (references) {
-          tags.push('FK')
+          tags.push('<span title="foreign key">FK</span>')
+          icons.push(
+            `<img title="foreign key" class="icon" src="/icons/attach-outline.svg">`,
+          )
         }
-        const tag = tags.join(', ')
+        if (is_unique) {
+          tags.push('<span title="unique">UQ</span>')
+          icons.push(
+            `<img title="unique" class="icon" src="/icons/snow-outline.svg">`,
+          )
+        }
+
+        const mode =
+          navigator.userAgent.includes('Mac OS') ||
+          navigator.userAgent.includes('Macintosh') ||
+          navigator.userAgent.includes('iPhone') ||
+          navigator.userAgent.includes('iPad')
+            ? 'icon'
+            : 'text'
+
+        const tag = mode == 'icon' ? icons.join('') : tags.join(', ')
         const null_text = is_null ? 'NULL' : ''
 
         let tr = this.fieldMap.get(name)
