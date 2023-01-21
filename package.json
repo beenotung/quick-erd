@@ -58,7 +58,8 @@
     "report:update": "nyc --reporter=lcov npm run mocha -- --reporter=progress",
     "report:open": "open-cli coverage/lcov-report/index.html",
     "report": "run-s report:update report:open",
-    "prepublishOnly": "run-s test build"
+    "preversion": "npm test",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "fastest-levenshtein": "^1.0.16"
