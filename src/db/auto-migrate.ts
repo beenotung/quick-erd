@@ -110,7 +110,7 @@ module.exports = config;
   } else {
     code = `
 import type { Knex } from 'knex'
-import { env } from './${srcDir}/env'
+import { env } from '${importDir}/env'
 
 const config: { [key: string]: Knex.Config } = {
   development: {
