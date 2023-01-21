@@ -30,9 +30,9 @@ export function setupSqlite(options: { dbFile: string; srcDir: string }) {
   if (existsSync(dbTsFile)) {
     return
   }
-  addDependencies('better-sqlite3-schema', '^2.3.5')
+  addDependencies('better-sqlite3-schema', '^2.3.6')
   addDependencies('@types/integer', '^4.0.1', 'dev')
-  addDependencies('better-sqlite3-proxy', '^1.5.0')
+  addDependencies('better-sqlite3-proxy', '^1.6.0')
   const code = `
 import { toSafeMode, newDB, DBInstance } from 'better-sqlite3-schema'
 
@@ -54,7 +54,7 @@ export function setupEnvFile(options: { srcDir: string }) {
   if (existsSync(file)) {
     return
   }
-  addDependencies('dotenv', '^16.0.1')
+  addDependencies('dotenv', '^16.0.3')
   addDependencies('populate-env', '^2.0.0')
   const code = `
 import { config } from 'dotenv'
@@ -84,7 +84,7 @@ export function setupKnexFile(options: { srcDir: string; db_client: string }) {
   if (existsSync(file)) {
     return
   }
-  addDependencies('knex', '^2.3.0')
+  addDependencies('knex', '^2.4.1')
   let importDir = srcDir
   if (!importDir.startsWith('.')) {
     importDir = './' + srcDir
