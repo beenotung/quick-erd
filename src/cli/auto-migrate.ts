@@ -4,6 +4,7 @@ import { parse } from '../core/ast'
 import { readErdFromStdin } from '../utils/file'
 import {
   detectSrcDir,
+  setupEnvFile,
   setupKnexFile,
   setupKnexMigration,
   setupSqlite,
@@ -43,6 +44,7 @@ async function main() {
     case 'pg':
     case 'postgresql':
       db_client = dbFile_or_client
+      setupEnvFile({ srcDir, db_client })
       break
     default: {
       db_client = 'better-sqlite3'

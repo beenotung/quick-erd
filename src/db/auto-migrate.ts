@@ -49,7 +49,13 @@ toSafeMode(db)
   return
 }
 
-export function setupEnvFile(options: { srcDir: string }) {
+let defaultPorts: Record<string, number> = {
+  mysql: 3306,
+  pg: 5432,
+  postgresql: 5432,
+}
+
+export function setupEnvFile(options: { srcDir: string; db_client: string }) {
   const file = join(options.srcDir, 'env.ts')
   if (existsSync(file)) {
     return
@@ -63,17 +69,14 @@ import populateEnv from 'populate-env'
 config()
 
 export const env = {
-  DB_HOST: 'optional',
-  DB_PORT: 1,
+  DB_HOST: 'localhost',
+  DB_PORT: ${defaultPorts[options.db_client] || 0},
   DB_NAME: '',
   DB_USERNAME: '',
   DB_PASSWORD: '',
 }
 
 populateEnv(env, { mode: 'halt' })
-
-env.DB_HOST = process.env.DB_HOST
-env.DB_PORT = +process.env.DB_PORT!
 `
   writeSrcFile(file, code)
 }
