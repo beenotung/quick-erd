@@ -17,7 +17,7 @@ import {
 import { toSqliteColumnSql } from './text-to-sqlite'
 
 export function detectSrcDir() {
-  for (const dir of ['src', 'server', '.']) {
+  for (const dir of ['src', 'server']) {
     if (existsSync(dir)) {
       return dir
     }
