@@ -49,7 +49,7 @@ toSafeMode(db)
   return
 }
 
-let defaultPorts: Record<string, number> = {
+const defaultPorts: Record<string, number> = {
   mysql: 3306,
   pg: 5432,
   postgresql: 5432,
