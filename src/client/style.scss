@@ -6,13 +6,11 @@ body {
 
 :root {
   --padding: 0.5rem;
-  --header-height: 2rem;
 }
 
 header {
   padding: var(--padding);
   background-color: steelblue;
-  height: var(--header-height);
 }
 
 button {
@@ -42,11 +40,16 @@ button kbd {
 }
 
 .controls {
+  position: absolute;
   font-size: 1rem;
-  position: fixed;
-  top: calc(var(--padding) * 3 + var(--header-height));
-  right: calc(var(--padding) + 1rem);
+  top: calc(var(--padding) * 2);
+  right: calc(var(--padding) * 2);
   user-select: none;
+  .buttons {
+    position: fixed;
+    width: max-content;
+    transform: translateX(-100%);
+  }
   button {
     width: 1.5rem;
     height: 1.5rem;
