@@ -9,7 +9,7 @@
   </head>
 
   <body>
-    <header>
+    <header class="_hover">
       <button>More</button>
       <button
         id="format"
@@ -47,17 +47,34 @@
         <button>About</button>
       </a>
       <div class="more">
-        <button id="load-example">Load Example</button>
-        <button
-          id="random-color"
-          title="Assign random color to each table name. You can press [C] key as keyboard shortcut"
-        >
-          Random <kbd>C</kbd>olor
-        </button>
-        <button id="reset-color" title="Reset default color to each table name">
-          Reset Color
-        </button>
-        <div class="deprecated" style="display: inline" title="(deprecated)">
+        <div class="more-group">
+          <button id="load-example">Load Example</button>
+        </div>
+        <div class="more-group">
+          <button
+            id="random-color"
+            title="Assign random color to each table name. You can press [C] key as keyboard shortcut"
+          >
+            Random <kbd>C</kbd>olor
+          </button>
+          <button
+            id="reset-color"
+            title="Reset default color to each table name"
+          >
+            Reset Color
+          </button>
+        </div>
+        <div class="more-group">
+          <button class="color-btn">
+            <label for="bg-color">BG</label>
+            <input id="bg-color" type="color" />
+          </button>
+          <button class="color-btn">
+            <label for="text-color">Text</label>
+            <input id="text-color" type="color" />
+          </button>
+        </div>
+        <div class="more-group deprecated" title="(deprecated)">
           <button id="import">Import</button>
           <button id="export">Export</button>
         </div>

@@ -10,6 +10,8 @@ import {
 export class InputController {
   constructor(public input: HTMLTextAreaElement) {}
 
+  setBgColor(color: string) {}
+  setTextColor(color: string) {}
   setZoom(zoom: number) {
     this.updateLine(zoomLineRegex, zoomToLine(zoom))
   }

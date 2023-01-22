@@ -6,6 +6,8 @@ body {
 
 :root {
   --padding: 0.5rem;
+  --bg-color: cornflowerblue;
+  --text-color: black;
 }
 
 header {
@@ -17,13 +19,16 @@ header {
     height: 0;
     opacity: 0;
     z-index: 1;
-    padding: 0.25rem;
     background-color: steelblue;
     position: absolute;
     margin-bottom: 1rem;
   }
 }
-header:hover {
+.more-group {
+  margin: 0.25rem;
+}
+header:hover,
+header.hover {
   .more {
     opacity: 1;
     height: initial;
@@ -37,6 +42,11 @@ button {
   margin: 0;
   padding: 0.25em;
   line-height: 1em;
+}
+.color-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .deprecated {
@@ -81,8 +91,9 @@ main {
   width: max-content;
   // flex-shrink: 1;
   overflow: hidden;
-  background-color: cornflowerblue;
+  background-color: var(--bg-color);
   textarea {
+    color: var(--text-color);
     overflow: auto;
     background-color: transparent;
     resize: horizontal;
@@ -176,7 +187,7 @@ dialog[open] {
   }
 }
 .table-title {
-  background-color: cornflowerblue;
+  background-color: var(--bg-color);
   color: white;
   padding: 0.5em;
   font-weight: bold;

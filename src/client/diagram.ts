@@ -18,17 +18,15 @@ type Rect = {
 }
 
 export class DiagramController {
-  message = this.div.querySelector('.message') as HTMLDivElement
-  tablesContainer = new TablesContainer(
-    this,
-    this.div.querySelector('#tables-container') as HTMLDivElement,
-  )
+  fontSizeSpan: HTMLSpanElement
+  message: HTMLDivElement
+  tablesContainer: TablesContainer
+  controls: HTMLDivElement
+
   tableMap = new Map<string, TableController>()
   maxZIndex = 0
   fontSize = +(localStorage.getItem('zoom') || '') || 1
   barRadius = this.calcBarRadius()
-
-  controls = this.div.querySelector('.controls') as HTMLDivElement
 
   isDetailMode = new StoredValue('is_detail_mode', true)
 
@@ -42,9 +40,15 @@ export class DiagramController {
 
   constructor(
     public div: HTMLDivElement,
-    public fontSizeSpan: HTMLSpanElement,
     public inputController: InputController,
   ) {
+    this.fontSizeSpan = this.div.querySelector('#font-size')!
+    this.message = this.div.querySelector('.message')!
+    this.tablesContainer = new TablesContainer(
+      this,
+      this.div.querySelector('#tables-container')!,
+    )
+    this.controls = this.div.querySelector('.controls')!
     this.div.addEventListener('mousemove', ev => {
       if (this.onMouseMove) {
         this.onMouseMove(ev)

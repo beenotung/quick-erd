@@ -1,23 +1,36 @@
 import { parse } from '../core/ast'
 import { makeGuide } from '../core/guide'
 import { astToText } from '../core/table'
+import { decodeColor } from './color'
 import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
 import { InputController } from './input'
 import { normalize } from './normalize'
-const input = document.querySelector('#editor textarea') as HTMLTextAreaElement
-const fontSize = document.querySelector('#font-size') as HTMLSpanElement
+
+const bgColor = document.querySelector('#bg-color') as HTMLTextAreaElement
+const textColor = document.querySelector('#text-color') as HTMLTextAreaElement
+const editor = document.querySelector('#editor') as HTMLTextAreaElement
+const input = editor.querySelector('textarea') as HTMLTextAreaElement
 const diagram = document.querySelector('#diagram') as HTMLDivElement
 
 const inputController = new InputController(input)
-const diagramController = new DiagramController(
-  diagram,
-  fontSize,
-  inputController,
-)
+const diagramController = new DiagramController(diagram, inputController)
 
 input.value = localStorage.getItem('input') || input.value
 input.style.width = localStorage.getItem('input_width') || ''
+
+bgColor.value = decodeColor(getComputedStyle(editor).backgroundColor)
+textColor.value = decodeColor(getComputedStyle(input).color)
+
+let root = document.body.parentElement as HTMLElement
+bgColor.addEventListener('change', () => {
+  root.style.setProperty('--bg-color', bgColor.value)
+  inputController.setBgColor(bgColor.value)
+})
+textColor.addEventListener('change', () => {
+  root.style.setProperty('--text-color', textColor.value)
+  inputController.setTextColor(textColor.value)
+})
 
 window.addEventListener('storage', () => {
   input.value = localStorage.getItem('input') || input.value
