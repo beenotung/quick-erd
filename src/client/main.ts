@@ -19,8 +19,11 @@ const diagramController = new DiagramController(diagram, inputController)
 input.value = localStorage.getItem('input') || input.value
 input.style.width = localStorage.getItem('input_width') || ''
 
-bgColor.value = decodeColor(getComputedStyle(editor).backgroundColor)
-textColor.value = decodeColor(getComputedStyle(input).color)
+function initColors() {
+  bgColor.value = decodeColor(getComputedStyle(editor).backgroundColor)
+  textColor.value = decodeColor(getComputedStyle(input).color)
+}
+initColors()
 
 let root = document.body.parentElement as HTMLElement
 bgColor.addEventListener('change', () => {
@@ -75,9 +78,16 @@ try {
 function parseInput() {
   const result = parse(input.value)
   diagramController.render(result)
+  if (result.bg) {
+    bgColor.value = decodeColor(result.bg)
+    root.style.setProperty('--bg-color', bgColor.value)
+  }
+  if (result.color) {
+    textColor.value = decodeColor(result.color)
+    root.style.setProperty('--text-color', textColor.value)
+  }
 }
 input.addEventListener('input', parseInput)
-setTimeout(parseInput)
 
 document.querySelector('#export')?.addEventListener('click', () => {
   const dialog = openDialog(diagramController)
@@ -263,6 +273,9 @@ document.querySelector('#random-color')?.addEventListener('click', () => {
 })
 
 document.querySelector('#reset-color')?.addEventListener('click', () => {
+  root.style.setProperty('--bg-color', 'cornflowerblue')
+  root.style.setProperty('--text-color', 'black')
+  initColors()
   diagramController.resetColor()
 })
 
@@ -321,3 +334,5 @@ window.addEventListener('keypress', e => {
     // console.debug(e.key)
   }
 })
+
+parseInput()

@@ -1,8 +1,11 @@
 import { formatEnum } from './enum'
 import {
   Position,
+  bgColorRegex,
+  bgColorToLine,
   tableNameRegex,
   tableNameRegex_g,
+  textColorRegex,
   viewPositionRegex,
   zoomValueRegex,
 } from './meta'
@@ -17,6 +20,8 @@ export type ParseResult = {
   table_list: Table[]
   zoom?: number
   view?: Position
+  bg?: string
+  color?: string
 }
 
 class Parser implements ParseResult {
@@ -24,6 +29,8 @@ class Parser implements ParseResult {
   line_list: string[] = []
   zoom?: number
   view?: Position
+  bg?: string
+  color?: string
   parse(input: string) {
     input.split('\n').forEach(line => {
       line = line
@@ -47,6 +54,12 @@ class Parser implements ParseResult {
 
     const view = input.match(viewPositionRegex)
     if (view) this.view = { x: +view[1], y: +view[2] }
+
+    const bg = input.match(bgColorRegex)
+    if (bg) this.bg = bg?.[1]
+
+    const color = input.match(textColorRegex)
+    if (color) this.color = color?.[1]
 
     input.match(tableNameRegex_g)?.forEach(line => {
       const match = line.match(tableNameRegex) || []

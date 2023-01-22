@@ -1,6 +1,10 @@
 import {
+  bgColorRegex,
+  bgColorToLine,
   tableNameToLine,
   tableNameToRegex,
+  textColorRegex,
+  textColorToLine,
   viewLineRegex,
   viewToLine,
   zoomLineRegex,
@@ -10,8 +14,12 @@ import {
 export class InputController {
   constructor(public input: HTMLTextAreaElement) {}
 
-  setBgColor(color: string) {}
-  setTextColor(color: string) {}
+  setBgColor(color: string) {
+    this.updateLine(bgColorRegex, bgColorToLine(color))
+  }
+  setTextColor(color: string) {
+    this.updateLine(textColorRegex, textColorToLine(color))
+  }
   setZoom(zoom: number) {
     this.updateLine(zoomLineRegex, zoomToLine(zoom))
   }

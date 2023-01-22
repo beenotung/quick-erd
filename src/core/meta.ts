@@ -31,3 +31,14 @@ export function tableNameToLine(name: string, position: Position) {
   const y = position.y.toFixed(0)
   return `# ${name} (${x}, ${y})`
 }
+
+export const bgColorRegex = /# bg: (#\w+)/
+export const textColorRegex = /# color: (#\w+)/
+
+export function bgColorToLine(color: string): string {
+  return `# bg: ${color}`
+}
+
+export function textColorToLine(color: string): string {
+  return `# color: ${color}`
+}
