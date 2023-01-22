@@ -10,7 +10,7 @@
 
   <body>
     <header>
-      <button id="load-example">Load Example</button>
+      <button>More</button>
       <button
         id="format"
         title="Warning: comments will not be preserved! Refresh to restore input. (You can press [F] key as keyboard shortcut.)"
@@ -32,25 +32,13 @@
       >
         Toggle <kbd>D</kbd>etails
       </button>
-      <button
-        id="random-color"
-        title="Assign random color to each table name. You can press [C] key as keyboard shortcut"
-      >
-        Random <kbd>C</kbd>olor
-      </button>
-      <button id="reset-color" title="Reset default color to each table name">
-        Reset Color
-      </button>
+
       <button
         id="reset-zoom"
         title="You can press [R] key or [0] key as keyboard shortcut"
       >
         <kbd>R</kbd>eset Zoom
       </button>
-      <div class="deprecated" style="display: inline" title="(deprecated)">
-        <button id="import">Import</button>
-        <button id="export">Export</button>
-      </div>
       <a
         target="_blank"
         href="https://github.com/beenotung/quick-erd"
@@ -58,6 +46,22 @@
       >
         <button>About</button>
       </a>
+      <div class="more">
+        <button id="load-example">Load Example</button>
+        <button
+          id="random-color"
+          title="Assign random color to each table name. You can press [C] key as keyboard shortcut"
+        >
+          Random <kbd>C</kbd>olor
+        </button>
+        <button id="reset-color" title="Reset default color to each table name">
+          Reset Color
+        </button>
+        <div class="deprecated" style="display: inline" title="(deprecated)">
+          <button id="import">Import</button>
+          <button id="export">Export</button>
+        </div>
+      </div>
     </header>
     <main>
       <div id="editor">

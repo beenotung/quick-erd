@@ -11,6 +11,24 @@ body {
 header {
   padding: var(--padding);
   background-color: steelblue;
+  .more {
+    pointer-events: none;
+    transition: all 0.2s ease-in-out;
+    height: 0;
+    opacity: 0;
+    z-index: 1;
+    padding: 0.25rem;
+    background-color: steelblue;
+    position: absolute;
+    margin-bottom: 1rem;
+  }
+}
+header:hover {
+  .more {
+    opacity: 1;
+    height: initial;
+    pointer-events: initial;
+  }
 }
 
 button {
