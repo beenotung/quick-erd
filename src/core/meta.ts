@@ -51,3 +51,8 @@ export const tableBgColorRegex = /# table-bg: (#\w+)/
 export function tableBgColorToLine(color: string): string {
   return `# table-bg: ${color}`
 }
+
+export const tableTextColorRegex = /# table-text: (#\w+)/
+export function tableTextColorToLine(color: string): string {
+  return `# table-text: ${color}`
+}

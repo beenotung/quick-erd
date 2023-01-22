@@ -20,11 +20,16 @@ export class ColorController {
       getComputedStyle(this.targets.tableStub).backgroundColor,
     onColorChanged: color => this.inputController.setTableBgColor(color),
   })
+  tableTextColor = new ColorInput(this.root, 'table-text-color', {
+    getEffectiveColor: () => getComputedStyle(this.targets.tableStub).color,
+    onColorChanged: color => this.inputController.setTableTextColor(color),
+  })
   inputs = [
     this.textBgColor,
     this.textColor,
     this.diagramBgColor,
     this.tableBgColor,
+    this.tableTextColor,
   ]
   constructor(
     public root: HTMLElement,

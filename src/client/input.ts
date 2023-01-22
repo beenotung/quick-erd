@@ -13,6 +13,8 @@ import {
   tableBgColorToLine,
   tableBgColorRegex,
   diagramBgColorRegex,
+  tableTextColorRegex,
+  tableTextColorToLine,
 } from '../core/meta'
 
 export class InputController {
@@ -29,6 +31,9 @@ export class InputController {
   }
   setTableBgColor(color: string) {
     this.updateLine(tableBgColorRegex, tableBgColorToLine(color))
+  }
+  setTableTextColor(color: string) {
+    this.updateLine(tableTextColorRegex, tableTextColorToLine(color))
   }
   setZoom(zoom: number) {
     this.updateLine(zoomLineRegex, zoomToLine(zoom))

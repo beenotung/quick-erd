@@ -83,6 +83,10 @@
             <label for="table-bg-color">Table BG</label>
             <input id="table-bg-color" type="color" />
           </button>
+          <button class="color-btn">
+            <label for="table-text-color">Table Text</label>
+            <input id="table-text-color" type="color" />
+          </button>
         </div>
         <div class="more-group deprecated" title="(deprecated)">
           <button id="import">Import</button>
@@ -119,7 +123,9 @@
             </button>
           </div>
         </div>
-        <div id="tables-container"></div>
+        <div id="tables-container">
+          <div data-table="_stub_"></div>
+        </div>
       </div>
     </main>
     <script type="module" src="main.js"></script>

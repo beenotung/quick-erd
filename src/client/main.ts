@@ -12,10 +12,9 @@ const editor = document.querySelector('#editor') as HTMLTextAreaElement
 const input = editor.querySelector('textarea') as HTMLTextAreaElement
 const diagram = document.querySelector('#diagram') as HTMLDivElement
 
-const tableStub = document.createElement('div')
-tableStub.dataset.table = 'stub'
-tableStub.style.display = 'none'
-diagram.appendChild(tableStub)
+const tableStub = document.querySelector(
+  '[data-table="_stub_"]',
+) as HTMLDivElement
 
 const inputController = new InputController(input)
 const diagramController = new DiagramController(diagram, inputController)
@@ -79,6 +78,12 @@ function parseInput() {
   }
   if (result.diagramBgColor) {
     colorController.diagramBgColor.applyParsedColor(result.diagramBgColor)
+  }
+  if (result.tableBgColor) {
+    colorController.tableBgColor.applyParsedColor(result.tableBgColor)
+  }
+  if (result.tableTextColor) {
+    colorController.tableTextColor.applyParsedColor(result.tableTextColor)
   }
 }
 input.addEventListener('input', parseInput)

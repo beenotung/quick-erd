@@ -10,6 +10,7 @@ import {
   zoomValueRegex,
   diagramBgColorRegex,
   tableBgColorRegex,
+  tableTextColorRegex,
 } from './meta'
 
 export function parse(input: string): ParseResult {
@@ -26,6 +27,7 @@ export type ParseResult = {
   textColor?: string
   diagramBgColor?: string
   tableBgColor?: string
+  tableTextColor?: string
 }
 
 class Parser implements ParseResult {
@@ -37,6 +39,7 @@ class Parser implements ParseResult {
   textColor?: string
   diagramBgColor?: string
   tableBgColor?: string
+  tableTextColor?: string
   parse(input: string) {
     input.split('\n').forEach(line => {
       line = line
@@ -72,6 +75,9 @@ class Parser implements ParseResult {
 
     const tableBgColor = input.match(tableBgColorRegex)
     if (tableBgColor) this.tableBgColor = tableBgColor[1]
+
+    const tableTextColor = input.match(tableTextColorRegex)
+    if (tableTextColor) this.tableTextColor = tableTextColor[1]
 
     input.match(tableNameRegex_g)?.forEach(line => {
       const match = line.match(tableNameRegex) || []
