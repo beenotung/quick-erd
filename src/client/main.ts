@@ -26,11 +26,11 @@ function initColors() {
 initColors()
 
 let root = document.body.parentElement as HTMLElement
-bgColor.addEventListener('change', () => {
+bgColor.addEventListener('input', () => {
   root.style.setProperty('--bg-color', bgColor.value)
   inputController.setBgColor(bgColor.value)
 })
-textColor.addEventListener('change', () => {
+textColor.addEventListener('input', () => {
   root.style.setProperty('--text-color', textColor.value)
   inputController.setTextColor(textColor.value)
 })
