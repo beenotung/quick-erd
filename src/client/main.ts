@@ -1,39 +1,32 @@
 import { parse } from '../core/ast'
 import { makeGuide } from '../core/guide'
 import { astToText } from '../core/table'
-import { decodeColor } from './color'
+import { ColorController } from './color'
 import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
 import { InputController } from './input'
 import { normalize } from './normalize'
 
-const bgColor = document.querySelector('#bg-color') as HTMLTextAreaElement
-const textColor = document.querySelector('#text-color') as HTMLTextAreaElement
+const root = document.body.parentElement as HTMLElement
 const editor = document.querySelector('#editor') as HTMLTextAreaElement
 const input = editor.querySelector('textarea') as HTMLTextAreaElement
 const diagram = document.querySelector('#diagram') as HTMLDivElement
 
+const tableStub = document.createElement('div')
+tableStub.dataset.table = 'stub'
+tableStub.style.display = 'none'
+diagram.appendChild(tableStub)
+
 const inputController = new InputController(input)
 const diagramController = new DiagramController(diagram, inputController)
+const colorController = new ColorController(
+  root,
+  { editor, input, diagram, tableStub },
+  inputController,
+)
 
 input.value = localStorage.getItem('input') || input.value
 input.style.width = localStorage.getItem('input_width') || ''
-
-function initColors() {
-  bgColor.value = decodeColor(getComputedStyle(editor).backgroundColor)
-  textColor.value = decodeColor(getComputedStyle(input).color)
-}
-initColors()
-
-let root = document.body.parentElement as HTMLElement
-bgColor.addEventListener('input', () => {
-  root.style.setProperty('--bg-color', bgColor.value)
-  inputController.setBgColor(bgColor.value)
-})
-textColor.addEventListener('input', () => {
-  root.style.setProperty('--text-color', textColor.value)
-  inputController.setTextColor(textColor.value)
-})
 
 window.addEventListener('storage', () => {
   input.value = localStorage.getItem('input') || input.value
@@ -78,13 +71,14 @@ try {
 function parseInput() {
   const result = parse(input.value)
   diagramController.render(result)
-  if (result.bg) {
-    bgColor.value = decodeColor(result.bg)
-    root.style.setProperty('--bg-color', bgColor.value)
+  if (result.textBgColor) {
+    colorController.textBgColor.applyParsedColor(result.textBgColor)
   }
-  if (result.color) {
-    textColor.value = decodeColor(result.color)
-    root.style.setProperty('--text-color', textColor.value)
+  if (result.textColor) {
+    colorController.textColor.applyParsedColor(result.textColor)
+  }
+  if (result.diagramBgColor) {
+    colorController.diagramBgColor.applyParsedColor(result.diagramBgColor)
   }
 }
 input.addEventListener('input', parseInput)
@@ -212,6 +206,8 @@ content text
 document.querySelector('#format')?.addEventListener('click', format)
 
 function format() {
+  diagramController.flushToInputController()
+  colorController.flushToInputController()
   const result = parse(input.value)
   input.value = astToText(result) + '\n'
 }
@@ -273,9 +269,7 @@ document.querySelector('#random-color')?.addEventListener('click', () => {
 })
 
 document.querySelector('#reset-color')?.addEventListener('click', () => {
-  root.style.setProperty('--bg-color', 'cornflowerblue')
-  root.style.setProperty('--text-color', 'black')
-  initColors()
+  colorController.resetColors()
   diagramController.resetColor()
 })
 

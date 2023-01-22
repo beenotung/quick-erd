@@ -1,13 +1,15 @@
 import { formatEnum } from './enum'
 import {
   Position,
-  bgColorRegex,
-  bgColorToLine,
+  textBgColorRegex,
+  textBgColorToLine,
   tableNameRegex,
   tableNameRegex_g,
   textColorRegex,
   viewPositionRegex,
   zoomValueRegex,
+  diagramBgColorRegex,
+  tableBgColorRegex,
 } from './meta'
 
 export function parse(input: string): ParseResult {
@@ -20,8 +22,10 @@ export type ParseResult = {
   table_list: Table[]
   zoom?: number
   view?: Position
-  bg?: string
-  color?: string
+  textBgColor?: string
+  textColor?: string
+  diagramBgColor?: string
+  tableBgColor?: string
 }
 
 class Parser implements ParseResult {
@@ -29,8 +33,10 @@ class Parser implements ParseResult {
   line_list: string[] = []
   zoom?: number
   view?: Position
-  bg?: string
-  color?: string
+  textBgColor?: string
+  textColor?: string
+  diagramBgColor?: string
+  tableBgColor?: string
   parse(input: string) {
     input.split('\n').forEach(line => {
       line = line
@@ -55,11 +61,17 @@ class Parser implements ParseResult {
     const view = input.match(viewPositionRegex)
     if (view) this.view = { x: +view[1], y: +view[2] }
 
-    const bg = input.match(bgColorRegex)
-    if (bg) this.bg = bg?.[1]
+    const textBgColor = input.match(textBgColorRegex)
+    if (textBgColor) this.textBgColor = textBgColor[1]
 
-    const color = input.match(textColorRegex)
-    if (color) this.color = color?.[1]
+    const textColor = input.match(textColorRegex)
+    if (textColor) this.textColor = textColor[1]
+
+    const diagramBgColor = input.match(diagramBgColorRegex)
+    if (diagramBgColor) this.diagramBgColor = diagramBgColor[1]
+
+    const tableBgColor = input.match(tableBgColorRegex)
+    if (tableBgColor) this.tableBgColor = tableBgColor[1]
 
     input.match(tableNameRegex_g)?.forEach(line => {
       const match = line.match(tableNameRegex) || []

@@ -367,6 +367,19 @@ export class DiagramController {
       table.exportJSON(json)
     })
   }
+  flushToInputController() {
+    this.inputController.setZoom(this.fontSize)
+    this.inputController.setViewPosition({
+      x: this.tablesContainer.translateX,
+      y: this.tablesContainer.translateY,
+    })
+    for (let [name, table] of this.tableMap) {
+      this.inputController.setTablePosition(name, {
+        x: table.translateX,
+        y: table.translateY,
+      })
+    }
+  }
 }
 
 export class TablesContainer {

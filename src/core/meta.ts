@@ -32,13 +32,22 @@ export function tableNameToLine(name: string, position: Position) {
   return `# ${name} (${x}, ${y})`
 }
 
-export const bgColorRegex = /# bg: (#\w+)/
-export const textColorRegex = /# color: (#\w+)/
-
-export function bgColorToLine(color: string): string {
-  return `# bg: ${color}`
+export const textBgColorRegex = /# text-bg: (#\w+)/
+export function textBgColorToLine(color: string): string {
+  return `# text-bg: ${color}`
 }
 
+export const textColorRegex = /# text-color: (#\w+)/
 export function textColorToLine(color: string): string {
-  return `# color: ${color}`
+  return `# text-color: ${color}`
+}
+
+export const diagramBgColorRegex = /# diagram-bg: (#\w+)/
+export function diagramBgColorToLine(color: string): string {
+  return `# diagram-bg: ${color}`
+}
+
+export const tableBgColorRegex = /# table-bg: (#\w+)/
+export function tableBgColorToLine(color: string): string {
+  return `# table-bg: ${color}`
 }

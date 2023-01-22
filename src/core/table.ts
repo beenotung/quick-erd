@@ -1,7 +1,15 @@
 import { Field, ParseResult, Table } from './ast'
 import { formatEnum } from './enum'
 import { makeGuide } from './guide'
-import { tableNameToLine, viewToLine, zoomToLine } from './meta'
+import {
+  diagramBgColorToLine,
+  tableBgColorToLine,
+  tableNameToLine,
+  textBgColorToLine,
+  textColorToLine,
+  viewToLine,
+  zoomToLine,
+} from './meta'
 
 function tableToString(table: Table): string {
   return `
@@ -54,6 +62,18 @@ export function astToText(ast: ParseResult): string {
   }
   if (ast.view) {
     text += '\n' + viewToLine(ast.view)
+  }
+  if (ast.textBgColor) {
+    text += '\n' + textBgColorToLine(ast.textBgColor)
+  }
+  if (ast.textColor) {
+    text += '\n' + textColorToLine(ast.textColor)
+  }
+  if (ast.diagramBgColor) {
+    text += '\n' + diagramBgColorToLine(ast.diagramBgColor)
+  }
+  if (ast.tableBgColor) {
+    text += '\n' + tableBgColorToLine(ast.tableBgColor)
   }
   for (const table of ast.table_list) {
     if (table.position) {
