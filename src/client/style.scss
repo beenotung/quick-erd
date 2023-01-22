@@ -32,16 +32,11 @@ header:hover {
 }
 
 button {
-  /* # height: 1em + 0.25em * 2 = 1.5em */
   text-transform: capitalize;
   font-size: 1em;
   margin: 0;
   padding: 0.25em;
   line-height: 1em;
-  // # to normalize square button in chrome
-  // border: 0.1em solid transparent;
-  // background-color: white;
-  // border-radius: 0.25em;
 }
 
 .deprecated {
