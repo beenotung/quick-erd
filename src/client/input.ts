@@ -15,6 +15,8 @@ import {
   diagramBgColorRegex,
   tableTextColorRegex,
   tableTextColorToLine,
+  diagramTextColorRegex,
+  diagramTextColorToLine,
 } from '../core/meta'
 
 export class InputController {
@@ -28,6 +30,9 @@ export class InputController {
   }
   setDiagramBgColor(color: string) {
     this.updateLine(diagramBgColorRegex, diagramBgColorToLine(color))
+  }
+  setDiagramTextColor(color: string) {
+    this.updateLine(diagramTextColorRegex, diagramTextColorToLine(color))
   }
   setTableBgColor(color: string) {
     this.updateLine(tableBgColorRegex, tableBgColorToLine(color))

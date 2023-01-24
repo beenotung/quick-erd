@@ -47,6 +47,11 @@ export function diagramBgColorToLine(color: string): string {
   return `# diagram-bg: ${color}`
 }
 
+export const diagramTextColorRegex = /# diagram-text: (#\w+)/
+export function diagramTextColorToLine(color: string): string {
+  return `# diagram-text: ${color}`
+}
+
 export const tableBgColorRegex = /# table-bg: (#\w+)/
 export function tableBgColorToLine(color: string): string {
   return `# table-bg: ${color}`

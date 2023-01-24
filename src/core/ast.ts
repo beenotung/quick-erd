@@ -11,6 +11,7 @@ import {
   diagramBgColorRegex,
   tableBgColorRegex,
   tableTextColorRegex,
+  diagramTextColorRegex,
 } from './meta'
 
 export function parse(input: string): ParseResult {
@@ -26,6 +27,7 @@ export type ParseResult = {
   textBgColor?: string
   textColor?: string
   diagramBgColor?: string
+  diagramTextColor?: string
   tableBgColor?: string
   tableTextColor?: string
 }
@@ -36,6 +38,7 @@ class Parser implements ParseResult {
   zoom?: number
   view?: Position
   textBgColor?: string
+  diagramTextColor?: string
   textColor?: string
   diagramBgColor?: string
   tableBgColor?: string
@@ -72,6 +75,9 @@ class Parser implements ParseResult {
 
     const diagramBgColor = input.match(diagramBgColorRegex)
     if (diagramBgColor) this.diagramBgColor = diagramBgColor[1]
+
+    const diagramTextColor = input.match(diagramTextColorRegex)
+    if (diagramTextColor) this.diagramTextColor = diagramTextColor[1]
 
     const tableBgColor = input.match(tableBgColorRegex)
     if (tableBgColor) this.tableBgColor = tableBgColor[1]

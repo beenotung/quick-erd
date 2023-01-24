@@ -3,6 +3,7 @@ import { formatEnum } from './enum'
 import { makeGuide } from './guide'
 import {
   diagramBgColorToLine,
+  diagramTextColorToLine,
   tableBgColorToLine,
   tableNameToLine,
   tableTextColorToLine,
@@ -72,6 +73,9 @@ export function astToText(ast: ParseResult): string {
   }
   if (ast.diagramBgColor) {
     text += '\n' + diagramBgColorToLine(ast.diagramBgColor)
+  }
+  if (ast.diagramTextColor) {
+    text += '\n' + diagramTextColorToLine(ast.diagramTextColor)
   }
   if (ast.tableBgColor) {
     text += '\n' + tableBgColorToLine(ast.tableBgColor)

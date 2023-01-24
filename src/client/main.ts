@@ -7,7 +7,7 @@ import { openDialog } from './dialog'
 import { InputController } from './input'
 import { normalize } from './normalize'
 
-const root = document.body.parentElement as HTMLElement
+const root = document.querySelector(':root') as HTMLElement
 const editor = document.querySelector('#editor') as HTMLTextAreaElement
 const input = editor.querySelector('textarea') as HTMLTextAreaElement
 const diagram = document.querySelector('#diagram') as HTMLDivElement
@@ -82,7 +82,6 @@ function parseInput() {
   }
   if (result.diagramBgColor) {
     colorController.diagramBgColor.applyParsedColor(result.diagramBgColor)
-    colorController.updateDiagramTextColor()
   }
   if (result.tableBgColor) {
     colorController.tableBgColor.applyParsedColor(result.tableBgColor)

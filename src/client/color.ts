@@ -14,10 +14,12 @@ export class ColorController {
   diagramBgColor = new ColorInput(this.root, 'diagram-bg-color', {
     getEffectiveColor: () =>
       getComputedStyle(this.targets.diagram).backgroundColor,
-    onColorChanged: color => {
-      this.inputController.setDiagramBgColor(color)
-      this.updateDiagramTextColor()
-    },
+    onColorChanged: color => this.inputController.setDiagramBgColor(color),
+  })
+  diagramTextColor = new ColorInput(this.root, 'diagram-text-color', {
+    getEffectiveColor: () =>
+      getComputedStyle(this.targets.diagram).backgroundColor,
+    onColorChanged: color => this.inputController.setDiagramTextColor(color),
   })
   tableBgColor = new ColorInput(this.root, 'table-bg-color', {
     getEffectiveColor: () =>
@@ -32,6 +34,7 @@ export class ColorController {
     this.textBgColor,
     this.textColor,
     this.diagramBgColor,
+    this.diagramTextColor,
     this.tableBgColor,
     this.tableTextColor,
   ]
@@ -51,13 +54,11 @@ export class ColorController {
     for (let input of this.inputs) {
       input.reset()
     }
-    this.updateDiagramTextColor()
   }
   initInputValues() {
     for (let input of this.inputs) {
       input.initInputValue()
     }
-    this.updateDiagramTextColor()
   }
   flushToInputController() {
     for (let input of this.inputs) {
@@ -68,22 +69,6 @@ export class ColorController {
     let { r, g, b } = this.tableBgColor.valueAsRGB
     let mean = (r + g + b) / 3
     return mean < 127 ? randomBrightColor() : randomDimColor()
-  }
-  updateDiagramTextColor() {
-    let { r, g, b } = this.diagramBgColor.valueAsRGB
-    let low = 80
-    let high = 180
-    if (low < r && r < high && low < g && g < high && low < b && b < high) {
-      r = 255
-      g = 255
-      b = 255
-    } else {
-      r = 255 - r
-      g = 255 - g
-      b = 255 - b
-    }
-    let color = '#' + toHex(r) + toHex(g) + toHex(b)
-    this.root.style.setProperty('--diagram-text-color', color)
   }
 }
 
