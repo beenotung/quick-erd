@@ -5,6 +5,7 @@ import {
   diagramBgColorToLine,
   tableBgColorToLine,
   tableNameToLine,
+  tableTextColorToLine,
   textBgColorToLine,
   textColorToLine,
   viewToLine,
@@ -76,7 +77,7 @@ export function astToText(ast: ParseResult): string {
     text += '\n' + tableBgColorToLine(ast.tableBgColor)
   }
   if (ast.tableTextColor) {
-    text += '\n' + tableBgColorToLine(ast.tableTextColor)
+    text += '\n' + tableTextColorToLine(ast.tableTextColor)
   }
   for (const table of ast.table_list) {
     if (table.position) {
