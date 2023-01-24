@@ -18,6 +18,7 @@ quick and easy text-based ERD editor with drag and drop visualization
   - [x] drag-and-drop moving
   - [x] show/hide non-relational columns
   - [x] plain/colorful table heading
+  - [x] customize color theme
   - [x] keyboard shortcuts
   - [x] auto save-and-restore with localStorage
   - [x] auto format the schema text
