@@ -2,7 +2,6 @@ import { formatEnum } from './enum'
 import {
   Position,
   textBgColorRegex,
-  textBgColorToLine,
   tableNameRegex,
   tableNameRegex_g,
   textColorRegex,

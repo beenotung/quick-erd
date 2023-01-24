@@ -6,7 +6,7 @@ import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
 import { InputController } from './input'
 import { normalize } from './normalize'
-import { StoredNumber, StoredString } from './storage'
+import { StoredString } from './storage'
 
 const root = document.querySelector(':root') as HTMLElement
 const editor = document.querySelector('#editor') as HTMLTextAreaElement

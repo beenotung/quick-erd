@@ -5,6 +5,7 @@ import {
   Table,
 } from '../core/ast'
 import { ColorController } from './color'
+import { querySelector } from './dom'
 import { InputController } from './input'
 import { StoredBoolean, StoredNumber } from './storage'
 const { abs, sign } = Math
@@ -44,13 +45,13 @@ export class DiagramController {
     public inputController: InputController,
     public colorController: ColorController,
   ) {
-    this.fontSizeSpan = this.div.querySelector('#font-size')!
-    this.message = this.div.querySelector('.message')!
+    this.fontSizeSpan = this.querySelector('#font-size')
+    this.message = this.querySelector('.message')
     this.tablesContainer = new TablesContainer(
       this,
-      this.div.querySelector('#tables-container')!,
+      this.querySelector('#tables-container'),
     )
-    this.controls = this.div.querySelector('.controls')!
+    this.controls = this.querySelector('.controls')
     this.div.addEventListener('mousemove', ev => {
       if (this.onMouseMove) {
         this.onMouseMove(ev)
@@ -82,6 +83,10 @@ export class DiagramController {
       ?.addEventListener('click', () => this.fontDec())
 
     this.applyFontSize()
+  }
+
+  private querySelector<T extends HTMLElement>(selector: string) {
+    return querySelector<T>(this.div, selector)
   }
 
   remove(table: TableController) {
@@ -375,7 +380,7 @@ export class DiagramController {
       x: this.tablesContainer.translateX.value,
       y: this.tablesContainer.translateY.value,
     })
-    for (let [name, table] of this.tableMap) {
+    for (const [name, table] of this.tableMap) {
       this.inputController.setTablePosition(name, {
         x: table.translateX.value,
         y: table.translateY.value,

@@ -1,3 +1,4 @@
+import { querySelector } from './dom'
 import { InputController } from './input'
 const { random, floor } = Math
 
@@ -51,23 +52,23 @@ export class ColorController {
     this.initInputValues()
   }
   resetColors() {
-    for (let input of this.inputs) {
+    for (const input of this.inputs) {
       input.reset()
     }
   }
   initInputValues() {
-    for (let input of this.inputs) {
+    for (const input of this.inputs) {
       input.initInputValue()
     }
   }
   flushToInputController() {
-    for (let input of this.inputs) {
+    for (const input of this.inputs) {
       input.flushToInputController()
     }
   }
   randomTitleBgColor() {
-    let { r, g, b } = this.tableBgColor.valueAsRGB
-    let mean = (r + g + b) / 3
+    const { r, g, b } = this.tableBgColor.valueAsRGB
+    const mean = (r + g + b) / 3
     return mean < 127 ? randomBrightColor() : randomDimColor()
   }
 }
@@ -87,7 +88,7 @@ class ColorInput {
   ) {
     this.propertyName = '--' + name
     this.defaultColor = this.root.style.getPropertyValue(this.propertyName)
-    this.input = this.root.querySelector('#' + name)!
+    this.input = querySelector(this.root, '#' + name)!
     this.input.addEventListener('input', () => {
       this.setCSSVariable(this.input.value)
       this.io.onColorChanged(this.input.value)
@@ -95,10 +96,10 @@ class ColorInput {
   }
 
   get valueAsRGB() {
-    let color = decodeColor(this.input.value, this.defaultColor)
-    let r = parseInt(color.slice(1, 3), 16)
-    let g = parseInt(color.slice(3, 5), 16)
-    let b = parseInt(color.slice(5, 7), 16)
+    const color = decodeColor(this.input.value, this.defaultColor)
+    const r = parseInt(color.slice(1, 3), 16)
+    const g = parseInt(color.slice(3, 5), 16)
+    const b = parseInt(color.slice(5, 7), 16)
     return { r, g, b }
   }
 
@@ -137,17 +138,17 @@ export function decodeColor(color: string, defaultColor: string): string {
     return '#' + toHex(match[1]) + toHex(match[2]) + toHex(match[3])
   }
 
-  let span = document.createElement('span')
+  const span = document.createElement('span')
   span.style.color = defaultColor
   span.style.display = 'none'
   document.body.appendChild(span)
-  let s = getComputedStyle(span).color
+  const s = getComputedStyle(span).color
   span.remove()
   return decodeColor(s, defaultColor)
 }
 
 function toHex(int: string | number): string {
-  let hex = (+int).toString(16)
+  const hex = (+int).toString(16)
   if (hex.length == 1) {
     return '0' + hex
   }

@@ -9,7 +9,7 @@ abstract class StoredValue<T> {
   watch(cb: (value: T) => void) {
     window.addEventListener('storage', event => {
       if (event.storageArea != localStorage || event.key != this.key) return
-      let value =
+      const value =
         event.newValue == null ? this.defaultValue : this.decode(event.newValue)
       if (this._value == value) return
       this.value = value
