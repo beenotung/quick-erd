@@ -18,9 +18,13 @@ import {
   diagramTextColorRegex,
   diagramTextColorToLine,
 } from '../core/meta'
+import { StoredString } from './storage'
 
 export class InputController {
-  constructor(public input: HTMLTextAreaElement) {}
+  constructor(
+    private input: HTMLTextAreaElement,
+    private stored: StoredString,
+  ) {}
 
   setTextBgColor(color: string) {
     this.updateLine(textBgColorRegex, textBgColorToLine(color))
@@ -80,7 +84,7 @@ export class InputController {
     const { input } = this
     const { selectionStart, selectionEnd, selectionDirection } = input
     input.value = value
-    localStorage.setItem('input', value)
+    this.stored.value = value
     input.selectionStart = selectionStart
     input.selectionEnd = selectionEnd
     input.selectionDirection = selectionDirection

@@ -119,8 +119,8 @@ export class DiagramController {
       startY = ev.clientY
       this.onMouseMove = ev => {
         if (!isMouseDown) return
-        controller.translateX += ev.clientX - startX
-        controller.translateY += ev.clientY - startY
+        controller.translateX.quickValue += ev.clientX - startX
+        controller.translateY.quickValue += ev.clientY - startY
         startX = ev.clientX
         startY = ev.clientY
         controller.renderTransform(this.getDiagramRect())
@@ -283,8 +283,8 @@ export class DiagramController {
         }
 
         // move and render
-        table.translateX += rect.speed.x
-        table.translateY += rect.speed.y
+        table.translateX.quickValue += rect.speed.x
+        table.translateY.quickValue += rect.speed.y
         table.quickRenderTransform(diagramRect)
         isMoved = true
 
@@ -377,8 +377,8 @@ export class DiagramController {
     })
     for (let [name, table] of this.tableMap) {
       this.inputController.setTablePosition(name, {
-        x: table.translateX,
-        y: table.translateY,
+        x: table.translateX.value,
+        y: table.translateY.value,
       })
     }
   }
@@ -476,8 +476,8 @@ function isPointInside(rect: RectCorner, x: number, y: number): boolean {
 }
 
 class TableController {
-  translateX = +(localStorage.getItem(this.data.name + '-x') || '0')
-  translateY = +(localStorage.getItem(this.data.name + '-y') || '0')
+  translateX = new StoredNumber(this.data.name + '-x', 0)
+  translateY = new StoredNumber(this.data.name + '-y', 0)
   // self_field + table + other_field -> line
   _lineMap = new Map<string, LineController>()
   reverseLineSet = new Set<LineController>()
@@ -608,10 +608,11 @@ class TableController {
     // apply position from erd text
     if (
       data.position &&
-      (data.position.x != this.translateX || data.position.y != this.translateY)
+      (data.position.x != this.translateX.value ||
+        data.position.y != this.translateY.value)
     ) {
-      this.translateX = data.position.x
-      this.translateY = data.position.y
+      this.translateX.quickValue = data.position.x
+      this.translateY.quickValue = data.position.y
       this.renderTransform(this.diagram.getDiagramRect())
     }
   }
@@ -644,9 +645,12 @@ class TableController {
     const { name } = this.data
     const x = this.translateX
     const y = this.translateY
-    localStorage.setItem(`${name}-x`, x.toString())
-    localStorage.setItem(`${name}-y`, y.toString())
-    this.diagram.inputController.setTablePosition(name, { x, y })
+    x.save()
+    y.save()
+    this.diagram.inputController.setTablePosition(name, {
+      x: x.value,
+      y: y.value,
+    })
   }
 
   renderLinesTransform(diagramRect: Rect) {
@@ -723,8 +727,8 @@ class TableController {
     this.fieldMap.clear()
     // eslint-disable-next-line no-constant-condition
     if (!'preserve position') {
-      localStorage.removeItem(`${this.data.name}-x`)
-      localStorage.removeItem(`${this.data.name}-y`)
+      this.translateX.remove()
+      this.translateY.remove()
     }
     this.diagram.inputController.removeTable(this.data.name)
   }

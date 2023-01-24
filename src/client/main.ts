@@ -6,6 +6,7 @@ import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
 import { InputController } from './input'
 import { normalize } from './normalize'
+import { StoredNumber, StoredString } from './storage'
 
 const root = document.querySelector(':root') as HTMLElement
 const editor = document.querySelector('#editor') as HTMLTextAreaElement
@@ -16,7 +17,10 @@ const tableStub = document.querySelector(
   '[data-table="_stub_"]',
 ) as HTMLDivElement
 
-const inputController = new InputController(input)
+const erdText = new StoredString('input', input.value)
+const inputWidth = new StoredString('input_width', input.style.width)
+
+const inputController = new InputController(input, erdText)
 const colorController = new ColorController(
   root,
   { editor, input, diagram, tableStub },
@@ -28,15 +32,15 @@ const diagramController = new DiagramController(
   colorController,
 )
 
-input.value = localStorage.getItem('input') || input.value
-input.style.width = localStorage.getItem('input_width') || ''
+input.value = erdText.value
+input.style.width = inputWidth.value
 
-window.addEventListener('storage', () => {
-  input.value = localStorage.getItem('input') || input.value
+erdText.watch(text => {
+  input.value = text
 })
 
 input.addEventListener('input', event => {
-  localStorage.setItem('input', input.value)
+  erdText.value = input.value
   checkNewTable(event as InputEvent)
 })
 
@@ -65,7 +69,7 @@ function checkNewTable(event: InputEvent) {
 
 try {
   new MutationObserver(() => {
-    localStorage.setItem('input_width', input.style.width)
+    inputWidth.value = input.style.width
   }).observe(input, { attributes: true })
 } catch (error) {
   console.error('MutationObserver not supported')
@@ -260,7 +264,7 @@ function showNormalize() {
     const tableName = table.value.trim() || fieldName
     input.value = normalize(input.value, fieldName, tableName)
     parseInput()
-    localStorage.setItem('input', input.value)
+    erdText.value = input.value
   }
   field.focus()
 }

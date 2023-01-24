@@ -6,13 +6,37 @@ abstract class StoredValue<T> {
     const text = localStorage.getItem(key)
     this._value = text == null ? defaultValue : this.decode(text)
   }
+  watch(cb: (value: T) => void) {
+    window.addEventListener('storage', event => {
+      if (event.storageArea != localStorage || event.key != this.key) return
+      let value =
+        event.newValue == null ? this.defaultValue : this.decode(event.newValue)
+      if (this._value == value) return
+      this.value = value
+      cb(value)
+    })
+  }
+  // value is auto persisted
   set value(value: T) {
     if (value == this._value) return
     this._value = value
-    localStorage.setItem(this.key, this.encode(value))
+    this.save()
   }
   get value() {
     return this._value
+  }
+  // quick value is not persisted, intended to be saved in batch
+  get quickValue() {
+    return this._value
+  }
+  set quickValue(value: T) {
+    this._value = value
+  }
+  save() {
+    localStorage.setItem(this.key, this.encode(this._value))
+  }
+  remove() {
+    localStorage.removeItem(this.key)
   }
   toString(): string {
     return this.encode(this._value)
