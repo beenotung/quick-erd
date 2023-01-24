@@ -1,4 +1,5 @@
 import { InputController } from './input'
+const { random, floor } = Math
 
 export class ColorController {
   textBgColor = new ColorInput(this.root, 'text-bg-color', {
@@ -58,6 +59,11 @@ export class ColorController {
       input.flushToInputController()
     }
   }
+  randomTitleBgColor() {
+    let { r, g, b } = this.tableBgColor.valueAsRGB
+    let mean = (r + g + b) / 3
+    return mean < 127 ? randomBrightColor() : randomDimColor()
+  }
 }
 
 class ColorInput {
@@ -80,6 +86,14 @@ class ColorInput {
       this.setCSSVariable(this.input.value)
       this.io.onColorChanged(this.input.value)
     })
+  }
+
+  get valueAsRGB() {
+    let color = decodeColor(this.input.value, this.defaultColor)
+    let r = parseInt(color.slice(1, 3), 16)
+    let g = parseInt(color.slice(3, 5), 16)
+    let b = parseInt(color.slice(5, 7), 16)
+    return { r, g, b }
   }
 
   flushToInputController() {
@@ -127,10 +141,32 @@ export function decodeColor(color: string, defaultColor: string): string {
   return decodeColor(s, defaultColor)
 }
 
-function toHex(int: string): string {
+function toHex(int: string | number): string {
   let hex = (+int).toString(16)
   if (hex.length == 1) {
     return '0' + hex
   }
   return hex
+}
+
+function randomDimHex() {
+  return toHex(floor(random() * 100))
+}
+
+function randomBrightHex() {
+  return toHex(floor(256 - random() * 100))
+}
+
+function randomDimColor() {
+  const r = randomDimHex()
+  const g = randomDimHex()
+  const b = randomDimHex()
+  return '#' + r + g + b
+}
+
+function randomBrightColor() {
+  const r = randomBrightHex()
+  const g = randomBrightHex()
+  const b = randomBrightHex()
+  return '#' + r + g + b
 }

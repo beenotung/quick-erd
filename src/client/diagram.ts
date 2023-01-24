@@ -4,9 +4,10 @@ import {
   RelationType,
   Table,
 } from '../core/ast'
+import { ColorController } from './color'
 import { InputController } from './input'
 import { StoredValue } from './storage'
-const { random, floor, abs, sign } = Math
+const { abs, sign } = Math
 
 type Rect = {
   left: number
@@ -41,6 +42,7 @@ export class DiagramController {
   constructor(
     public div: HTMLDivElement,
     public inputController: InputController,
+    public colorController: ColorController,
   ) {
     this.fontSizeSpan = this.div.querySelector('#font-size')!
     this.message = this.div.querySelector('.message')!
@@ -352,7 +354,7 @@ export class DiagramController {
   }
   randomColor() {
     this.div.querySelectorAll<HTMLDivElement>('.table-title').forEach(div => {
-      div.style.backgroundColor = randomDarkColor()
+      div.style.backgroundColor = this.colorController.randomTitleBgColor()
     })
   }
   resetColor() {
@@ -473,17 +475,6 @@ type RectCorner = {
 
 function isPointInside(rect: RectCorner, x: number, y: number): boolean {
   return rect.left <= x && x <= rect.right && rect.top <= y && y <= rect.bottom
-}
-
-function randomDarkHex() {
-  return floor(random() * 9).toString(16)
-}
-
-function randomDarkColor() {
-  const r = randomDarkHex() + randomDarkHex()
-  const g = randomDarkHex() + randomDarkHex()
-  const b = randomDarkHex() + randomDarkHex()
-  return '#' + r + g + b
 }
 
 class TableController {

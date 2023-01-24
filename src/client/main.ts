@@ -17,11 +17,15 @@ const tableStub = document.querySelector(
 ) as HTMLDivElement
 
 const inputController = new InputController(input)
-const diagramController = new DiagramController(diagram, inputController)
 const colorController = new ColorController(
   root,
   { editor, input, diagram, tableStub },
   inputController,
+)
+const diagramController = new DiagramController(
+  diagram,
+  inputController,
+  colorController,
 )
 
 input.value = localStorage.getItem('input') || input.value
