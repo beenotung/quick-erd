@@ -142,7 +142,7 @@ document.querySelector('#import')?.addEventListener('click', () => {
       if (zoom) {
         input.value = ''
         parseInput()
-        diagramController.fontSize = zoom
+        diagramController.zoom.value = zoom
         diagramController.applyFontSize()
       }
 

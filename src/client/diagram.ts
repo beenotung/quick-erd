@@ -6,7 +6,7 @@ import {
 } from '../core/ast'
 import { ColorController } from './color'
 import { InputController } from './input'
-import { StoredValue } from './storage'
+import { StoredBoolean, StoredNumber } from './storage'
 const { abs, sign } = Math
 
 type Rect = {
@@ -26,10 +26,10 @@ export class DiagramController {
 
   tableMap = new Map<string, TableController>()
   maxZIndex = 0
-  fontSize = +(localStorage.getItem('zoom') || '') || 1
+  zoom = new StoredNumber('zoom', 1)
   barRadius = this.calcBarRadius()
 
-  isDetailMode = new StoredValue('is_detail_mode', true)
+  isDetailMode = new StoredBoolean('is_detail_mode', true)
 
   isAutoMoving = false
 
@@ -157,13 +157,13 @@ export class DiagramController {
     }
 
     if (view) {
-      this.tablesContainer.translateX = view.x
-      this.tablesContainer.translateY = view.y
+      this.tablesContainer.translateX.value = view.x
+      this.tablesContainer.translateY.value = view.y
       this.tablesContainer.renderTransform('skip_storage')
     }
 
     if (zoom) {
-      this.fontSize = zoom
+      this.zoom.value = zoom
       this.applyFontSize('skip_storage')
     }
 
@@ -320,12 +320,12 @@ export class DiagramController {
   }
 
   applyFontSize(mode?: 'skip_storage') {
+    const fontSize = this.zoom.value
     if (mode !== 'skip_storage') {
-      localStorage.setItem('zoom', this.fontSize.toString())
-      this.inputController.setZoom(this.fontSize)
+      this.inputController.setZoom(fontSize)
     }
-    this.fontSizeSpan.textContent = (this.fontSize * 100).toFixed(0) + '%'
-    this.div.style.fontSize = this.fontSize + 'em'
+    this.fontSizeSpan.textContent = (fontSize * 100).toFixed(0) + '%'
+    this.div.style.fontSize = fontSize + 'em'
     this.barRadius = this.calcBarRadius()
     const diagramRect = this.getDiagramRect()
     this.tableMap.forEach(table => {
@@ -333,18 +333,18 @@ export class DiagramController {
     })
   }
   calcFontStep() {
-    return Math.min(this.fontSize * 0.1, 0.25)
+    return Math.min(this.zoom.value * 0.1, 0.25)
   }
   fontInc() {
-    this.fontSize += this.calcFontStep()
+    this.zoom.value += this.calcFontStep()
     this.applyFontSize()
   }
   fontDec() {
-    this.fontSize -= this.calcFontStep()
+    this.zoom.value -= this.calcFontStep()
     this.applyFontSize()
   }
   fontReset() {
-    this.fontSize = 1
+    this.zoom.value = 1
     this.applyFontSize()
   }
   resetView() {
@@ -363,17 +363,17 @@ export class DiagramController {
     })
   }
   exportJSON(json: any) {
-    json.zoom = this.fontSize
+    json.zoom = this.zoom.value
     this.tablesContainer.exportJSON(json)
     this.tableMap.forEach(table => {
       table.exportJSON(json)
     })
   }
   flushToInputController() {
-    this.inputController.setZoom(this.fontSize)
+    this.inputController.setZoom(this.zoom.value)
     this.inputController.setViewPosition({
-      x: this.tablesContainer.translateX,
-      y: this.tablesContainer.translateY,
+      x: this.tablesContainer.translateX.value,
+      y: this.tablesContainer.translateY.value,
     })
     for (let [name, table] of this.tableMap) {
       this.inputController.setTablePosition(name, {
@@ -385,15 +385,15 @@ export class DiagramController {
 }
 
 export class TablesContainer {
-  translateX = +(localStorage.getItem('view:x') || '0')
-  translateY = +(localStorage.getItem('view:y') || '0')
+  translateX = new StoredNumber('view:x', 0)
+  translateY = new StoredNumber('view:y', 0)
   onMouseMove: (ev: { clientX: number; clientY: number }) => void
 
   constructor(public diagram: DiagramController, public div: HTMLDivElement) {
     this.div.style.transform = `translate(${this.translateX}px,${this.translateY}px)`
     this.diagram.inputController.setViewPosition({
-      x: this.translateX,
-      y: this.translateY,
+      x: this.translateX.value,
+      y: this.translateY.value,
     })
 
     let isMouseDown = false
@@ -402,8 +402,8 @@ export class TablesContainer {
     this.onMouseMove = ev => {
       if (!isMouseDown) return
 
-      this.translateX += ev.clientX - startX
-      this.translateY += ev.clientY - startY
+      this.translateX.value += ev.clientX - startX
+      this.translateY.value += ev.clientY - startY
 
       startX = ev.clientX
       startY = ev.clientY
@@ -440,11 +440,9 @@ export class TablesContainer {
     const x = this.translateX.toString()
     const y = this.translateY.toString()
     if (mode != 'skip_storage') {
-      localStorage.setItem(`view:x`, x)
-      localStorage.setItem(`view:y`, y)
       this.diagram.inputController.setViewPosition({
-        x: this.translateX,
-        y: this.translateY,
+        x: this.translateX.value,
+        y: this.translateY.value,
       })
     }
     this.div.style.transform = `translate(${x}px,${y}px)`
@@ -455,8 +453,8 @@ export class TablesContainer {
   }
 
   resetView() {
-    this.translateX = 0
-    this.translateY = 0
+    this.translateX.value = 0
+    this.translateY.value = 0
     this.renderTransform()
   }
 
