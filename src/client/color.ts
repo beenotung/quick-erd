@@ -126,7 +126,6 @@ export function decodeColor(color: string, defaultColor: string): string {
   let match = color.match(/^#\w+$/)
   if (match) return color
 
-  console.log(color)
   match = color.match(/^rgb\((\w+)\s*,\s*(\w+)\s*,\s*(\w+)\)$/)
   if (match) {
     return '#' + toHex(match[1]) + toHex(match[2]) + toHex(match[3])
