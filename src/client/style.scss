@@ -9,6 +9,7 @@ body {
   --text-bg-color: cornflowerblue;
   --text-color: black;
   --diagram-bg-color: whitesmoke;
+  --diagram-text-color: black;
   --table-bg-color: white;
   --table-text-color: black;
 }
@@ -156,6 +157,12 @@ main {
     right: 0;
     pointer-events: none;
   }
+  path {
+    stroke: var(--diagram-text-color);
+  }
+}
+#font-size {
+  color: var(--diagram-text-color);
 }
 
 dialog[open] {

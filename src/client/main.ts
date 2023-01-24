@@ -82,6 +82,7 @@ function parseInput() {
   }
   if (result.diagramBgColor) {
     colorController.diagramBgColor.applyParsedColor(result.diagramBgColor)
+    colorController.updateDiagramTextColor()
   }
   if (result.tableBgColor) {
     colorController.tableBgColor.applyParsedColor(result.tableBgColor)
