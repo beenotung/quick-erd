@@ -75,6 +75,9 @@ export function astToText(ast: ParseResult): string {
   if (ast.tableBgColor) {
     text += '\n' + tableBgColorToLine(ast.tableBgColor)
   }
+  if (ast.tableTextColor) {
+    text += '\n' + tableBgColorToLine(ast.tableTextColor)
+  }
   for (const table of ast.table_list) {
     if (table.position) {
       text += '\n' + tableNameToLine(table.name, table.position)
