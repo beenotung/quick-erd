@@ -1,7 +1,7 @@
 {
   "name": "quick-erd",
   "version": "4.2.0",
-  "type": "commonjs",
+  "type": "module",
   "sideEffects": false,
   "description": "quick and easy text-based ERD",
   "keywords": [
