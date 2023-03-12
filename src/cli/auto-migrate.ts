@@ -26,7 +26,7 @@ for (let i = 2; i < process.argv.length; i++) {
 }
 if (!dbFile_or_client) {
   console.error('Error: missing argument')
-  console.error('Either provice sqlite filename in argument')
+  console.error('Either provide sqlite filename in argument')
   console.error(
     'Or provide database client in argument or DB_CLIENT environment variable',
   )
