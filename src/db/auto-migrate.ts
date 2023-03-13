@@ -87,7 +87,7 @@ export function setupKnexFile(options: { srcDir: string; db_client: string }) {
   if (existsSync(file)) {
     return
   }
-  addDependencies('knex', '^2.4.1')
+  addDependencies('knex', '^2.4.2')
   let importDir = srcDir
   if (!importDir.startsWith('.')) {
     importDir = './' + srcDir
