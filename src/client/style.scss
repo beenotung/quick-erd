@@ -60,6 +60,11 @@ button {
 label {
   text-transform: capitalize;
 }
+.table-field-name {
+}
+.table-field-name label {
+  text-transform: initial;
+}
 
 button kbd {
   text-decoration: underline;

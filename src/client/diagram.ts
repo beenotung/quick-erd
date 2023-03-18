@@ -602,7 +602,12 @@ class TableController {
 
         tr.innerHTML = /* html */ `
   <td class='table-field-tag'>${tag}</td>
-  <td class='table-field-name'>${name}</td>
+  <td class='table-field-name'>
+    <label>
+      <input type='checkbox'>
+      ${name}
+    </label>
+  </td>
   <td class='table-field-type'>${type}</td>
   <td class='table-field-null'>${null_text}</td>
 `
