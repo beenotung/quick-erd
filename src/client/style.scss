@@ -60,11 +60,6 @@ button {
 label {
   text-transform: capitalize;
 }
-.table-field-name {
-}
-.table-field-name label {
-  text-transform: initial;
-}
 
 button kbd {
   text-decoration: underline;
@@ -202,6 +197,9 @@ dialog[open] {
     min-width: 100%;
   }
 }
+[data-table-field] td {
+  padding: 0.25em;
+}
 .table-title {
   background-color: var(--text-bg-color);
   color: var(--table-bg-color);
@@ -212,12 +210,15 @@ dialog[open] {
 }
 .table-field-name {
   text-align: start;
+  padding: 0 !important;
+}
+.table-field-name label {
+  text-transform: initial;
+  padding: 0.25em;
+  display: block;
 }
 .table-field-type {
   text-align: start;
-}
-[data-table-field] td {
-  padding: 0.25em;
 }
 .table-field-tag {
   border-right: 1px solid;
