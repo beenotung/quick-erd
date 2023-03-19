@@ -6,7 +6,7 @@ import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
 import { InputController } from './input'
 import { normalize } from './normalize'
-import { StoredString } from './storage'
+import { cleanStorage, StoredString } from './storage'
 
 const root = document.querySelector(':root') as HTMLElement
 const editor = document.querySelector('#editor') as HTMLTextAreaElement
@@ -17,6 +17,7 @@ const tableStub = document.querySelector(
   '[data-table="_stub_"]',
 ) as HTMLDivElement
 
+cleanStorage()
 const erdText = new StoredString('input', input.value)
 const inputWidth = new StoredString('input_width', input.style.width)
 
