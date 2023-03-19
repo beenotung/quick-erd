@@ -217,6 +217,13 @@ dialog[open] {
   padding: 0.25em;
   display: block;
 }
+.table-field-name input {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+[data-mode="schema"] .table-field-name input {
+  display: none;
+}
 .table-field-type {
   text-align: start;
 }
@@ -225,6 +232,13 @@ dialog[open] {
 }
 .table-field-type {
   border-left: 1px solid;
+}
+
+[data-mode="schema"] #queryInput {
+  display: none;
+}
+[data-mode="query"] #erdInput {
+  display: none;
 }
 
 [data-table="_stub_"] {

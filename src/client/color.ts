@@ -1,5 +1,5 @@
 import { querySelector } from './dom'
-import { InputController } from './input'
+import { ErdInputController } from './erd-input'
 const { random, floor } = Math
 
 export class ColorController {
@@ -47,7 +47,7 @@ export class ColorController {
       diagram: HTMLElement
       tableStub: HTMLElement
     },
-    public inputController: InputController,
+    public inputController: ErdInputController,
   ) {
     this.initInputValues()
   }

@@ -20,7 +20,7 @@ import {
 } from '../core/meta'
 import { StoredString } from './storage'
 
-export class InputController {
+export class ErdInputController {
   constructor(
     private input: HTMLTextAreaElement,
     private stored: StoredString,
