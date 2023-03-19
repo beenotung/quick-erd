@@ -227,6 +227,10 @@ dialog[open] {
   border-left: 1px solid;
 }
 
+[data-table="_stub_"] {
+  display: none;
+}
+
 .icon {
   width: 1em;
   height: 1em;
