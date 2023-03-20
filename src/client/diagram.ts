@@ -4,7 +4,7 @@ import {
   RelationType,
   Table,
 } from '../core/ast'
-import { QueryBuilder } from '../core/query'
+import { QueryBuilder } from './query-builder'
 import { ColorController } from './color'
 import { querySelector } from './dom'
 import { ErdInputController } from './erd-input'
@@ -395,6 +395,10 @@ export class DiagramController {
         y: table.translateY.value,
       })
     }
+  }
+
+  getTableList(): ParseResult['table_list'] {
+    return Array.from(this.tableMap.values(), table => table.data)
   }
 }
 

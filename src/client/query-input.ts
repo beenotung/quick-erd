@@ -1,60 +1,68 @@
+import { ParseResult } from '../core/ast'
+import { Column, findColumnIndex, generateQuery } from './query-builder'
 import { StoredString } from './storage'
 
 const separator = '-'.repeat(10)
 
-export type Column = { table: string; field: string }
-
-function findColumnIndex(
-  columns: Column[],
-  table: string,
-  field: string,
-): number {
-  return columns.findIndex(
-    column => column.table === table && column.field === field,
-  )
+function parseColumns(part: string) {
+  return part
+    .split('\n')
+    .map(line => line.trim().split('.'))
+    .filter(parts => parts.length == 2)
+    .map(([table, field]) => {
+      return { table, field }
+    })
 }
 
 export class QueryInputController {
   constructor(
     private input: HTMLTextAreaElement,
     private stored: StoredString,
+    private getTableList: () => ParseResult['table_list'],
   ) {}
 
-  getColumns(): Column[] {
-    let text = this.input.value || this.stored.value
-    text = text.split(separator)[0]
-    return text
-      .split('\n')
-      .map(line => line.trim().split('.'))
-      .filter(parts => parts.length == 2)
-      .map(([table, field]) => {
-        return { table, field }
-      })
+  private getParts() {
+    const text = this.input.value || this.stored.value
+    const parts = text.split(separator).map(part => part.trim())
+    return parts
   }
 
-  private update(columns: Column[]): void {
-    let text = columns
+  private update(columns: Column[], previousParts: string[]): void {
+    const parts: string[] = []
+
+    parts[0] = columns
       .map(column => `${column.table}.${column.field}`)
       .join('\n')
-    text += '\n' + separator + '\n'
-    text += 'TODO'
+
+    parts[1] = generateQuery(columns, this.getTableList())
+
+    parts[2] = previousParts[2]
+
+    const text = parts.join('\n\n' + separator + '\n\n')
+
     this.input.value = text
     this.stored.value = text
   }
 
+  getColumns(parts: string[] = this.getParts()) {
+    return parseColumns(parts[0])
+  }
+
   addColumn(table: string, field: string) {
-    const columns = this.getColumns()
+    const parts = this.getParts()
+    const columns = this.getColumns(parts)
     const idx = findColumnIndex(columns, table, field)
     if (idx !== -1) return
     columns.push({ table, field })
-    this.update(columns)
+    this.update(columns, parts)
   }
 
   removeColumn(table: string, field: string) {
-    const columns = this.getColumns()
+    const parts = this.getParts()
+    const columns = this.getColumns(parts)
     const idx = findColumnIndex(columns, table, field)
     if (idx === -1) return
     columns.splice(idx, 1)
-    this.update(columns)
+    this.update(columns, parts)
   }
 }

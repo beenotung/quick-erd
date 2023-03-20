@@ -1,5 +1,5 @@
-import { QueryBuilder } from './../core/query'
-import { parse } from '../core/ast'
+import { QueryBuilder } from './query-builder'
+import { parse, ParseResult } from '../core/ast'
 import { makeGuide } from '../core/guide'
 import { astToText } from '../core/table'
 import { ColorController } from './color'
@@ -40,7 +40,11 @@ const colorController = new ColorController(
   { editor, input: erdInput, diagram, tableStub },
   erdInputController,
 )
-const queryInputController = new QueryInputController(queryInput, queryText)
+const queryInputController = new QueryInputController(
+  queryInput,
+  queryText,
+  (): ParseResult['table_list'] => diagramController.getTableList(),
+)
 const queryBuilder = new QueryBuilder(queryInputController)
 const diagramController = new DiagramController(
   diagram,

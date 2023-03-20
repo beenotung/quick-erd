@@ -13,7 +13,7 @@ quick and easy text-based ERD editor with drag and drop visualization
   - [x] knex migrate script
   - [x] sqlite migrate statements
 - [x] published as npx script
-- [x] web-based visualization
+- [x] web-based schema visualization
   - [x] zoom in/out
   - [x] drag-and-drop moving
   - [x] show/hide non-relational columns
@@ -27,6 +27,10 @@ quick and easy text-based ERD editor with drag and drop visualization
   - [x] import/export diagram with drag position and zoom level
   - [x] right-click on diagram to select table/column in editor
   - [x] auto-complete when creating new table
+- [x] web-based query builder
+  - [x] select columns with checkbox
+  - [x] auto-fill nested join-table
+  - [x] support additional query (where / group-by / order-by / limit, e.t.c.)
 
 ## Usage
 
