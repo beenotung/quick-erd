@@ -19,7 +19,6 @@ type TablePath = {
 }[]
 
 function getRefTableName(path: TablePath, currentIdx: number) {
-  console.debug('getRefTableName', { path, currentIdx })
   const previousNode = path[currentIdx - 1]
   const currentNode = path[currentIdx]
   return previousNode?.refField?.replace('_id', '') || currentNode.tableName
@@ -47,7 +46,6 @@ function findPath(
       refTables.set(field.references.table, [field.name])
     }
   }
-  console.debug({ refTables })
 
   const refFromTables = new Map<string, string[]>()
   for (const table of tableList) {
@@ -128,7 +126,6 @@ export function generateQuery(
       path.forEach((currentNode, currentIdx) => {
         if (tables.has(currentNode.tableName)) return
         tables.add(currentNode.tableName)
-        console.debug({ currentNode, last: path[currentIdx - 1] })
         const previousNode = path[currentIdx - 1]
         const refField = previousNode?.refField
         if (!refField) return
