@@ -197,6 +197,9 @@ dialog[open] {
     min-width: 100%;
   }
 }
+[data-table-field] td {
+  padding: 0.25em;
+}
 .table-title {
   background-color: var(--text-bg-color);
   color: var(--table-bg-color);
@@ -207,18 +210,39 @@ dialog[open] {
 }
 .table-field-name {
   text-align: start;
+  padding: 0 !important;
+}
+.table-field-name label {
+  text-transform: initial;
+  padding: 0.25em;
+  display: block;
+}
+.table-field-name input {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+[data-mode="schema"] .table-field-name input {
+  display: none;
 }
 .table-field-type {
   text-align: start;
-}
-[data-table-field] td {
-  padding: 0.25em;
 }
 .table-field-tag {
   border-right: 1px solid;
 }
 .table-field-type {
   border-left: 1px solid;
+}
+
+[data-mode="schema"] #queryInput {
+  display: none;
+}
+[data-mode="query"] #erdInput {
+  display: none;
+}
+
+[data-table="_stub_"] {
+  display: none;
 }
 
 .icon {

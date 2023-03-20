@@ -11,7 +11,7 @@
     <link rel="preload" href="/icons/snow-outline.svg" as="image" />
   </head>
 
-  <body>
+  <body data-mode="schema">
     <header class="_hover">
       <button>More</button>
       <button
@@ -35,7 +35,18 @@
       >
         Toggle <kbd>D</kbd>etails
       </button>
-
+      <button
+        id="schema-mode"
+        title="Switch to schema editing mode. You can press [S] key as keyboard shortcut"
+      >
+        <kbd>S</kbd>chema
+      </button>
+      <button
+        id="query-mode"
+        title="Switch to query building mode. You can press [Q] key as keyboard shortcut"
+      >
+        <kbd>Q</kbd>uery
+      </button>
       <button
         id="reset-zoom"
         title="You can press [R] key or [0] key as keyboard shortcut"
@@ -105,7 +116,11 @@
     </header>
     <main>
       <div id="editor">
-        <textarea placeholder="input table draft here"></textarea>
+        <textarea id="erdInput" placeholder="input table draft here"></textarea>
+        <textarea
+          id="queryInput"
+          placeholder="generated query will be shown here"
+        ></textarea>
       </div>
       <div id="diagram">
         <div class="message">

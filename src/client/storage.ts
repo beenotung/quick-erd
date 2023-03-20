@@ -70,3 +70,12 @@ export class StoredNumber extends StoredValue<number> {
     return Number.isNaN(number) ? this.defaultValue : number
   }
 }
+
+export function cleanStorage() {
+  for (let i = localStorage.length; i >= 0; i--) {
+    const key = localStorage.key(i)
+    if (key && localStorage.getItem(key) == '0') {
+      delete localStorage[key]
+    }
+  }
+}

@@ -4,9 +4,10 @@ import {
   RelationType,
   Table,
 } from '../core/ast'
+import { QueryBuilder } from './query-builder'
 import { ColorController } from './color'
 import { querySelector } from './dom'
-import { InputController } from './input'
+import { ErdInputController } from './erd-input'
 import { StoredBoolean, StoredNumber } from './storage'
 const { abs, sign } = Math
 
@@ -42,8 +43,9 @@ export class DiagramController {
 
   constructor(
     public div: HTMLDivElement,
-    public inputController: InputController,
+    public inputController: ErdInputController,
     public colorController: ColorController,
+    public queryBuilder: QueryBuilder,
   ) {
     this.fontSizeSpan = this.querySelector('#font-size')
     this.message = this.querySelector('.message')
@@ -199,6 +201,13 @@ export class DiagramController {
     })
 
     this.controls.style.zIndex = this.getSafeZIndex().toString()
+  }
+
+  renderLines() {
+    const diagramRect = this.getDiagramRect()
+    this.tableMap.forEach(table => {
+      table.renderLine(diagramRect)
+    })
   }
 
   autoPlace() {
@@ -386,6 +395,10 @@ export class DiagramController {
         y: table.translateY.value,
       })
     }
+  }
+
+  getTableList(): ParseResult['table_list'] {
+    return Array.from(this.tableMap.values(), table => table.data)
   }
 }
 
@@ -602,10 +615,33 @@ class TableController {
 
         tr.innerHTML = /* html */ `
   <td class='table-field-tag'>${tag}</td>
-  <td class='table-field-name'>${name}</td>
+  <td class='table-field-name'>
+    <label>
+      <input type='checkbox'>
+      ${name}
+    </label>
+  </td>
   <td class='table-field-type'>${type}</td>
   <td class='table-field-null'>${null_text}</td>
 `
+
+        const checkbox = tr.querySelector(
+          'input[type=checkbox]',
+        ) as HTMLInputElement
+
+        checkbox.checked = this.diagram.queryBuilder.hasColumn(
+          this.data.name,
+          name,
+        )
+
+        checkbox.onchange = () => {
+          if (checkbox.checked) {
+            this.diagram.queryBuilder.addColumn(this.data.name, name)
+          } else {
+            this.diagram.queryBuilder.removeColumn(this.data.name, name)
+          }
+        }
+
         this.tbody.appendChild(tr)
       },
     )

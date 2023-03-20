@@ -1,82 +1,120 @@
-import { parse } from '../core/ast'
+import { QueryBuilder } from './query-builder'
+import { parse, ParseResult } from '../core/ast'
 import { makeGuide } from '../core/guide'
 import { astToText } from '../core/table'
 import { ColorController } from './color'
 import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
-import { InputController } from './input'
+import { ErdInputController } from './erd-input'
 import { normalize } from './normalize'
-import { StoredString } from './storage'
+import { cleanStorage, StoredString } from './storage'
+import { QueryInputController } from './query-input'
 
 const root = document.querySelector(':root') as HTMLElement
 const editor = document.querySelector('#editor') as HTMLTextAreaElement
-const input = editor.querySelector('textarea') as HTMLTextAreaElement
+const erdInput = editor.querySelector('#erdInput') as HTMLTextAreaElement
+const queryInput = editor.querySelector('#queryInput') as HTMLTextAreaElement
 const diagram = document.querySelector('#diagram') as HTMLDivElement
 
 const tableStub = document.querySelector(
   '[data-table="_stub_"]',
 ) as HTMLDivElement
 
-const erdText = new StoredString('input', input.value)
-const inputWidth = new StoredString('input_width', input.style.width)
+cleanStorage()
 
-const inputController = new InputController(input, erdText)
+if (localStorage.input && !localStorage.erd) {
+  localStorage.erd = localStorage.input
+  delete localStorage.input
+}
+
+const erdText = new StoredString('erd', erdInput.value)
+const queryText = new StoredString('query', queryInput.value)
+const inputWidth = new StoredString('input_width', erdInput.style.width)
+const modeText = new StoredString('mode', 'schema')
+
+document.body.dataset.mode = modeText.value
+
+const erdInputController = new ErdInputController(erdInput, erdText)
 const colorController = new ColorController(
   root,
-  { editor, input, diagram, tableStub },
-  inputController,
+  { editor, input: erdInput, diagram, tableStub },
+  erdInputController,
 )
+const queryInputController = new QueryInputController(
+  queryInput,
+  queryText,
+  (): ParseResult['table_list'] => diagramController.getTableList(),
+)
+const queryBuilder = new QueryBuilder(queryInputController)
 const diagramController = new DiagramController(
   diagram,
-  inputController,
+  erdInputController,
   colorController,
+  queryBuilder,
 )
 
-input.value = erdText.value
-input.style.width = inputWidth.value
+erdInput.value = erdText.value
+erdInput.style.width = inputWidth.value
+
+queryInput.value = queryText.value
+queryInput.style.width = inputWidth.value
 
 erdText.watch(text => {
-  input.value = text
+  erdInput.value = text
 })
 
-input.addEventListener('input', event => {
-  erdText.value = input.value
+erdInput.addEventListener('input', event => {
+  erdText.value = erdInput.value
   checkNewTable(event as InputEvent)
 })
 
 function checkNewTable(event: InputEvent) {
   if (!(event.inputType == 'insertText' && event.data == '-')) return
-  if (input.selectionStart != input.selectionEnd) return
+  if (erdInput.selectionStart != erdInput.selectionEnd) return
 
-  let index = input.selectionStart
+  let index = erdInput.selectionStart
 
-  const before = input.value.slice(0, index)
+  const before = erdInput.value.slice(0, index)
   if (!before.endsWith('\n-')) return
 
-  const after = input.value.slice(index)
+  const after = erdInput.value.slice(index)
 
   const tableName = before.split('\n').slice(-2)[0]
   if (!tableName) return
 
   const mid = '-'.repeat(tableName.length - 1) + '\nid\n'
 
-  input.value = before + mid + after
+  erdInput.value = before + mid + after
   index += mid.length
 
-  input.selectionStart = index
-  input.selectionEnd = index
+  erdInput.selectionStart = index
+  erdInput.selectionEnd = index
 }
+
+queryText.watch(text => {
+  queryInput.value = text
+})
+
+queryInput.addEventListener('input', event => {
+  queryText.value = queryInput.value
+  checkQueryInput(event as InputEvent)
+})
+
+function checkQueryInput(event: InputEvent) {}
 
 try {
   new MutationObserver(() => {
-    inputWidth.value = input.style.width
-  }).observe(input, { attributes: true })
+    inputWidth.value = erdInput.style.width
+  }).observe(erdInput, { attributes: true })
+  new MutationObserver(() => {
+    inputWidth.value = queryInput.style.width
+  }).observe(queryInput, { attributes: true })
 } catch (error) {
   console.error('MutationObserver not supported')
 }
 
-function parseInput() {
-  const result = parse(input.value)
+function parseErdInput() {
+  const result = parse(erdInput.value)
   diagramController.render(result)
   if (result.textBgColor) {
     colorController.textBgColor.applyParsedColor(result.textBgColor)
@@ -94,7 +132,7 @@ function parseInput() {
     colorController.tableTextColor.applyParsedColor(result.tableTextColor)
   }
 }
-input.addEventListener('input', parseInput)
+erdInput.addEventListener('input', parseErdInput)
 
 document.querySelector('#export')?.addEventListener('click', () => {
   const dialog = openDialog(diagramController)
@@ -106,7 +144,7 @@ document.querySelector('#export')?.addEventListener('click', () => {
 `
   const textarea = dialog.querySelector('textarea') as HTMLTextAreaElement
   const p = dialog.querySelector('p') as HTMLDivElement
-  const json = { input: input.value }
+  const json = { input: erdInput.value }
   diagramController.exportJSON(json)
   textarea.value = JSON.stringify(json)
   dialog.querySelector('.cancel')?.addEventListener('click', () => {
@@ -144,16 +182,16 @@ document.querySelector('#import')?.addEventListener('click', () => {
 
       const zoom = +json.zoom
       if (zoom) {
-        input.value = ''
-        parseInput()
+        erdInput.value = ''
+        parseErdInput()
         diagramController.zoom.value = zoom
         diagramController.applyFontSize()
       }
 
       Object.assign(localStorage, json)
 
-      input.value = json.input
-      parseInput()
+      erdInput.value = json.input
+      parseErdInput()
 
       p.textContent = 'import successfully'
       p.style.color = 'green'
@@ -165,7 +203,7 @@ document.querySelector('#import')?.addEventListener('click', () => {
 })
 
 document.querySelector('#load-example')?.addEventListener('click', () => {
-  if (!input.value.trim()) {
+  if (!erdInput.value.trim()) {
     loadExample()
     return
   }
@@ -185,7 +223,7 @@ document.querySelector('#load-example')?.addEventListener('click', () => {
 })
 
 function loadExample() {
-  input.value = `
+  erdInput.value = `
 ${makeGuide(location.origin)}
 
 
@@ -213,7 +251,7 @@ user_id fk
 reply_id null fk # it's fine to include other modifiers in the middle
 content text
 `.trim()
-  parseInput()
+  parseErdInput()
 }
 
 document.querySelector('#format')?.addEventListener('click', format)
@@ -221,8 +259,8 @@ document.querySelector('#format')?.addEventListener('click', format)
 function format() {
   diagramController.flushToInputController()
   colorController.flushToInputController()
-  const result = parse(input.value)
-  input.value = astToText(result) + '\n'
+  const result = parse(erdInput.value)
+  erdInput.value = astToText(result) + '\n'
 }
 
 document.querySelector('#normalize')?.addEventListener('click', showNormalize)
@@ -262,9 +300,9 @@ function showNormalize() {
     const fieldName = field.value.trim()
     if (!fieldName) return
     const tableName = table.value.trim() || fieldName
-    input.value = normalize(input.value, fieldName, tableName)
-    parseInput()
-    erdText.value = input.value
+    erdInput.value = normalize(erdInput.value, fieldName, tableName)
+    parseErdInput()
+    erdText.value = erdInput.value
   }
   field.focus()
 }
@@ -275,6 +313,14 @@ document.querySelector('#auto-place')?.addEventListener('click', () => {
 
 document.querySelector('#toggle-details')?.addEventListener('click', () => {
   diagramController.toggleDetails()
+})
+
+document.querySelector('#schema-mode')?.addEventListener('click', () => {
+  switchMode('schema')
+})
+
+document.querySelector('#query-mode')?.addEventListener('click', () => {
+  switchMode('query')
 })
 
 document.querySelector('#random-color')?.addEventListener('click', () => {
@@ -290,12 +336,10 @@ document.querySelector('#reset-zoom')?.addEventListener('click', () => {
   diagramController.resetView()
 })
 
-function closeDialog() {
-  const es = document.querySelectorAll('dialog')
-  const last = es.item(es.length - 1)
-  if (last) {
-    last.remove()
-  }
+function switchMode(mode: string) {
+  document.body.dataset.mode = mode
+  modeText.value = mode
+  diagramController.renderLines()
 }
 
 window.addEventListener('keypress', e => {
@@ -325,6 +369,14 @@ window.addEventListener('keypress', e => {
     case '0':
       diagramController.fontReset()
       return
+    case 's':
+    case 'S':
+      switchMode('schema')
+      return
+    case 'q':
+    case 'Q':
+      switchMode('query')
+      return
     case 'r':
     case 'R':
       diagramController.resetView()
@@ -333,13 +385,9 @@ window.addEventListener('keypress', e => {
     case 'N':
       showNormalize()
       return
-    case 'q':
-    case 'Q':
-      closeDialog()
-      return
     default:
     // console.debug(e.key)
   }
 })
 
-parseInput()
+parseErdInput()
