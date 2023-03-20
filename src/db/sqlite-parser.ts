@@ -22,6 +22,7 @@ export function parseTableSchema(rows: SchemaRow[]): Table[] {
   })
 
   for (const index_row of index_rows) {
+    if (!index_row.sql) continue
     const index = parseCreateIndex(index_row.sql)
     const table = table_list.find(table => table.name === index?.table)
     const field = table?.field_list.find(field => field.name === index?.field)
