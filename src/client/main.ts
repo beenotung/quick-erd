@@ -100,7 +100,9 @@ queryInput.addEventListener('input', event => {
   checkQueryInput(event as InputEvent)
 })
 
-function checkQueryInput(event: InputEvent) {}
+function checkQueryInput(_event: InputEvent) {
+  // TODO update queryInputController while preserving selection position
+}
 
 try {
   new MutationObserver(() => {
