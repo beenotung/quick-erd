@@ -88,7 +88,7 @@ class ColorInput {
   ) {
     this.propertyName = '--' + name
     this.defaultColor = this.root.style.getPropertyValue(this.propertyName)
-    this.input = querySelector(this.root, '#' + name)!
+    this.input = querySelector(this.root, '#' + name)
     this.input.addEventListener('input', () => {
       this.setCSSVariable(this.input.value)
       this.io.onColorChanged(this.input.value)
