@@ -1,4 +1,3 @@
-import { QueryBuilder } from './query-builder'
 import { parse, ParseResult } from '../core/ast'
 import { makeGuide } from '../core/guide'
 import { astToText } from '../core/table'
@@ -45,12 +44,11 @@ const queryInputController = new QueryInputController(
   queryText,
   (): ParseResult['table_list'] => diagramController.getTableList(),
 )
-const queryBuilder = new QueryBuilder(queryInputController)
 const diagramController = new DiagramController(
   diagram,
   erdInputController,
   colorController,
-  queryBuilder,
+  queryInputController,
 )
 
 erdInput.value = erdText.value

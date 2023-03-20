@@ -1,5 +1,5 @@
 import { ParseResult } from '../core/ast'
-import { Column, findColumnIndex, generateQuery } from './query-builder'
+import { Column, findColumnIndex, generateQuery } from '../core/query'
 import { StoredString } from './storage'
 
 const separator = '-'.repeat(10)
@@ -15,6 +15,7 @@ function parseColumns(part: string) {
 }
 
 export class QueryInputController {
+  private columns = this.getColumns()
   constructor(
     private input: HTMLTextAreaElement,
     private stored: StoredString,
@@ -50,7 +51,7 @@ export class QueryInputController {
 
   addColumn(table: string, field: string) {
     const parts = this.getParts()
-    const columns = this.getColumns(parts)
+    const columns = this.columns
     const idx = findColumnIndex(columns, table, field)
     if (idx !== -1) return
     columns.push({ table, field })
@@ -59,10 +60,16 @@ export class QueryInputController {
 
   removeColumn(table: string, field: string) {
     const parts = this.getParts()
-    const columns = this.getColumns(parts)
+    const columns = this.columns
     const idx = findColumnIndex(columns, table, field)
     if (idx === -1) return
     columns.splice(idx, 1)
     this.update(columns, parts)
+  }
+
+  hasColumn(table: string, field: string): boolean {
+    return this.columns.some(
+      column => column.table === table && column.field === field,
+    )
   }
 }

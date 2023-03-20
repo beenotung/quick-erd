@@ -4,11 +4,11 @@ import {
   RelationType,
   Table,
 } from '../core/ast'
-import { QueryBuilder } from './query-builder'
 import { ColorController } from './color'
 import { querySelector } from './dom'
 import { ErdInputController } from './erd-input'
 import { StoredBoolean, StoredNumber } from './storage'
+import { QueryInputController } from './query-input'
 const { abs, sign } = Math
 
 type Rect = {
@@ -45,7 +45,7 @@ export class DiagramController {
     public div: HTMLDivElement,
     public inputController: ErdInputController,
     public colorController: ColorController,
-    public queryBuilder: QueryBuilder,
+    public queryController: QueryInputController,
   ) {
     this.fontSizeSpan = this.querySelector('#font-size')
     this.message = this.querySelector('.message')
@@ -629,16 +629,16 @@ class TableController {
           'input[type=checkbox]',
         ) as HTMLInputElement
 
-        checkbox.checked = this.diagram.queryBuilder.hasColumn(
+        checkbox.checked = this.diagram.queryController.hasColumn(
           this.data.name,
           name,
         )
 
         checkbox.onchange = () => {
           if (checkbox.checked) {
-            this.diagram.queryBuilder.addColumn(this.data.name, name)
+            this.diagram.queryController.addColumn(this.data.name, name)
           } else {
-            this.diagram.queryBuilder.removeColumn(this.data.name, name)
+            this.diagram.queryController.removeColumn(this.data.name, name)
           }
         }
 
