@@ -24,15 +24,21 @@ function getRefTableName(path: TablePath, currentIdx: number) {
   return previousNode?.refField?.replace('_id', '') || currentNode.tableName
 }
 
+export type ColumnForPath = {
+  field: string
+  table: Table
+}
+
 function findPath(
   currentTable: Table,
-  column: Column,
-  columns: Column[],
+  column: ColumnForPath,
+  columns: ColumnForPath[],
   tableList: ParseResult['table_list'],
   tablePath: TablePath,
 ): TablePath {
-  if (currentTable.name === column.table) {
-    return [...tablePath, { tableName: column.table }]
+  const columnTableName = column.table.name
+  if (currentTable.name === columnTableName) {
+    return [...tablePath, { tableName: columnTableName }]
   }
 
   // tableName -> refFieldNames
@@ -70,7 +76,7 @@ function findPath(
         columns.some(
           column =>
             column.field === refFieldName &&
-            refFromTables.get(refTableName)?.includes(column.table),
+            refFromTables.get(refTableName)?.includes(columnTableName),
         ),
       )[0] || refFieldNames[0]
 
@@ -85,29 +91,59 @@ function findPath(
 }
 
 export function generateQuery(
-  columns: Column[],
+  _columns: Column[],
   tableList: ParseResult['table_list'],
 ): string {
+  const columns = _columns
+    .map(column => ({
+      field: column.field,
+      table: tableList.find(table => table.name === column.table),
+    }))
+    .filter(entry => entry.table) as ColumnForPath[]
+
   if (columns.length === 0) {
     return ''
   }
+
   if (columns.length === 1) {
     const { table, field } = columns[0]
-    return `select ${field} from ${table}`
+    return `select ${field} from ${table.name}`
   }
-  const baseTable = tableList.find(table => table.name === columns[0].table)
-  if (!baseTable) return ''
 
-  const tables = new Set<string>()
-  tables.add(baseTable.name)
+  let baseTable = columns[0].table
+
+  let combines = columns.map(column => ({
+    column,
+    path: findPath(baseTable, column, columns, tableList, []),
+  }))
+  let remains = combines.filter(entry => entry.path.length === 0)
+
+  if (remains.length > 0) {
+    for (const entry of combines) {
+      if (entry.path.length > 0) continue
+      // this entry is not reachable from baseTable
+      const newBaseTable = entry.column.table
+      const newCombines = columns.map(column => ({
+        column,
+        path: findPath(newBaseTable, column, columns, tableList, []),
+      }))
+      const newRemains = newCombines.filter(entry => entry.path.length === 0)
+      if (newRemains.length < remains.length) {
+        baseTable = newBaseTable
+        combines = newCombines
+        remains = newRemains
+        if (newRemains.length === 0) break
+      }
+    }
+  }
+
   let select = ''
   let from = 'from ' + baseTable.name
 
-  columns
-    .map(column => ({
-      column,
-      path: findPath(baseTable, column, columns, tableList, []),
-    }))
+  const tables = new Set<string>()
+  tables.add(baseTable.name)
+
+  combines
     .sort((a, b) => a.path.length - b.path.length)
     .forEach(({ column, path }) => {
       if (path.length === 0) return
