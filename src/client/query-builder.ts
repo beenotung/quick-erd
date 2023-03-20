@@ -72,13 +72,15 @@ function findPath(
     if (!refTable) continue
 
     const refField =
-      refFieldNames.filter(refFieldName =>
-        columns.some(
-          column =>
-            column.field === refFieldName &&
-            refFromTables.get(refTableName)?.includes(columnTableName),
-        ),
-      )[0] || refFieldNames[0]
+      refFieldNames.length == 1
+        ? refFieldNames[0]
+        : refFieldNames.filter(refFieldName =>
+            columns.some(
+              column =>
+                column.field === refFieldName &&
+                refFromTables.get(refTableName)?.includes(column.table.name),
+            ),
+          )[0] || refFieldNames[0]
 
     const result = findPath(refTable, column, columns, tableList, [
       ...tablePath,
