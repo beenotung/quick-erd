@@ -1,5 +1,6 @@
 import { inspect } from 'util'
 import { parse } from '../core/ast'
+import { toTsType } from '../core/ts-type'
 import { sortTables } from './sort-tables'
 
 export function textToSqliteProxy(
@@ -136,35 +137,4 @@ function toTypeName(name: string): string {
     .split('_')
     .map(part => part[0].toLocaleUpperCase() + part.slice(1))
     .join('')
-}
-
-function toTsType(type: string): string {
-  if (
-    type.match(/^varchar/i) ||
-    type.match(/^string/i) ||
-    type.match(/^text/i)
-  ) {
-    return 'string'
-  }
-  if (
-    type.match(/^int/i) ||
-    type.match(/^float/i) ||
-    type.match(/^double/i) ||
-    type.match(/^real/i)
-  ) {
-    return 'number'
-  }
-  if (type.match(/^bool/i)) {
-    return 'boolean'
-  }
-  if (type.match(/^enum/i)) {
-    return type.replace(/^enum/i, '').split(',').join(' | ')
-  }
-  if (type.match(/^date/i) || type.match(/^time/i)) {
-    return 'string'
-  }
-  if (type.match(/^blob/i)) {
-    return 'Buffer'
-  }
-  return 'string // ' + type
 }
