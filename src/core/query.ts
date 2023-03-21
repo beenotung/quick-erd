@@ -138,7 +138,8 @@ export function generateQuery(
     }
   }
 
-  let select = ''
+  const fieldNameCounts = new Map<string, number>()
+  const selectColumns: { table: string; field: string; name: string }[] = []
   let from = 'from ' + baseTable.name
 
   const tables = new Set<string>()
@@ -150,15 +151,11 @@ export function generateQuery(
       if (path.length === 0) return
 
       const tableName = getRefTableName(path, path.length - 1)
+      const fieldName = column.field
 
-      const name = tableName + '.' + column.field
-      if (select) {
-        select += `
-, ${name}`
-      } else {
-        select += `
-  ${name}`
-      }
+      const name = tableName + '.' + fieldName
+      selectColumns.push({ table: tableName, field: fieldName, name })
+      fieldNameCounts.set(fieldName, (fieldNameCounts.get(fieldName) || 0) + 1)
 
       path.forEach((currentNode, currentIdx) => {
         if (tables.has(currentNode.tableName)) return
@@ -178,6 +175,15 @@ inner join ${currentNode.tableName}`
       })
     })
 
-  return `select ${select}
+  return `select
+  ${selectColumns
+    .map(({ table, field, name }) => {
+      const count = fieldNameCounts.get(field) || 1
+      if (count > 1) {
+        return `${name} as ${table}_${field}`
+      }
+      return name
+    })
+    .join('\n, ')}
 ${from}`
 }
