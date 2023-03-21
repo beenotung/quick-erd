@@ -9,6 +9,7 @@ import { querySelector } from './dom'
 import { ErdInputController } from './erd-input'
 import { StoredBoolean, StoredNumber } from './storage'
 import { QueryInputController } from './query-input'
+import { Column } from '../core/query'
 const { abs, sign } = Math
 
 type Rect = {
@@ -400,6 +401,21 @@ export class DiagramController {
   getTableList(): ParseResult['table_list'] {
     return Array.from(this.tableMap.values(), table => table.data)
   }
+
+  applySelectedColumns(columns: Column[]) {
+    const tableFields = new Map<string, string[]>()
+    columns.forEach(column => {
+      const fields = tableFields.get(column.table)
+      if (fields) {
+        fields.push(column.field)
+      } else {
+        tableFields.set(column.table, [column.field])
+      }
+    })
+    this.tableMap.forEach(table => {
+      table.applySelectedFields(tableFields.get(table.data.name) || [])
+    })
+  }
 }
 
 export class TablesContainer {
@@ -504,6 +520,7 @@ class TableController {
 
   tbody: HTMLTableSectionElement
   fieldMap = new Map<string, HTMLTableRowElement>()
+  fieldCheckboxes = new Map<string, HTMLInputElement>()
 
   toFieldKey(own_field: string, table: string, other_field: string) {
     return `${own_field}:${table}.${other_field}`
@@ -642,6 +659,8 @@ class TableController {
           }
         }
 
+        this.fieldCheckboxes.set(name, checkbox)
+
         this.tbody.appendChild(tr)
       },
     )
@@ -778,6 +797,12 @@ class TableController {
     const name = this.data.name
     json[name + '-x'] = this.translateX
     json[name + '-y'] = this.translateY
+  }
+
+  applySelectedFields(fields: string[]) {
+    this.fieldCheckboxes.forEach((checkbox, field) => {
+      checkbox.checked = fields.includes(field)
+    })
   }
 }
 

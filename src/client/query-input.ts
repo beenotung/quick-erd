@@ -14,18 +14,63 @@ function parseColumns(part: string) {
     })
 }
 
+function parseParts(text: string) {
+  const parts = text.split(separator).map(part => part.trim())
+  return parts
+}
+
+function isColumnsSame(newColumns: Column[], oldColumns: Column[]): boolean {
+  const n = newColumns.length
+  if (n != oldColumns.length) return false
+  for (let i = 0; i < n; i++) {
+    const c = newColumns[i]
+    const d = oldColumns[i]
+    if (c.table != d.table) return false
+    if (c.field != d.field) return false
+  }
+  return true
+}
+
 export class QueryInputController {
-  private columns = this.getColumns()
+  private columns = parseColumns(this.getParts()[0])
   constructor(
     private input: HTMLTextAreaElement,
     private stored: StoredString,
     private getTableList: () => ParseResult['table_list'],
   ) {}
 
+  cleanColumns() {
+    const parts = this.getParts()
+    const tables = this.getTableList()
+    const columns = this.columns
+    const n = columns.length
+    columns.forEach(column => {
+      const table = tables.find(table => table.name === column.table)
+      if (
+        table &&
+        table.field_list.some(field => field.name === column.field)
+      ) {
+        return
+      }
+      const idx = columns.indexOf(column)
+      columns.splice(idx, 1)
+    })
+    if (columns.length === n) return
+    this.update(columns, parts)
+  }
+
   private getParts() {
     const text = this.input.value || this.stored.value
-    const parts = text.split(separator).map(part => part.trim())
-    return parts
+    return parseParts(text)
+  }
+
+  checkUpdate(text: string) {
+    const parts = parseParts(text)
+    const newColumns: Column[] = parseColumns(parts[0])
+    if (isColumnsSame(newColumns, this.columns)) return
+    this.columns = newColumns
+    this.update(newColumns, parts)
+    return newColumns
   }
 
   private update(columns: Column[], previousParts: string[]): void {
@@ -43,10 +88,6 @@ export class QueryInputController {
 
     this.input.value = text
     this.stored.value = text
-  }
-
-  getColumns(parts: string[] = this.getParts()) {
-    return parseColumns(parts[0])
   }
 
   addColumn(table: string, field: string) {

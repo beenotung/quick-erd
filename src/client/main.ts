@@ -99,7 +99,14 @@ queryInput.addEventListener('input', event => {
 })
 
 function checkQueryInput(_event: InputEvent) {
-  // TODO update queryInputController while preserving selection position
+  const s = queryInput.selectionStart
+  const e = queryInput.selectionEnd
+  const columns = queryInputController.checkUpdate(queryInput.value)
+  if (columns) {
+    diagramController.applySelectedColumns(columns)
+  }
+  queryInput.selectionStart = s
+  queryInput.selectionEnd = e
 }
 
 try {
@@ -391,3 +398,4 @@ window.addEventListener('keypress', e => {
 })
 
 parseErdInput()
+queryInputController.cleanColumns()
