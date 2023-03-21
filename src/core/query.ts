@@ -1,4 +1,5 @@
 import { ParseResult, Table } from './ast'
+import { toTsType } from './ts-type'
 
 export type Column = { table: string; field: string }
 
@@ -26,6 +27,7 @@ function getRefTableName(path: TablePath, currentIdx: number) {
 export type ColumnForPath = {
   field: string
   table: Table
+  ts_type: string
 }
 
 function findPath(
@@ -94,21 +96,29 @@ function findPath(
 export function generateQuery(
   _columns: Column[],
   tableList: ParseResult['table_list'],
-): string {
-  const columns = _columns
-    .map(column => ({
-      field: column.field,
-      table: tableList.find(table => table.name === column.table),
-    }))
-    .filter(entry => entry.table) as ColumnForPath[]
-
-  if (columns.length === 0) {
-    return ''
+): { sql: string; tsType: string } {
+  const columns: ColumnForPath[] = []
+  for (const col of _columns) {
+    const table = tableList.find(table => table.name === col.table)
+    if (!table) continue
+    const field = table.field_list.find(field => field.name == col.field)
+    if (!field) continue
+    let ts_type = toTsType(field.type)
+    if (field.is_null) {
+      ts_type = 'null | ' + ts_type
+    }
+    columns.push({
+      table,
+      field: field.name,
+      ts_type,
+    })
   }
 
-  if (columns.length === 1) {
-    const { table, field } = columns[0]
-    return `select ${field} from ${table.name}`
+  let tsType = 'export type Row = {'
+
+  if (columns.length === 0) {
+    tsType += '\n}'
+    return { sql: '', tsType }
   }
 
   let baseTable = columns[0].table
@@ -139,8 +149,12 @@ export function generateQuery(
   }
 
   const fieldNameCounts = new Map<string, number>()
-  const selectColumns: { table: string; field: string; name: string }[] = []
-  let select = 'select'
+  const selectColumns: {
+    table: string
+    field: string
+    name: string
+    ts_type: string
+  }[] = []
   let from = 'from ' + baseTable.name
 
   const tables = new Set<string>()
@@ -155,7 +169,12 @@ export function generateQuery(
       const fieldName = column.field
 
       const name = tableName + '.' + fieldName
-      selectColumns.push({ table: tableName, field: fieldName, name })
+      selectColumns.push({
+        table: tableName,
+        field: fieldName,
+        name,
+        ts_type: column.ts_type,
+      })
       fieldNameCounts.set(fieldName, (fieldNameCounts.get(fieldName) || 0) + 1)
 
       path.forEach((currentNode, currentIdx) => {
@@ -176,7 +195,9 @@ inner join ${currentNode.tableName}`
       })
     })
 
-  selectColumns.forEach(({ table, field, name }, i) => {
+  let select = 'select'
+
+  selectColumns.forEach(({ table, field, name, ts_type }, i) => {
     const count = fieldNameCounts.get(field) || 1
     if (i === 0) {
       select += '\n  '
@@ -185,11 +206,17 @@ inner join ${currentNode.tableName}`
     }
     select += name
     if (count > 1) {
-      select += ` as ${table}_${field}`
+      name = table + '_' + field
+      select += ' as ' + name
+    } else {
+      name = field
     }
+    tsType += `\n  ${name}: ${ts_type}`
   })
+
+  tsType += '\n}'
 
   const sql = select + '\n' + from
 
-  return sql
+  return { tsType, sql }
 }

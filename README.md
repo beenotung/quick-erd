@@ -29,7 +29,8 @@ quick and easy text-based ERD editor with drag and drop visualization
   - [x] auto-complete when creating new table
 - [x] web-based query builder
   - [x] select columns with checkbox
-  - [x] auto-fill nested join-table
+  - [x] generate nested join-table
+  - [x] generate typescript type of query result
   - [x] support additional query (where / group-by / order-by / limit, e.t.c.)
 
 ## Usage

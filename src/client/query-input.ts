@@ -80,9 +80,13 @@ export class QueryInputController {
       .map(column => `${column.table}.${column.field}`)
       .join('\n')
 
-    parts[1] = generateQuery(columns, this.getTableList())
+    const { sql, tsType } = generateQuery(columns, this.getTableList())
 
-    parts[2] = previousParts[2]
+    parts[1] = tsType
+
+    parts[2] = sql
+
+    parts[3] = previousParts[3]
 
     const text = parts.join('\n\n' + separator + '\n\n')
 
