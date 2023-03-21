@@ -140,6 +140,7 @@ export function generateQuery(
 
   const fieldNameCounts = new Map<string, number>()
   const selectColumns: { table: string; field: string; name: string }[] = []
+  let select = 'select'
   let from = 'from ' + baseTable.name
 
   const tables = new Set<string>()
@@ -175,15 +176,20 @@ inner join ${currentNode.tableName}`
       })
     })
 
-  return `select
-  ${selectColumns
-    .map(({ table, field, name }) => {
-      const count = fieldNameCounts.get(field) || 1
-      if (count > 1) {
-        return `${name} as ${table}_${field}`
-      }
-      return name
-    })
-    .join('\n, ')}
-${from}`
+  selectColumns.forEach(({ table, field, name }, i) => {
+    const count = fieldNameCounts.get(field) || 1
+    if (i === 0) {
+      select += '\n  '
+    } else {
+      select += '\n, '
+    }
+    select += name
+    if (count > 1) {
+      select += ` as ${table}_${field}`
+    }
+  })
+
+  const sql = select + '\n' + from
+
+  return sql
 }
