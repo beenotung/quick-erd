@@ -29,10 +29,10 @@ export type ${typeName} = {`
       const type = toTsType(field.type)
       if (field.is_primary_key) {
         tableTypes += `
-  ${field.name}?: ${type} | null`
+  ${field.name}?: null | ${type}`
       } else if (field.is_null) {
         tableTypes += `
-  ${field.name}: ${type} | null`
+  ${field.name}: null | ${type}`
       } else {
         tableTypes += `
   ${field.name}: ${type}`
