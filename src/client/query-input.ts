@@ -80,13 +80,12 @@ export class QueryInputController {
       .map(column => `${column.table}.${column.field}`)
       .join('\n')
 
-    const { sql, tsType } = generateQuery(columns, this.getTableList())
+    const query = generateQuery(columns, this.getTableList())
 
-    parts[1] = tsType
-
-    parts[2] = sql
-
-    parts[3] = previousParts[3]
+    parts[1] = query.tsType
+    parts[2] = query.sql
+    parts[3] = query.knex
+    parts[4] = previousParts[4] || 'remark here is preserved...'
 
     const text = parts.join('\n\n' + separator + '\n\n')
 

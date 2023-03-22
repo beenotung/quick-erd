@@ -96,7 +96,11 @@ function findPath(
 export function generateQuery(
   _columns: Column[],
   tableList: ParseResult['table_list'],
-): { sql: string; tsType: string } {
+): {
+  sql: string
+  tsType: string
+  knex: string
+} {
   const columns: ColumnForPath[] = []
   for (const col of _columns) {
     const table = tableList.find(table => table.name === col.table)
@@ -118,7 +122,7 @@ export function generateQuery(
 
   if (columns.length === 0) {
     tsType += '\n}'
-    return { sql: '', tsType }
+    return { sql: '', tsType, knex: '' }
   }
 
   let baseTable = columns[0].table
@@ -157,6 +161,9 @@ export function generateQuery(
   }[] = []
   let from = 'from ' + baseTable.name
 
+  let knex = `knex
+  .from('${baseTable.name}')`
+
   const tables = new Set<string>()
   tables.add(baseTable.name)
 
@@ -188,14 +195,20 @@ export function generateQuery(
         if (!currentTableName) return
         from += `
 inner join ${currentNode.tableName}`
+        knex += `
+  .innerJoin('${currentNode.tableName}`
         if (currentNode.tableName !== currentTableName) {
           from += ' as ' + currentTableName
+          knex += ' as ' + currentTableName
         }
         from += ` on ${currentTableName}.id = ${previousTableName}.${refField}`
+        knex += `', '${currentTableName}.id', '${previousTableName}.${refField}')`
       })
     })
 
   let select = 'select'
+  knex += `
+  .select(`
 
   selectColumns.forEach(({ table, field, name, ts_type }, i) => {
     const count = fieldNameCounts.get(field) || 1
@@ -205,18 +218,24 @@ inner join ${currentNode.tableName}`
       select += '\n, '
     }
     select += name
+    knex += `
+    '${name}`
     if (count > 1) {
       name = table + '_' + field
       select += ' as ' + name
+      knex += ' as ' + name
     } else {
       name = field
     }
+    knex += `',`
     tsType += `\n  ${name}: ${ts_type}`
   })
 
   tsType += '\n}'
+  knex += `
+  )`
 
   const sql = select + '\n' + from
 
-  return { tsType, sql }
+  return { tsType, sql, knex }
 }
