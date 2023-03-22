@@ -7,6 +7,8 @@ export function toTsType(type: string): string {
     return 'string'
   }
   if (
+    type.match(/^decimal/i) ||
+    type.match(/^numeric/i) ||
     type.match(/^int/i) ||
     type.match(/^float/i) ||
     type.match(/^double/i) ||

@@ -19,44 +19,56 @@ export function toKnexCreateColumnTypeCode(field: Field): string {
       .replace(/','/g, "', '")
 
     code += `.enum('${field.name}', ${values})`
+    return code
+  }
+
+  type = type.replace(/^varchar/i, 'string')
+
+  let length = ''
+
+  if (!length) {
+    const match = type.match(/^string\((\d+)\)/i)
+    if (match) {
+      length = match[1]
+      type = 'string'
+    }
+  }
+
+  if (!length) {
+    const match = type.match(/^int.*\((\d+)\)/i)
+    if (match) {
+      length = match[1]
+      type = 'integer'
+    }
+  }
+
+  if (type.match(/^decimal/i) || type.match(/^numeric/i)) {
+    const match = type.match(/\(([\d\s,]+)\)/)
+    if (match) {
+      length = match[1]
+        .split(',')
+        .map(x => +x)
+        .join(', ')
+    }
+    type = 'decimal'
+  }
+
+  type = type_alias[type.toLowerCase()] || type
+
+  if (type && type[0] == type[0].toUpperCase()) {
+    type = type.toLowerCase()
+  }
+
+  if (type.match(/^real$/i) || type.match(/^char\(\d+\)$/i)) {
+    code += `.specificType('${field.name}', '${type}')`
+  } else if (length) {
+    code += `.${type}('${field.name}', ${length})`
   } else {
-    type = type.replace(/^varchar/i, 'string')
+    code += `.${type}('${field.name}')`
+  }
 
-    let length = ''
-
-    if (!length) {
-      const match = type.match(/^string\((\d+)\)/i)
-      if (match) {
-        length = match[1]
-        type = 'string'
-      }
-    }
-
-    if (!length) {
-      const match = type.match(/^int.*\((\d+)\)/i)
-      if (match) {
-        length = match[1]
-        type = 'integer'
-      }
-    }
-
-    type = type_alias[type.toLowerCase()] || type
-
-    if (type && type[0] == type[0].toUpperCase()) {
-      type = type.toLowerCase()
-    }
-
-    if (type.match(/^real$/i) || type.match(/^char\(\d+\)$/i)) {
-      code += `.specificType('${field.name}', '${type}')`
-    } else if (length) {
-      code += `.${type}('${field.name}', ${length})`
-    } else {
-      code += `.${type}('${field.name}')`
-    }
-
-    if (field.is_unsigned || field.references) {
-      code += `.unsigned()`
-    }
+  if (field.is_unsigned || field.references) {
+    code += `.unsigned()`
   }
 
   return code
