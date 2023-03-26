@@ -32,7 +32,7 @@ export class ErdInputController {
 
   private setupCopyListener() {
     const input = this.input
-    let copyBtn = querySelector(
+    const copyBtn = querySelector(
       document.body,
       '.erd-controls .copy-btn',
     ) as HTMLButtonElement

@@ -23,14 +23,15 @@ function parseParts(text: string) {
 
 function getRemarks(parts: string[]) {
   for (let i = 1; i < parts.length; i++) {
-    let part = parts[i].trim()
+    const part = parts[i].trim()
     if (
       part.startsWith('export type ') ||
       part.startsWith('select\n  ') ||
       part.startsWith(`knex
   .from('`)
-    )
+    ) {
       continue
+    }
     return part
   }
 }
@@ -57,9 +58,9 @@ export class QueryOutputControl {
     private queryInputController: QueryInputController,
     private getText: () => string | undefined,
   ) {
-    let id = this.fieldset.id
-    let key = id + 'Enabled'
-    let stored = new StoredBoolean(key, true)
+    const id = this.fieldset.id
+    const key = id + 'Enabled'
+    const stored = new StoredBoolean(key, true)
 
     this.checkbox.checked = stored.value
     this.checkbox.addEventListener('change', () => {
@@ -67,9 +68,11 @@ export class QueryOutputControl {
       this.queryInputController.checkUpdate({ skipSame: false })
     })
 
-    let copyBtn = this.fieldset.querySelector('.copy-btn') as HTMLButtonElement
+    const copyBtn = this.fieldset.querySelector(
+      '.copy-btn',
+    ) as HTMLButtonElement
     copyBtn.addEventListener('click', () => {
-      let text = this.getText()
+      const text = this.getText()
       if (!text) return
       const result = Promise.resolve(this.queryInputController.copy(text))
       showCopyResult(copyBtn, result)
@@ -107,7 +110,7 @@ export class QueryInputController {
 
   copy(text: string) {
     const input = this.input
-    let index = input.value.indexOf(text)
+    const index = input.value.indexOf(text)
     if (index == -1) return 'skip' as const
     input.select()
 

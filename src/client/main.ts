@@ -7,17 +7,12 @@ import { openDialog } from './dialog'
 import { ErdInputController } from './erd-input'
 import { normalize } from './normalize'
 import { cleanStorage, StoredString } from './storage'
-import { QueryInputController, QueryOutputControl } from './query-input'
+import { QueryInputController } from './query-input'
 
 const root = document.querySelector(':root') as HTMLElement
 const editor = document.querySelector('#editor') as HTMLTextAreaElement
 const erdInput = editor.querySelector('#erdInput') as HTMLTextAreaElement
 const queryInput = editor.querySelector('#queryInput') as HTMLTextAreaElement
-const resultRowType = editor.querySelector(
-  '#resultRowType',
-) as HTMLFieldSetElement
-const sqlQuery = editor.querySelector('#sqlQuery') as HTMLFieldSetElement
-const knexQuery = editor.querySelector('#knexQuery') as HTMLFieldSetElement
 const diagram = document.querySelector('#diagram') as HTMLDivElement
 
 const tableStub = document.querySelector(
