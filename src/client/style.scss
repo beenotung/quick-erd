@@ -129,6 +129,18 @@ main {
     white-space: pre;
     // outline: none; // to normalize chrome behavior when :focus-visible
   }
+  position: relative;
+  .erd-controls,
+  .output-controls {
+    position: absolute;
+    top: calc(var(--padding));
+    right: calc(var(--padding));
+    background-color: var(--text-bg-color);
+  }
+  legend,
+  label {
+    color: var(--text-color);
+  }
 }
 #diagram {
   padding: var(--padding);
@@ -234,10 +246,12 @@ dialog[open] {
   border-left: 1px solid;
 }
 
-[data-mode="schema"] #queryInput {
+[data-mode="schema"] #queryInput,
+[data-mode="schema"] .output-controls {
   display: none;
 }
-[data-mode="query"] #erdInput {
+[data-mode="query"] #erdInput,
+[data-mode="query"] .erd-controls {
   display: none;
 }
 

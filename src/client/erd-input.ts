@@ -18,13 +18,36 @@ import {
   diagramTextColorRegex,
   diagramTextColorToLine,
 } from '../core/meta'
+import { showCopyResult } from './copy'
+import { querySelector } from './dom'
 import { StoredString } from './storage'
 
 export class ErdInputController {
   constructor(
     private input: HTMLTextAreaElement,
     private stored: StoredString,
-  ) {}
+  ) {
+    this.setupCopyListener()
+  }
+
+  private setupCopyListener() {
+    const input = this.input
+    let copyBtn = querySelector(
+      document.body,
+      '.erd-controls .copy-btn',
+    ) as HTMLButtonElement
+    copyBtn.addEventListener('click', () => {
+      input.select()
+      input.selectionStart = 0
+      input.selectionEnd = input.value.length
+      const result = Promise.resolve(
+        navigator.clipboard
+          ? navigator.clipboard.writeText(input.value).then(() => true)
+          : document.execCommand('copy'),
+      )
+      showCopyResult(copyBtn, result)
+    })
+  }
 
   setTextBgColor(color: string) {
     this.updateLine(textBgColorRegex, textBgColorToLine(color))

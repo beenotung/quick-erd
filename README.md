@@ -20,7 +20,7 @@ quick and easy text-based ERD editor with drag and drop visualization
   - [x] plain/colorful table heading
   - [x] customize color theme
   - [x] keyboard shortcuts
-  - [x] auto save-and-restore with localStorage
+  - [x] auto save-and-restore with localStorag
   - [x] auto format the schema text
   - [x] auto normalize specified column
   - [x] auto avoid table overlapping visually
@@ -31,6 +31,7 @@ quick and easy text-based ERD editor with drag and drop visualization
   - [x] select columns with checkbox
   - [x] generate SQL/knex query with nested join-table
   - [x] generate typescript type of query result
+  - [x] copy selected part into clipboard
   - [x] support additional query (where / group-by / order-by / limit, e.t.c.)
 
 ## Usage

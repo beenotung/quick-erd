@@ -7,12 +7,17 @@ import { openDialog } from './dialog'
 import { ErdInputController } from './erd-input'
 import { normalize } from './normalize'
 import { cleanStorage, StoredString } from './storage'
-import { QueryInputController } from './query-input'
+import { QueryInputController, QueryOutputControl } from './query-input'
 
 const root = document.querySelector(':root') as HTMLElement
 const editor = document.querySelector('#editor') as HTMLTextAreaElement
 const erdInput = editor.querySelector('#erdInput') as HTMLTextAreaElement
 const queryInput = editor.querySelector('#queryInput') as HTMLTextAreaElement
+const resultRowType = editor.querySelector(
+  '#resultRowType',
+) as HTMLFieldSetElement
+const sqlQuery = editor.querySelector('#sqlQuery') as HTMLFieldSetElement
+const knexQuery = editor.querySelector('#knexQuery') as HTMLFieldSetElement
 const diagram = document.querySelector('#diagram') as HTMLDivElement
 
 const tableStub = document.querySelector(
@@ -30,6 +35,12 @@ const erdText = new StoredString('erd', erdInput.value)
 const queryText = new StoredString('query', queryInput.value)
 const inputWidth = new StoredString('input_width', erdInput.style.width)
 const modeText = new StoredString('mode', 'schema')
+
+erdInput.value = erdText.value
+erdInput.style.width = inputWidth.value
+
+queryInput.value = queryText.value
+queryInput.style.width = inputWidth.value
 
 document.body.dataset.mode = modeText.value
 
@@ -50,12 +61,6 @@ const diagramController = new DiagramController(
   colorController,
   queryInputController,
 )
-
-erdInput.value = erdText.value
-erdInput.style.width = inputWidth.value
-
-queryInput.value = queryText.value
-queryInput.style.width = inputWidth.value
 
 erdText.watch(text => {
   erdInput.value = text
@@ -101,7 +106,7 @@ queryInput.addEventListener('input', event => {
 function checkQueryInput(_event: InputEvent) {
   const s = queryInput.selectionStart
   const e = queryInput.selectionEnd
-  const columns = queryInputController.checkUpdate(queryInput.value)
+  const columns = queryInputController.checkUpdate({ skipSame: true })
   if (columns) {
     diagramController.applySelectedColumns(columns)
   }

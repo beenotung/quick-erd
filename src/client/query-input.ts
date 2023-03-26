@@ -1,6 +1,8 @@
 import { ParseResult } from '../core/ast'
 import { Column, findColumnIndex, generateQuery } from '../core/query'
-import { StoredString } from './storage'
+import { StoredBoolean, StoredString } from './storage'
+import { querySelector } from './dom'
+import { showCopyResult } from './copy'
 
 const separator = '-'.repeat(10)
 
@@ -19,6 +21,20 @@ function parseParts(text: string) {
   return parts
 }
 
+function getRemarks(parts: string[]) {
+  for (let i = 1; i < parts.length; i++) {
+    let part = parts[i].trim()
+    if (
+      part.startsWith('export type ') ||
+      part.startsWith('select\n  ') ||
+      part.startsWith(`knex
+  .from('`)
+    )
+      continue
+    return part
+  }
+}
+
 function isColumnsSame(newColumns: Column[], oldColumns: Column[]): boolean {
   const n = newColumns.length
   if (n != oldColumns.length) return false
@@ -31,13 +47,79 @@ function isColumnsSame(newColumns: Column[], oldColumns: Column[]): boolean {
   return true
 }
 
+export class QueryOutputControl {
+  private checkbox = this.fieldset.querySelector(
+    'input[type=checkbox]',
+  ) as HTMLInputElement
+
+  constructor(
+    private fieldset: HTMLFieldSetElement,
+    private queryInputController: QueryInputController,
+    private getText: () => string | undefined,
+  ) {
+    let id = this.fieldset.id
+    let key = id + 'Enabled'
+    let stored = new StoredBoolean(key, true)
+
+    this.checkbox.checked = stored.value
+    this.checkbox.addEventListener('change', () => {
+      stored.value = this.checkbox.checked
+      this.queryInputController.checkUpdate({ skipSame: false })
+    })
+
+    let copyBtn = this.fieldset.querySelector('.copy-btn') as HTMLButtonElement
+    copyBtn.addEventListener('click', () => {
+      let text = this.getText()
+      if (!text) return
+      const result = Promise.resolve(this.queryInputController.copy(text))
+      showCopyResult(copyBtn, result)
+    })
+  }
+
+  getShouldShow() {
+    return this.checkbox.checked
+  }
+}
+
 export class QueryInputController {
   private columns = parseColumns(this.getParts()[0])
+  private resultRowType = new QueryOutputControl(
+    querySelector(document.body, '#resultRowType'),
+    this,
+    () => this.getQuery().tsType,
+  )
+  private sqlQuery = new QueryOutputControl(
+    querySelector(document.body, '#sqlQuery'),
+    this,
+    () => this.getQuery().sql,
+  )
+  private knexQuery = new QueryOutputControl(
+    querySelector(document.body, '#knexQuery'),
+    this,
+    () => this.getQuery().knex,
+  )
+  private lastQuery?: ReturnType<typeof generateQuery>
   constructor(
     private input: HTMLTextAreaElement,
     private stored: StoredString,
     private getTableList: () => ParseResult['table_list'],
   ) {}
+
+  copy(text: string) {
+    const input = this.input
+    let index = input.value.indexOf(text)
+    if (index == -1) return 'skip' as const
+    input.select()
+
+    input.selectionStart = index
+    input.selectionEnd = index + text.length
+
+    if (navigator.clipboard) {
+      return navigator.clipboard.writeText(text).then(() => true)
+    } else {
+      return document.execCommand('copy')
+    }
+  }
 
   cleanColumns() {
     const parts = this.getParts()
@@ -60,32 +142,51 @@ export class QueryInputController {
   }
 
   private getParts() {
-    const text = this.input.value || this.stored.value
+    const text = this.input.value
     return parseParts(text)
   }
 
-  checkUpdate(text: string) {
+  checkUpdate(flags: { skipSame: boolean }) {
+    const text = this.input.value
     const parts = parseParts(text)
     const newColumns: Column[] = parseColumns(parts[0])
-    if (isColumnsSame(newColumns, this.columns)) return
+    if (flags.skipSame && isColumnsSame(newColumns, this.columns)) return
     this.columns = newColumns
     this.update(newColumns, parts)
     return newColumns
   }
 
+  private getQuery() {
+    if (!this.lastQuery) {
+      const parts = this.getParts()
+      const columns = parseColumns(parts[0])
+      const query = generateQuery(columns, this.getTableList())
+      this.lastQuery = query
+    }
+    return this.lastQuery
+  }
+
   private update(columns: Column[], previousParts: string[]): void {
     const parts: string[] = []
 
-    parts[0] = columns
-      .map(column => `${column.table}.${column.field}`)
-      .join('\n')
+    parts.push(
+      columns.map(column => `${column.table}.${column.field}`).join('\n'),
+    )
 
     const query = generateQuery(columns, this.getTableList())
+    this.lastQuery = query
 
-    parts[1] = query.tsType
-    parts[2] = query.sql
-    parts[3] = query.knex
-    parts[4] = previousParts[4] || 'remark here is preserved...'
+    if (this.resultRowType.getShouldShow()) {
+      parts.push(query.tsType)
+    }
+    if (this.sqlQuery.getShouldShow()) {
+      parts.push(query.sql)
+    }
+    if (this.knexQuery.getShouldShow()) {
+      parts.push(query.knex)
+    }
+
+    parts.push(getRemarks(previousParts) || 'remark here is preserved...')
 
     const text = parts.join('\n\n' + separator + '\n\n')
 

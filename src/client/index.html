@@ -117,10 +117,44 @@
     <main>
       <div id="editor">
         <textarea id="erdInput" placeholder="input table draft here"></textarea>
+        <div class="erd-controls">
+          <button class="copy-btn" title="copy erd text to clipboard">
+            copy
+          </button>
+        </div>
         <textarea
           id="queryInput"
           placeholder="generated query will be shown here"
         ></textarea>
+        <div class="output-controls">
+          <fieldset id="resultRowType">
+            <legend>result row type</legend>
+            <label title="toggle show/hide typescript type of result row"
+              >Show <input type="checkbox" />
+            </label>
+            <button class="copy-btn" title="copy result row type to clipboard">
+              copy
+            </button>
+          </fieldset>
+          <fieldset id="sqlQuery">
+            <legend>sql query</legend>
+            <label title="toggle show/hide sql query"
+              >Show <input type="checkbox" />
+            </label>
+            <button class="copy-btn" title="copy sql query to clipboard">
+              copy
+            </button>
+          </fieldset>
+          <fieldset id="knexQuery">
+            <legend>knex query</legend>
+            <label title="toggle show/hide knex query"
+              >Show <input type="checkbox" />
+            </label>
+            <button class="copy-btn" title="copy knex query to clipboard">
+              copy
+            </button>
+          </fieldset>
+        </div>
       </div>
       <div id="diagram">
         <div class="message">
