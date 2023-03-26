@@ -189,7 +189,7 @@ user_id fk
       expect(field_list[0].references).not.undefined
       expect(field_list[0].references.table).to.equals('user')
       expect(field_list[0].references.field).to.equals('id')
-      expect(field_list[0].references.type).to.equals('>-')
+      expect(field_list[0].references.type).to.equals('>0-')
     })
   })
 

@@ -36,7 +36,7 @@ it('should auto fill reference table and column to fk column according to the co
   const line = formattedText
     .split('\n')
     .find(line => line.startsWith('user_id '))
-  expect(line).contain('FK >- user.id')
+  expect(line).contain('FK >0- user.id')
 })
 
 it('should preserve zoom line', () => {

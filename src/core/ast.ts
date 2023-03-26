@@ -222,7 +222,7 @@ class Parser implements ParseResult {
       return {
         table: ref_field_name.replace(/_id$/, ''),
         field: 'id',
-        type: '>-',
+        type: defaultRelationType,
       }
     }
     const type = this.parseRelationType()
@@ -315,3 +315,5 @@ export type RelationType =
   | '>0-'
 
 const defaultFieldType = 'integer'
+
+const defaultRelationType: RelationType = '>0-'
