@@ -36,6 +36,7 @@ function findPath(
   columns: ColumnForPath[],
   tableList: ParseResult['table_list'],
   tablePath: TablePath,
+  visited: Set<Table>,
 ): TablePath {
   const columnTableName = column.table.name
   if (currentTable.name === columnTableName) {
@@ -71,6 +72,9 @@ function findPath(
   for (const [refTableName, refFieldNames] of refTables.entries()) {
     const refTable = tableList.find(table => table.name === refTableName)
     if (!refTable) continue
+    if (visited.has(refTable)) continue
+    const newVisited = new Set(visited)
+    newVisited.add(refTable)
 
     const refField =
       refFieldNames.length == 1
@@ -83,10 +87,14 @@ function findPath(
             ),
           )[0] || refFieldNames[0]
 
-    const result = findPath(refTable, column, columns, tableList, [
-      ...tablePath,
-      { tableName: currentTable.name, refField },
-    ])
+    const result = findPath(
+      refTable,
+      column,
+      columns,
+      tableList,
+      [...tablePath, { tableName: currentTable.name, refField }],
+      newVisited,
+    )
     if (result.length > 0) return result
   }
 
@@ -129,7 +137,7 @@ export function generateQuery(
 
   let combines = columns.map(column => ({
     column,
-    path: findPath(baseTable, column, columns, tableList, []),
+    path: findPath(baseTable, column, columns, tableList, [], new Set()),
   }))
   let remains = combines.filter(entry => entry.path.length === 0)
 
@@ -140,7 +148,7 @@ export function generateQuery(
       const newBaseTable = entry.column.table
       const newCombines = columns.map(column => ({
         column,
-        path: findPath(newBaseTable, column, columns, tableList, []),
+        path: findPath(newBaseTable, column, columns, tableList, [], new Set()),
       }))
       const newRemains = newCombines.filter(entry => entry.path.length === 0)
       if (newRemains.length < remains.length) {
