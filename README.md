@@ -47,7 +47,7 @@ Option 2: Run it locally
 1. Clone this git repository
 2. cd into the folder
 3. Run `npm install`
-4. Run `npm run dev`
+4. Run `npm start`
 
 ### Database Utility
 

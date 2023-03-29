@@ -36,7 +36,7 @@
     "dist"
   ],
   "scripts": {
-    "dev": "npm run type:module && snowpack dev",
+    "start": "npm run type:module && snowpack dev",
     "upload": "run-s clean build:client surge:all",
     "type:module": "node set-type.js module",
     "type:commonjs": "node set-type.js commonjs",
