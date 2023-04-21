@@ -1,6 +1,6 @@
 {
   "name": "quick-erd",
-  "version": "4.5.3",
+  "version": "4.6.0",
   "type": "module",
   "sideEffects": false,
   "description": "quick and easy text-based ERD",
