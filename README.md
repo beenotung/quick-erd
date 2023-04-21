@@ -166,7 +166,7 @@ This command auto setup knex, then it generates incremental migration script for
 
 For sqlite database, it also auto setup `db.ts` with `better-sqlite3` connection using given database filename.
 
-The `--rename` or `-r` flag enable column rename detection.
+The `--rename` or `-r` flag enable table/column rename detection.
 
 If there are pending knex migrations not applied, it will show error message and stop running.
 

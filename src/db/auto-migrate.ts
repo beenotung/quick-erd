@@ -137,6 +137,37 @@ module.exports = config;
 
 const migrations_dir = 'migrations'
 
+function isInternalTable(name: string): boolean {
+  switch (name) {
+    case 'knex_migrations':
+    case 'knex_migrations_lock':
+    case 'sqlite_sequence':
+      return true
+    default:
+      return false
+  }
+}
+
+function diffArray(aArray: string[], bArray: string[]): [string[], string[]] {
+  const aSet = new Set(aArray)
+  const bSet = new Set(bArray)
+
+  const aDiff: string[] = []
+  const bDiff: string[] = []
+
+  for (const a of aSet) {
+    if (bSet.has(a)) continue
+    aDiff.push(a)
+  }
+
+  for (const b of bSet) {
+    if (aSet.has(b)) continue
+    bDiff.push(b)
+  }
+
+  return [aDiff, bDiff]
+}
+
 export async function setupKnexMigration(options: {
   knex: KnexType
   db_client: string
@@ -152,7 +183,10 @@ export async function setupKnexMigration(options: {
   await checkPendingMigrations(knex)
 
   log('Scanning existing database schema...')
-  const existing_table_list: Table[] = await loadTableList(knex, db_client)
+  let existing_table_list: Table[] = await loadTableList(knex, db_client)
+  existing_table_list = existing_table_list.filter(
+    table => !isInternalTable(table.name),
+  )
 
   const { up_lines, down_lines } = generateAutoMigrate({
     existing_table_list,
@@ -196,12 +230,67 @@ export function generateAutoMigrate(options: {
   const up_lines: string[] = []
   const down_lines: string[] = []
 
+  const renamed_tables: string[] = []
+
+  // detect deleted tables
+  const [diff_existing_table_names, diff_parsed_table_names] = diffArray(
+    options.existing_table_list.map(table => table.name),
+    options.parsed_table_list.map(table => table.name),
+  )
+  for (let i = 0; i < diff_existing_table_names.length; i++) {
+    const existing_table_name = diff_existing_table_names[i]
+    const existing_table = options.existing_table_list.find(
+      table => table.name === existing_table_name,
+    )
+    if (!existing_table) continue
+
+    // detect rename table
+    if (
+      options.detect_rename &&
+      options.existing_table_list.length === options.parsed_table_list.length
+    ) {
+      const parsed_table_name = closest(
+        existing_table_name,
+        diff_parsed_table_names,
+      )
+      const parsed_table = options.parsed_table_list.find(
+        table => table.name === parsed_table_name,
+      )
+      if (!parsed_table) continue
+
+      up_lines.push(
+        `  await knex.schema.renameTable('${existing_table_name}', '${parsed_table_name}')`,
+      )
+      down_lines.push(
+        `  await knex.schema.renameTable('${parsed_table_name}', '${existing_table_name}')`,
+      )
+
+      renamed_tables.push(parsed_table_name)
+
+      // remove matched pair
+      diff_existing_table_names.splice(i, 1)
+      i--
+      const idx = diff_parsed_table_names.indexOf(parsed_table_name)
+      diff_parsed_table_names.splice(idx, 1)
+
+      continue
+    }
+
+    // detected deleted table
+    up_lines.push(
+      `  await knex.schema.dropTableIfExists('${existing_table_name}')`,
+    )
+    down_lines.push(toKnexCreateTableCode(existing_table))
+  }
+
+  // detect new / modified tables
   sortTables(options.parsed_table_list).forEach(table => {
     const { name, field_list } = table
     const existing_table = options.existing_table_list.find(
       table => table.name === name,
     )
     if (!existing_table) {
+      if (renamed_tables.includes(name)) return
       up_lines.push(toKnexCreateTableCode(table))
       down_lines.unshift(`  await knex.schema.dropTableIfExists('${name}')`)
       return
@@ -308,6 +397,7 @@ export function generateAutoMigrate(options: {
       removed_columns.push(existing_field)
     })
 
+    // detect renamed fields
     if (
       options.detect_rename &&
       new_columns.length === removed_columns.length

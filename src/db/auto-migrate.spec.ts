@@ -372,5 +372,28 @@ describe('auto-migrate TestSuit', () => {
         "await knex.raw('alter table `tag` drop column `name`')",
       )
     })
+    it('should detect table rename', () => {
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'better-sqlite3',
+        existing_table_list: [
+          { name: 'user', field_list: [] },
+          { name: 'post', field_list: [] },
+        ],
+        parsed_table_list: [
+          { name: 'user', field_list: [] },
+          { name: 'article', field_list: [] },
+        ],
+        detect_rename: true,
+      })
+      expect(up_lines).to.have.lengthOf(1)
+      expect(up_lines[0].trim()).to.equals(
+        "await knex.schema.renameTable('post', 'article')",
+      )
+
+      expect(down_lines).to.have.lengthOf(1)
+      expect(down_lines[0].trim()).to.equals(
+        "await knex.schema.renameTable('article', 'post')",
+      )
+    })
   })
 })
