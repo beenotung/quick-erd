@@ -36,11 +36,15 @@
     "dist"
   ],
   "scripts": {
-    "start": "npm run type:module && snowpack dev",
+    "start": "npm run build:client && serve-lite build",
     "upload": "run-s clean build:client surge:all",
     "type:module": "node set-type.js module",
     "type:commonjs": "node set-type.js commonjs",
-    "build:client": "npm run type:module && snowpack build",
+    "build:client": "mkdir -p build/icons && run-p build:client:*",
+    "build:client:js": "esbuild --bundle src/client/main.ts --outfile=build/main.js",
+    "build:client:css": "sass src/client/style.scss:build/style.css",
+    "build:client:html": "cp src/client/index.html build/index.html",
+    "build:client:icon": "cp lib/ionicons/*.svg build/icons/",
     "surge:all": "run-s surge:erd surge:quick",
     "surge:erd": "surge build https://erd.surge.sh",
     "surge:quick": "surge build https://quick-erd.surge.sh",
@@ -72,7 +76,6 @@
     "pg": "^8.10.0"
   },
   "devDependencies": {
-    "@snowpack/plugin-sass": "^1.4.0",
     "@types/chai": "^4.3.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.16.3",
@@ -80,6 +83,7 @@
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
     "chai": "^4.3.7",
+    "esbuild": "^0.17.18",
     "eslint": "^8.39.0",
     "format-json-cli": "^1.0.2",
     "mocha": "^10.2.0",
@@ -89,8 +93,8 @@
     "prettier": "^2.8.8",
     "rimraf": "^5.0.0",
     "sass": "^1.62.1",
+    "serve-lite": "^1.1.2",
     "sinon": "^15.0.4",
-    "snowpack": "^3.8.8",
     "surge": "^0.23.1",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.1",
