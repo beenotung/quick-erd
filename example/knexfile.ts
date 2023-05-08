@@ -32,6 +32,8 @@ module.exports = {
       database: env.DB_NAME,
       user: env.DB_USERNAME,
       password: env.DB_PASSWORD,
+      host: env.DB_HOST,
+      port: env.DB_PORT,
     },
     pool: {
       min: 2,
