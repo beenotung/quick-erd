@@ -8,10 +8,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "better-sqlite3-proxy": "^2.0.0",
-    "better-sqlite3-schema": "^3.0.0",
+    "better-sqlite3-proxy": "^2.3.2",
+    "better-sqlite3-schema": "^3.1.2",
     "mysql": "^2.18.1",
-    "pg": "^8.8.0",
+    "pg": "^8.11.0",
     "populate-env": "^2.0.0",
     "quick-erd": "link:.."
   },
