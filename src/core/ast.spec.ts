@@ -348,4 +348,40 @@ username text not null
     expect(field_list[1].type).to.equals('text')
     expect(field_list[1].is_null).to.be.false
   })
+
+  it.only('should parse default value', () => {
+    const text = `
+user
+----
+id
+role text default 'guest'
+score real default 0
+created_at datetime CURRENT_TIMESTAMP
+updated_at datetime now()
+`
+
+    const table = parseSingleTable(text)
+    const { field_list } = table
+    console.log(field_list)
+    expect(field_list).to.have.lengthOf(5)
+
+    expect(field_list[0].name).to.equals('id')
+    expect(field_list[0].default_value).to.be.undefined
+
+    expect(field_list[1].name).to.equals('role')
+    expect(field_list[1].type).to.equals('text')
+    expect(field_list[1].default_value).to.equals("'guest'")
+
+    expect(field_list[2].name).to.equals('score')
+    expect(field_list[2].type).to.equals('real')
+    expect(field_list[2].default_value).to.equals('0')
+
+    expect(field_list[3].name).to.equals('created_at')
+    expect(field_list[3].type).to.equals('datetime')
+    expect(field_list[3].default_value).to.equals('CURRENT_TIMESTAMP')
+
+    expect(field_list[4].name).to.equals('updated_at')
+    expect(field_list[4].type).to.equals('datetime')
+    expect(field_list[4].default_value).to.equals('now()')
+  })
 })

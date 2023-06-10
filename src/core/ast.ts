@@ -130,6 +130,7 @@ class Parser implements ParseResult {
     let is_unique = false
     let is_primary_key = false
     let is_unsigned = false
+    let default_value: string | undefined
     let references: ForeignKeyReference | undefined
     for (;;) {
       const name = this.parseType()
@@ -143,6 +144,10 @@ class Parser implements ParseResult {
           continue
         case 'UNSIGNED':
           is_unsigned = true
+          continue
+        case 'DEFAULT':
+          // TODO parse default value
+          default_value = this.parseDefaultValue()
           continue
         case 'PK':
           is_primary_key = true
@@ -162,7 +167,7 @@ class Parser implements ParseResult {
       is_unique,
       is_primary_key,
       is_unsigned,
-      default_value: undefined, // TODO support default value
+      default_value,
       references,
     }
   }
@@ -206,6 +211,25 @@ class Parser implements ParseResult {
       return formatEnum(name)
     }
     return name
+  }
+  parseDefaultValue(): string {
+    let line = this.peekLine()
+    let end: number
+    if (line[0] === '"') {
+      end = line.indexOf('"', 1) + 1
+    } else if (line[0] === "'") {
+      end = line.indexOf("'", 1) + 1
+    } else if (line[0] === '`') {
+      end = line.indexOf('`', 1) + 1
+    } else if (line.includes(' ')) {
+      end = line.indexOf(' ')
+    } else {
+      end = line.length - 1
+    }
+    let value = line.slice(0, end + 1)
+    line = line.replace(value, '').trim()
+    this.line_list[0] = line
+    return value
   }
   parseRelationType(): RelationType {
     let line = this.peekLine()
