@@ -155,9 +155,9 @@ user_id fk >- user.id
 
       expect(field_list[0].name).to.equals('user_id')
       expect(field_list[0].references).not.undefined
-      expect(field_list[0].references.table).to.equals('user')
-      expect(field_list[0].references.field).to.equals('id')
-      expect(field_list[0].references.type).to.equals('>-')
+      expect(field_list[0].references!.table).to.equals('user')
+      expect(field_list[0].references!.field).to.equals('id')
+      expect(field_list[0].references!.type).to.equals('>-')
     })
 
     it('should parse explicit reference without stating primary key', () => {
@@ -171,9 +171,9 @@ author_id fk >- user
 
       expect(field_list[0].name).to.equals('author_id')
       expect(field_list[0].references).not.undefined
-      expect(field_list[0].references.table).to.equals('user')
-      expect(field_list[0].references.field).to.equals('id')
-      expect(field_list[0].references.type).to.equals('>-')
+      expect(field_list[0].references!.table).to.equals('user')
+      expect(field_list[0].references!.field).to.equals('id')
+      expect(field_list[0].references!.type).to.equals('>-')
     })
 
     it('should parse explicit reference without table name nor field', () => {
@@ -187,9 +187,9 @@ user_id fk
 
       expect(field_list[0].name).to.equals('user_id')
       expect(field_list[0].references).not.undefined
-      expect(field_list[0].references.table).to.equals('user')
-      expect(field_list[0].references.field).to.equals('id')
-      expect(field_list[0].references.type).to.equals('>0-')
+      expect(field_list[0].references!.table).to.equals('user')
+      expect(field_list[0].references!.field).to.equals('id')
+      expect(field_list[0].references!.type).to.equals('>0-')
     })
   })
 
