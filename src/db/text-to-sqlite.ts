@@ -20,6 +20,7 @@ export function textToSqlite(text: string) {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined, // TODO support default value
         references: undefined,
       })
     }

@@ -162,6 +162,7 @@ class Parser implements ParseResult {
       is_unique,
       is_primary_key,
       is_unsigned,
+      default_value: undefined, // TODO support default value
       references,
     }
   }
@@ -279,6 +280,7 @@ export type Field = {
   is_null: boolean
   is_unsigned: boolean
   references: ForeignKeyReference | undefined
+  default_value: string | undefined
 }
 export type ForeignKeyReference = {
   type: RelationType

@@ -17,6 +17,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
       {
@@ -26,6 +27,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
     ]
@@ -47,6 +49,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
       {
@@ -56,6 +59,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
       {
@@ -65,6 +69,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
       {
@@ -74,6 +79,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
     ]
@@ -95,6 +101,7 @@ create table test (
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
       {
@@ -104,6 +111,7 @@ create table test (
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
       {
@@ -113,6 +121,7 @@ create table test (
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
       {
@@ -122,6 +131,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
     ]
@@ -141,6 +151,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
       {
@@ -150,6 +161,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
     ]
@@ -170,6 +182,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
       {
@@ -179,6 +192,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
     ]
@@ -199,6 +213,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
       {
@@ -208,6 +223,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
     ]
@@ -228,6 +244,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
       {
@@ -237,6 +254,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: { table: 'user', field: 'id', type: '>-' },
       },
       {
@@ -246,6 +264,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: { table: 'post', field: 'id', type: '>-' },
       },
     ]
@@ -265,6 +284,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: { table: 'user', field: 'id', type: '>-' },
       },
       {
@@ -274,6 +294,7 @@ create table test (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: { table: 'post', field: 'id', type: '>-' },
       },
     ]
@@ -295,6 +316,7 @@ CREATE TABLE test(
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: { table: 'user', field: 'id', type: '>-' },
       },
       {
@@ -304,6 +326,7 @@ CREATE TABLE test(
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: { table: 'post', field: 'id', type: '>-' },
       },
     ]
@@ -323,6 +346,7 @@ create table user (
         is_null: true,
         is_unique: true,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
       {
@@ -332,6 +356,7 @@ create table user (
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       },
     ]
@@ -368,6 +393,7 @@ CREATE UNIQUE INDEX \`user_username_unique\` on \`user\` (\`username\`)
             is_primary_key: true,
             is_unique: false,
             is_unsigned: false,
+            default_value: undefined,
             references: undefined,
           },
           {
@@ -377,6 +403,7 @@ CREATE UNIQUE INDEX \`user_username_unique\` on \`user\` (\`username\`)
             is_primary_key: false,
             is_unique: true,
             is_unsigned: false,
+            default_value: undefined,
             references: undefined,
           },
         ],
@@ -409,6 +436,7 @@ CREATE TABLE \`thread\` (
             is_primary_key: true,
             is_unique: false,
             is_unsigned: false,
+            default_value: undefined,
             references: undefined,
           },
           {
@@ -418,6 +446,50 @@ CREATE TABLE \`thread\` (
             is_primary_key: false,
             is_unique: false,
             is_unsigned: false,
+            default_value: undefined,
+            references: undefined,
+          },
+        ],
+      },
+    ]
+    expect(parseTableSchema(rows)).to.deep.equals(table_list)
+  })
+
+  it('should parse default value', () => {
+    const rows: SchemaRow[] = [
+      {
+        type: 'table',
+        name: 'user',
+        sql: /* sql */ `
+CREATE TABLE \`user\` (
+  \`role\` text DEFAULT 'guest'
+, \`created_at\` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+`,
+      },
+    ]
+    const table_list: Table[] = [
+      {
+        name: 'user',
+        field_list: [
+          {
+            name: 'role',
+            type: 'text',
+            is_null: true,
+            is_primary_key: false,
+            is_unique: false,
+            is_unsigned: false,
+            default_value: `'guest'`,
+            references: undefined,
+          },
+          {
+            name: 'created_at',
+            type: 'datetime',
+            is_null: false,
+            is_primary_key: false,
+            is_unique: false,
+            is_unsigned: false,
+            default_value: `CURRENT_TIMESTAMP`,
             references: undefined,
           },
         ],

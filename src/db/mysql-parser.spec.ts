@@ -28,53 +28,62 @@ CREATE TABLE \`user\` (
       is_null: false,
       is_unique: false,
       is_unsigned: true,
+      default_value: undefined,
       references: undefined,
     }
     expect(fields).deep.contains(field)
   })
 
   it('should parse varchar', () => {
-    expect(fields).deep.contains({
+    const field: Field = {
       name: 'domain',
       type: 'varchar(32)',
       is_primary_key: false,
       is_null: false,
       is_unique: false,
       is_unsigned: false,
+      default_value: undefined,
       references: undefined,
-    })
+    }
+    expect(fields).deep.contains(field)
   })
 
   it('should parse unique column', () => {
-    expect(fields).deep.contains({
+    const field: Field = {
       name: 'username',
       type: 'varchar(64)',
       is_primary_key: false,
       is_null: false,
       is_unique: true,
       is_unsigned: false,
+      default_value: undefined,
       references: undefined,
-    })
+    }
+    expect(fields).deep.contains(field)
   })
 
-  it('should parse datetime', () => {
-    expect(fields).deep.contains({
+  it('should parse datetime with default value', () => {
+    let field: Field = {
       name: 'created_at',
       type: 'datetime',
       is_primary_key: false,
       is_null: false,
       is_unique: false,
       is_unsigned: false,
+      default_value: 'current_timestamp()',
       references: undefined,
-    })
-    expect(fields).deep.contains({
+    }
+    expect(fields).deep.contains(field)
+    field = {
       name: 'updated_at',
       type: 'datetime',
       is_primary_key: false,
       is_null: false,
       is_unique: false,
       is_unsigned: false,
+      default_value: 'current_timestamp()',
       references: undefined,
-    })
+    }
+    expect(fields).deep.contains(field)
   })
 })

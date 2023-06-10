@@ -18,6 +18,7 @@ describe('auto-migrate TestSuit', () => {
               is_null: false,
               is_unique: false,
               is_unsigned: true,
+              default_value: undefined,
               references: { table: 'author', field: 'id', type: '>0-' },
             },
           ],
@@ -34,6 +35,7 @@ describe('auto-migrate TestSuit', () => {
               is_null: false,
               is_unique: false,
               is_unsigned: true,
+              default_value: undefined,
               references: { table: 'user', field: 'id', type: '>0-' },
             },
           ],
@@ -92,6 +94,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       }
       const score: Field = {
@@ -101,6 +104,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       }
       const existing_table_list: Table[] = [
@@ -145,6 +149,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       }
       const score: Field = {
@@ -154,6 +159,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       }
       const existing_table_list: Table[] = [
@@ -197,6 +203,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       }
       const bus_segment_id: Field = {
@@ -259,6 +266,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: { table: 'segment', field: 'id', type: '>-' },
       }
       const bus_segment_id: Field = {
@@ -321,6 +329,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        default_value: undefined,
         references: { table: 'user', field: 'id', type: '>-' },
       }
       const { up_lines, down_lines } = generateAutoMigrate({
@@ -348,6 +357,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: true,
         is_unsigned: false,
+        default_value: undefined,
         references: undefined,
       }
       const { up_lines, down_lines } = generateAutoMigrate({

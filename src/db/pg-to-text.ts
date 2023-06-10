@@ -166,6 +166,16 @@ WHERE constraint_name = ?
         }
       }
 
+      /* check default value */
+      result = await knex.raw(/* sql */ `
+SELECT column_default
+FROM information_schema.columns
+WHERE table_name = ?
+  AND column_name = ?
+;
+`)
+      const default_value = result.rows[0].column_default
+
       table.field_list.push({
         name: column_row.column_name,
         type,
@@ -180,6 +190,7 @@ WHERE constraint_name = ?
               field: fk_row.foreign_column_name,
             }
           : undefined,
+        default_value,
       })
     }
   }

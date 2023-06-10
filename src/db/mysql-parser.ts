@@ -31,6 +31,7 @@ export function parseCreateTable(sql: string): Field[] {
           is_null: !field.not_null,
           is_unique: false,
           references: undefined,
+          default_value: field.default_value,
         })
       }
     }
@@ -63,6 +64,22 @@ export function parseCreateTable(sql: string): Field[] {
     }
   }
   return field_list
+}
+
+function parseDefaultValue(sql: string) {
+  if (sql[0] === '"') {
+    let end = sql.indexOf('"', 1)
+    return sql.slice(0, end + 1)
+  }
+  if (sql[0] === "'") {
+    let end = sql.indexOf("'", 1)
+    return sql.slice(0, end + 1)
+  }
+  if (sql[0] === '`') {
+    let end = sql.indexOf('`', 1)
+    return sql.slice(0, end + 1)
+  }
+  return sql.match(/[\w-_()]+/)?.[0]
 }
 
 function nextPart(sql: string) {
@@ -115,6 +132,7 @@ type Statement =
       not_null: boolean
       auto_inc: boolean
       unsigned: boolean
+      default_value: string | undefined
       rest: string
     }
   | {
@@ -186,8 +204,13 @@ function parseColumnStatement(sql: string): Statement {
   }
 
   /* parse default value */
+  let default_value = undefined
   if (sql.startsWith('DEFAULT')) {
-    sql = nextPart(sql)
+    sql = sql.slice('DEFAULT'.length).trim()
+    default_value = parseDefaultValue(sql)
+    if (default_value) {
+      sql = sql.slice(default_value.length)
+    }
   }
 
   /* parse on update */
@@ -217,6 +240,7 @@ function parseColumnStatement(sql: string): Statement {
     unsigned,
     not_null,
     auto_inc,
+    default_value,
     rest: sql,
   }
 }

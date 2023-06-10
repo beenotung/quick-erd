@@ -127,6 +127,17 @@ export function parseCreateTable(sql: string): Field[] | null {
       rest = before + after
       lower = rest.toLowerCase()
     }
+    let default_value: string | undefined = undefined
+    if (lower.includes('default')) {
+      const start = lower.indexOf('default')
+      const end = start + 'default'.length
+      const before = rest.substring(0, start)
+      const after = rest.substring(end).trim()
+      default_value = parseDefaultValue(after)
+      if (default_value) {
+        rest = before + after.slice(default_value.length)
+      }
+    }
     if (lower.match(/check.*in.*/)) {
       let match = lower.match(/check(.*)/)?.[1].trim() || ''
       if (match.startsWith('(') && match.endsWith(')')) {
@@ -145,6 +156,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       is_null,
       is_unique,
       is_unsigned: false,
+      default_value,
       references,
     }
   })
@@ -206,6 +218,22 @@ function firstIndexOf(string: string, patterns: string[], offset = 0): number {
     .filter(index => index !== -1)
     .sort((a, b) => a - b)
   return index_list.length === 0 ? -1 : index_list[0]
+}
+
+function parseDefaultValue(sql: string) {
+  if (sql[0] === '"') {
+    let end = sql.indexOf('"', 1)
+    return sql.slice(0, end + 1)
+  }
+  if (sql[0] === "'") {
+    let end = sql.indexOf("'", 1)
+    return sql.slice(0, end + 1)
+  }
+  if (sql[0] === '`') {
+    let end = sql.indexOf('`', 1)
+    return sql.slice(0, end + 1)
+  }
+  return sql.match(/[\w-_()]+/)?.[0]
 }
 
 function parseName(sql: string) {
