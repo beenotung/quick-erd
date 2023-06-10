@@ -13,7 +13,7 @@ import {
   zoomToLine,
 } from './meta'
 
-function tableToString(table: Table): string {
+export function tableToString(table: Table): string {
   return `
 ${table.name}
 ${'-'.repeat(table.name.length)}
