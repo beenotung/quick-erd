@@ -148,4 +148,16 @@ is_staff BOOL
     expect(code).to.contains(`table.boolean('is_admin')`)
     expect(code).to.contains(`table.boolean('is_staff')`)
   })
+
+  it('should support default value', () => {
+    const text = `
+user
+----
+role text default 'guest'
+`
+
+    expect(textToKnex(text)).to.contains(
+      "table.text('role').notNullable().defaultTo('guest')",
+    )
+  })
 })

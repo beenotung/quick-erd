@@ -39,6 +39,10 @@ export type ${typeName} = {`
   ${field.name}: ${type}`
       }
 
+      if (field.default_value) {
+        tableTypes += ` // default: ${field.default_value}`
+      }
+
       if (field.references) {
         const typeName = toTypeName(field.references.table)
         let name = field.name.replace(/_id$/, '')

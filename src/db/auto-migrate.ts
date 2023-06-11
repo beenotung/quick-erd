@@ -13,6 +13,7 @@ import {
   toKnexCreateTableCode,
   toKnexCreateColumnCode,
   toKnexCreateColumnTypeCode,
+  toKnexDefaultValueCode,
   toKnexNullableCode,
 } from './text-to-knex'
 import { toSqliteColumnSql } from './text-to-sqlite'
@@ -569,6 +570,7 @@ function alterType(field: Field): string {
   let code = 'table'
   code += toKnexCreateColumnTypeCode(field)
   code += toKnexNullableCode(field)
+  code += toKnexDefaultValueCode(field)
   code += '.alter()'
   return code
 }

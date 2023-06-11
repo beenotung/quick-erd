@@ -464,6 +464,7 @@ CREATE TABLE \`thread\` (
 CREATE TABLE \`user\` (
   \`role\` text DEFAULT 'guest'
 , \`created_at\` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+, \`updated_at\` datetime default now() NOT NULL
 )
 `,
       },
@@ -490,6 +491,16 @@ CREATE TABLE \`user\` (
             is_unique: false,
             is_unsigned: false,
             default_value: `CURRENT_TIMESTAMP`,
+            references: undefined,
+          },
+          {
+            name: 'updated_at',
+            type: 'datetime',
+            is_null: false,
+            is_primary_key: false,
+            is_unique: false,
+            is_unsigned: false,
+            default_value: `now()`,
             references: undefined,
           },
         ],

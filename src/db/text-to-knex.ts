@@ -74,6 +74,10 @@ export function toKnexCreateColumnTypeCode(field: Field): string {
   return code
 }
 
+export function toKnexDefaultValueCode(field: Field): string {
+  return field.default_value ? `.defaultTo(${field.default_value})` : ''
+}
+
 export function toKnexNullableCode(field: Field): string {
   return field.is_null ? `.nullable()` : `.notNullable()`
 }
@@ -88,6 +92,7 @@ export function toKnexCreateColumnCode(field: Field): string {
 
   code += toKnexCreateColumnTypeCode(field)
   code += toKnexNullableCode(field)
+  code += toKnexDefaultValueCode(field)
 
   if (field.is_unique) {
     code += `.unique()`

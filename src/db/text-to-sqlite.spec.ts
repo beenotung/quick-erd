@@ -45,4 +45,16 @@ payload blob
     const up = textToSqlite(text).up
     expect(up).to.contains('payload blob not null')
   })
+
+  it('should support default value', () => {
+    const text = `
+user
+----
+score default 0
+role text default "guest"
+`
+    const up = textToSqlite(text).up
+    expect(up).to.contains('score integer not null default 0')
+    expect(up).to.contains('role text not null default "guest"')
+  })
 })

@@ -99,6 +99,10 @@ export function toSqliteColumnSql(field: Field): string {
     sql += ` unique`
   }
 
+  if (field.default_value) {
+    sql += ` default ${field.default_value}`
+  }
+
   if (enums) {
     sql += ` check(${field.name} in ${enums})`
   }

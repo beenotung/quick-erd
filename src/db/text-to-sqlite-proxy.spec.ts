@@ -24,4 +24,17 @@ nickname text
     const code = textToSqliteProxy(text)
     expect(code).to.contains(`['user', { field: 'id', table: 'user' }]`)
   })
+
+  it('should indicate default value as inline comment', () => {
+    const text = `
+user
+-
+score default 0
+role text default 'guest'
+`
+
+    const code = textToSqliteProxy(text)
+    expect(code).to.contains(`score: number // default: 0`)
+    expect(code).to.contains(`role: string // default: 'guest'`)
+  })
 })
