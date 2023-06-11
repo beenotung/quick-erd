@@ -125,7 +125,7 @@ class Parser implements ParseResult {
   }
   parseField(): Field {
     const field_name = this.parseName()
-    let type = defaultFieldType
+    let type = ''
     let is_null = false
     let is_unique = false
     let is_primary_key = false
@@ -156,9 +156,18 @@ class Parser implements ParseResult {
           references = this.parseForeignKeyReference(field_name)
           continue
         default:
+          if (type) {
+            console.debug('unexpected token:', {
+              field_name,
+              type,
+              token: name,
+            })
+            continue
+          }
           type = name
       }
     }
+    type ||= defaultFieldType
     this.skipLine()
     return {
       name: field_name,
@@ -200,7 +209,7 @@ class Parser implements ParseResult {
     if (match) {
       line = line.slice(match[0].length)
     }
-    match = line.match(/\w+\(.*?\)/) || line.match(/[a-zA-Z0-9_(),"']+/)
+    match = line.match(/^\w+\(.*?\)/) || line.match(/^[a-zA-Z0-9_(),"']+/)
     if (!match) {
       return
     }

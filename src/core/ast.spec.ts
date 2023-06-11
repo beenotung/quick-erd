@@ -349,20 +349,19 @@ username text not null
     expect(field_list[1].is_null).to.be.false
   })
 
-  it.only('should parse default value', () => {
+  it('should parse default value', () => {
     const text = `
 user
 ----
 id
 role text default 'guest'
 score real default 0
-created_at datetime CURRENT_TIMESTAMP
-updated_at datetime now()
+created_at datetime DEFAULT CURRENT_TIMESTAMP
+updated_at datetime default now()
 `
 
     const table = parseSingleTable(text)
     const { field_list } = table
-    console.log(field_list)
     expect(field_list).to.have.lengthOf(5)
 
     expect(field_list[0].name).to.equals('id')
