@@ -226,7 +226,7 @@ class Parser implements ParseResult {
     } else {
       end = line.length - 1
     }
-    let value = line.slice(0, end + 1)
+    const value = line.slice(0, end + 1)
     line = line.replace(value, '').trim()
     this.line_list[0] = line
     return value

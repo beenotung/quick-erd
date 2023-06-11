@@ -68,15 +68,15 @@ export function parseCreateTable(sql: string): Field[] {
 
 function parseDefaultValue(sql: string) {
   if (sql[0] === '"') {
-    let end = sql.indexOf('"', 1)
+    const end = sql.indexOf('"', 1)
     return sql.slice(0, end + 1)
   }
   if (sql[0] === "'") {
-    let end = sql.indexOf("'", 1)
+    const end = sql.indexOf("'", 1)
     return sql.slice(0, end + 1)
   }
   if (sql[0] === '`') {
-    let end = sql.indexOf('`', 1)
+    const end = sql.indexOf('`', 1)
     return sql.slice(0, end + 1)
   }
   return sql.match(/[\w-_()]+/)?.[0]
