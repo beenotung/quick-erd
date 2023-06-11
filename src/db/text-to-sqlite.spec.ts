@@ -21,6 +21,7 @@ status enum('pending','approved','rejected')
       "status text not null check(status in ('pending','approved','rejected'))",
     )
   })
+
   it('should support unique column', () => {
     const text = `
 user
@@ -34,6 +35,7 @@ domain text
     expect(up).to.contains('username text not null unique')
     expect(up).not.to.contains('domain text not null unique')
   })
+
   it('should support blob column', () => {
     const text = `
 content
