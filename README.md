@@ -20,7 +20,7 @@ quick and easy text-based ERD editor with drag and drop visualization
   - [x] plain/colorful table heading
   - [x] customize color theme
   - [x] keyboard shortcuts
-  - [x] auto save-and-restore with localStorag
+  - [x] auto save-and-restore with localStorage
   - [x] auto format the schema text
   - [x] auto normalize specified column
   - [x] auto avoid table overlapping visually
