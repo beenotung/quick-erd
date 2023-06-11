@@ -13,6 +13,7 @@ import {
   toKnexCreateTableCode,
   toKnexCreateColumnCode,
   toKnexCreateColumnTypeCode,
+  toKnexNullableCode,
 } from './text-to-knex'
 import { toSqliteColumnSql } from './text-to-sqlite'
 
@@ -567,11 +568,7 @@ function alterSqliteEnum(table: Table, field: Field): string {
 function alterType(field: Field): string {
   let code = 'table'
   code += toKnexCreateColumnTypeCode(field)
-  if (field.is_null) {
-    code += '.nullable()'
-  } else {
-    code += '.notNullable()'
-  }
+  code += toKnexNullableCode(field)
   code += '.alter()'
   return code
 }

@@ -74,6 +74,10 @@ export function toKnexCreateColumnTypeCode(field: Field): string {
   return code
 }
 
+export function toKnexNullableCode(field: Field): string {
+  return field.is_null ? `.nullable()` : `.notNullable()`
+}
+
 export function toKnexCreateColumnCode(field: Field): string {
   let code = `
       table`
@@ -83,12 +87,7 @@ export function toKnexCreateColumnCode(field: Field): string {
   }
 
   code += toKnexCreateColumnTypeCode(field)
-
-  if (field.is_null) {
-    code += `.nullable()`
-  } else {
-    code += `.notNullable()`
-  }
+  code += toKnexNullableCode(field)
 
   if (field.is_unique) {
     code += `.unique()`
