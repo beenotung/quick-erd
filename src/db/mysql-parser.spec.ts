@@ -9,7 +9,7 @@ CREATE TABLE \`user\` (
   \`username\` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
   \`domain\` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
   \`created_at\` datetime NOT NULL DEFAULT current_timestamp(),
-  \`updated_at\` datetime NOT NULL DEFAULT current_timestamp(),
+  \`updated_at\` datetime DEFAULT current_timestamp() NOT NULL,
   PRIMARY KEY (\`id\`),
   UNIQUE KEY \`username\` (\`username\`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci

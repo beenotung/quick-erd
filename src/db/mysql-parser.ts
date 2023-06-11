@@ -79,7 +79,9 @@ function parseDefaultValue(sql: string) {
     const end = sql.indexOf('`', 1)
     return sql.slice(0, end + 1)
   }
-  return sql.match(/[\w-_()]+/)?.[0]
+  const match = sql.match(/[\w-_()]+/)
+  if (!match) throw new Error('failed to parse default value')
+  return match[0]
 }
 
 function nextPart(sql: string) {
@@ -192,42 +194,53 @@ function parseColumnStatement(sql: string): Statement {
     sql = sql.slice('unsigned'.length).trim()
   }
 
-  /* parse text collection (encoding) */
-  if (sql.startsWith('COLLATE')) {
-    sql = nextPart(sql)
-  }
-
-  /* parse not null */
-  const not_null = sql.startsWith('NOT NULL')
-  if (not_null) {
-    sql = sql.slice('NOT NULL'.length).trim()
-  }
-
-  /* parse default value */
+  let not_null = false
+  let auto_inc = false
   let default_value = undefined
-  if (sql.startsWith('DEFAULT')) {
-    sql = sql.slice('DEFAULT'.length).trim()
-    default_value = parseDefaultValue(sql)
-    if (default_value) {
-      sql = sql.slice(default_value.length)
+
+  for (;;) {
+    /* parse text collection (encoding) */
+    if (sql.startsWith('COLLATE')) {
+      sql = nextPart(sql)
+      continue
     }
-  }
 
-  /* parse on update */
-  if (sql.startsWith('ON UPDATE')) {
-    sql = sql.slice(3)
-    sql = nextPart(sql)
-  }
+    /* parse not null */
+    if (sql.startsWith('NOT NULL')) {
+      not_null = true
+      sql = sql.slice('NOT NULL'.length).trim()
+      continue
+    }
 
-  /* parse auto increment */
-  const auto_inc = sql.startsWith('AUTO_INCREMENT')
-  if (auto_inc) {
-    sql = sql.slice('AUTO_INCREMENT'.length).trim()
-  }
+    /* parse default value */
+    if (sql.startsWith('DEFAULT')) {
+      sql = sql.slice('DEFAULT'.length).trim()
+      default_value = parseDefaultValue(sql)
+      sql = sql.slice(default_value.length).trim()
+      continue
+    }
 
-  const has_comment = sql.startsWith('COMMENT')
-  if (has_comment) {
-    sql = parseComment(sql)
+    /* parse on update */
+    if (sql.startsWith('ON UPDATE')) {
+      sql = sql.slice(3)
+      sql = nextPart(sql)
+      continue
+    }
+
+    /* parse auto increment */
+    if (sql.startsWith('AUTO_INCREMENT')) {
+      auto_inc = true
+      sql = sql.slice('AUTO_INCREMENT'.length).trim()
+      continue
+    }
+
+    const has_comment = sql.startsWith('COMMENT')
+    if (has_comment) {
+      sql = parseComment(sql)
+      continue
+    }
+
+    break
   }
 
   return {
