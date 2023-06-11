@@ -5,6 +5,29 @@ quick and easy text-based ERD editor with drag and drop visualization
 [![npm Package Version](https://img.shields.io/npm/v/quick-erd)](https://www.npmjs.com/package/quick-erd)
 [![npm Package Downloads](https://img.shields.io/npm/dy/quick-erd)](https://www.npmtrends.com/quick-erd)
 
+## Quick Reference
+
+### Web UI Diagram and Editor
+
+https://quick-erd.surge.sh
+
+### npx cli
+
+generate incremental migration:
+`auto-migrate`
+
+generate typed proxy:
+`erd-to-proxy`
+
+generate initial schema:
+`erd-to-sqlite`, `erd-to-knex`
+
+reverse-engineer erd text:
+`pg-to-erd`, `mysql-to-erd`, `sqlite-to-erd`
+
+format erd text:
+`format-erd`
+
 ## Features
 
 - [x] text-based erd editor
