@@ -13,11 +13,11 @@
     "importHelpers": false,
     "lib": [
       "dom",
-      "es2018"
+      "es2022"
     ],
     "module": "commonjs",
     "moduleResolution": "node",
-    "target": "es2017",
+    "target": "es2022",
     "outDir": "dist"
   },
   "include": [
