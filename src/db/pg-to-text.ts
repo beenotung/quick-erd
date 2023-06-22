@@ -158,7 +158,7 @@ FROM information_schema.check_constraints
 WHERE constraint_name = ?
 ;
 `,
-          `${table.name}_${column_row.column_name}_check`,
+          [`${table.name}_${column_row.column_name}_check`],
         )
         const check_clause = result.rows[0]?.check_clause
         if (check_clause) {
@@ -167,13 +167,16 @@ WHERE constraint_name = ?
       }
 
       /* check default value */
-      result = await knex.raw(/* sql */ `
+      result = await knex.raw(
+        /* sql */ `
 SELECT column_default
 FROM information_schema.columns
 WHERE table_name = ?
   AND column_name = ?
 ;
-`)
+`,
+        [table.name, column_row.column_name],
+      )
       const default_value = result.rows[0].column_default
 
       table.field_list.push({
