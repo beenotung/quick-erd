@@ -6,7 +6,7 @@ import { showCopyResult } from './copy'
 
 const separator = '-'.repeat(10)
 
-function parseColumns(part: string) {
+export function parseColumns(part: string) {
   return part
     .split('\n')
     .map(line => line.trim().split('.'))
@@ -16,7 +16,7 @@ function parseColumns(part: string) {
     })
 }
 
-function parseParts(text: string) {
+export function parseParts(text: string) {
   const parts = text.split(separator).map(part => part.trim())
   return parts
 }
