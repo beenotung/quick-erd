@@ -38,6 +38,17 @@ user.username
     const table_list = parse(schema_text).table_list
     const columns = parseColumns(parseParts(query_text)[0])
     const query = generateQuery(columns, table_list)
+    expect(query.tsType.trim()).to.equals(
+      `
+export type Row = {
+  name: string
+  product_id: number
+  order_id: number
+  courier_id: number
+  username: string
+}
+`.trim(),
+    )
     expect(query.sql.trim()).to.equals(
       /* sql */ `
 select
@@ -76,6 +87,16 @@ category.name
     const table_list = parse(schema_text).table_list
     const columns = parseColumns(parseParts(query_text)[0])
     const query = generateQuery(columns, table_list)
+    expect(query.tsType.trim()).to.equals(
+      `
+export type Row = {
+  id: number
+  product_name: string
+  category_id: number
+  category_name: string
+}
+`.trim(),
+    )
     expect(query.sql.trim()).to.equals(
       /* sql */ `
 select

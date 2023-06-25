@@ -9,6 +9,7 @@ export function generateQuery(
   const graph = new Schema.Graph(tableList)
   const select = new Query.Select(columns, graph)
   return {
+    tsType: selectToTsType(select),
     sql: selectToSQL(select),
   }
 }
@@ -136,7 +137,7 @@ namespace Query {
         forEachAlias(this.tableAliases.get(fieldNode.tableNode), tableAlias => {
           this.finalSelectFields.push({
             tableName: tableAlias || fieldNode.tableNode.table.name,
-            fieldName: fieldNode.field.name,
+            fieldNode: fieldNode,
             alias: this.fieldAliases.get(fieldNode) || null,
           })
         })
@@ -159,7 +160,7 @@ namespace Query {
   }
   export interface SelectField {
     tableName: string
-    fieldName: string
+    fieldNode: Schema.FieldNode
     alias: string | null
   }
 
@@ -246,13 +247,30 @@ function forEachAlias(
   aliases.forEach(alias => eachFn(alias))
 }
 
+function selectToTsType(select: Query.Select): string {
+  let tsType = 'export type Row = {'
+
+  select.finalSelectFields.forEach(selectField => {
+    const name = selectField.alias || selectField.fieldNode.field.name
+    let type = toTsType(selectField.fieldNode.field.type)
+    if (selectField.fieldNode.field.is_null) {
+      type = 'null | ' + type
+    }
+    tsType += `\n  ${name}: ${type}`
+  })
+
+  tsType += '\n}'
+  return tsType
+}
+
 function selectToSQL(select: Query.Select): string {
   if (select.finalSelectFields.length === 0) return ''
   let sql = `select`
-  select.finalSelectFields.forEach(field => {
-    sql += '\n, ' + field.tableName + '.' + field.fieldName
-    if (field.alias) {
-      sql += ' as ' + field.alias
+  select.finalSelectFields.forEach(selectField => {
+    sql +=
+      '\n, ' + selectField.tableName + '.' + selectField.fieldNode.field.name
+    if (selectField.alias) {
+      sql += ' as ' + selectField.alias
     }
   })
   // first select column don't need to start with comma
