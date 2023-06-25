@@ -246,7 +246,7 @@ function forEachAlias(
   aliases.forEach(alias => eachFn(alias))
 }
 
-function selectToSQL(select: Query.Select) {
+function selectToSQL(select: Query.Select): string {
   let sql = `select`
   select.finalSelectFields.forEach(field => {
     sql += '\n, ' + field.tableName + '.' + field.fieldName
