@@ -63,6 +63,22 @@ inner join shipment on shipment.order_id = order.id
 inner join user as courier on courier.id = shipment.courier_id
 `.trim(),
     )
+    expect(query.knex.trim()).to.equals(
+      `
+knex
+  .from('product')
+  .innerJoin('order', 'order.product_id', 'product.id')
+  .innerJoin('shipment', 'shipment.order_id', 'order.id')
+  .innerJoin('user as courier', 'courier.id', 'shipment.courier_id')
+  .select(
+    'product.name',
+    'order.product_id',
+    'shipment.order_id',
+    'shipment.courier_id',
+    'courier.username',
+  )
+`.trim(),
+    )
   })
 
   it('should alias column name when duplicated', () => {
@@ -106,6 +122,19 @@ select
 , category.name as category_name
 from product
 inner join category on category.id = product.category_id
+`.trim(),
+    )
+    expect(query.knex.trim()).to.equals(
+      `
+knex
+  .from('product')
+  .innerJoin('category', 'category.id', 'product.category_id')
+  .select(
+    'product.id',
+    'product.name as product_name',
+    'product.category_id',
+    'category.name as category_name',
+  )
 `.trim(),
     )
   })

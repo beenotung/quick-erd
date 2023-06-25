@@ -11,6 +11,7 @@ export function generateQuery(
   return {
     tsType: selectToTsType(select),
     sql: selectToSQL(select),
+    knex: selectToKnex(select),
   }
 }
 
@@ -303,4 +304,48 @@ function joinToSQL(select: Query.Select, join: Query.Join): string {
     })
   })
   return sql
+}
+
+function selectToKnex(select: Query.Select): string {
+  if (select.finalSelectFields.length === 0) return ''
+  let knex = `knex`
+  if (!select.fromTableNode) {
+    throw new Error('missing from table')
+  }
+  knex += `\n  .from('${select.fromTableNode.table.name}')`
+  for (const join of select.joinTables.values()) {
+    knex += joinToKnex(select, join)
+  }
+  knex += `\n  .select(`
+  select.finalSelectFields.forEach(selectField => {
+    let field = selectField.tableName + '.' + selectField.fieldNode.field.name
+    if (selectField.alias) {
+      field += ' as ' + selectField.alias
+    }
+    knex += `\n    '${field}',`
+  })
+  knex += `\n  )`
+  return knex
+}
+
+function joinToKnex(select: Query.Select, join: Query.Join): string {
+  const rightTableNode = join.rightFieldNode.tableNode
+  const leftTableNode = join.leftFieldNode.tableNode
+  let knex = ''
+  forEachAlias(select.tableAliases.get(rightTableNode), rightTableAlias => {
+    forEachAlias(select.tableAliases.get(leftTableNode), leftTableAlias => {
+      let rightTableName = rightTableNode.table.name
+      knex += `\n  .innerJoin('${rightTableName}`
+      if (rightTableAlias) {
+        rightTableName = rightTableAlias
+        knex += ` as ${rightTableName}`
+      }
+      knex += `'`
+      knex += `, '${rightTableName}.${join.rightFieldNode.field.name}'`
+      const leftTableName = leftTableAlias || leftTableNode.table.name
+      knex += `, '${leftTableName}.${join.leftFieldNode.field.name}'`
+      knex += `)`
+    })
+  })
+  return knex
 }
