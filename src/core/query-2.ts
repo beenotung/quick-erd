@@ -15,17 +15,19 @@ export function generateQuery(
 
 namespace Query {
   export class Select {
-    selectFieldNodes: Schema.FieldNode[]
+    private selectFieldNodes: Schema.FieldNode[]
     fromTableNode?: Schema.TableNode
     joinTables = new Map<Schema.TableNode, Join>()
     tableAliases = new Map<Schema.TableNode, Set<string>>()
     fieldAliases = new Map<Schema.FieldNode, string>()
+    finalSelectFields: SelectField[] = []
     constructor(columns: Column[], public graph: Schema.Graph) {
       this.selectFieldNodes = columns.map(column =>
         graph.getTable(column.table).getField(column.field),
       )
       this.findConnections()
       this.deduplicateFieldNames()
+      this.makeSelectFields()
     }
     findConnections() {
       const pendingFieldNodes = new Set(this.selectFieldNodes)
@@ -129,6 +131,17 @@ namespace Query {
         })
       }
     }
+    makeSelectFields() {
+      this.selectFieldNodes.forEach(fieldNode => {
+        forEachAlias(this.tableAliases.get(fieldNode.tableNode), tableAlias => {
+          this.finalSelectFields.push({
+            tableName: tableAlias || fieldNode.tableNode.table.name,
+            fieldName: fieldNode.field.name,
+            alias: this.fieldAliases.get(fieldNode) || null,
+          })
+        })
+      })
+    }
   }
   export class DisconnectedError extends Error {
     constructor(public pendingFieldNodes: Schema.FieldNode[]) {
@@ -144,15 +157,10 @@ namespace Query {
       )
     }
   }
-  export class SelectField {
-    tsType: string
-    alias?: string
-    constructor(public fieldNode: Schema.FieldNode) {
-      this.tsType = toTsType(this.fieldNode.field.type)
-      if (this.fieldNode.field.is_null) {
-        this.tsType = 'null | ' + this.tsType
-      }
-    }
+  export interface SelectField {
+    tableName: string
+    fieldName: string
+    alias: string | null
   }
 
   export interface Join {
@@ -240,15 +248,11 @@ function forEachAlias(
 
 function selectToSQL(select: Query.Select) {
   let sql = `select`
-  select.selectFieldNodes.forEach(fieldNode => {
-    forEachAlias(select.tableAliases.get(fieldNode.tableNode), tableAlias => {
-      const tableName = tableAlias || fieldNode.tableNode.table.name
-      sql += '\n, ' + tableName + '.' + fieldNode.field.name
-      const fieldAlias = select.fieldAliases.get(fieldNode)
-      if (fieldAlias) {
-        sql += ' as ' + fieldAlias
-      }
-    })
+  select.finalSelectFields.forEach(field => {
+    sql += '\n, ' + field.tableName + '.' + field.fieldName
+    if (field.alias) {
+      sql += ' as ' + field.alias
+    }
   })
   // first select column don't need to start with comma
   sql = sql.replace(', ', '  ')
