@@ -9,7 +9,7 @@ export function generateQuery(
   const graph = new Schema.Graph(tableList)
   const select = new Query.Select(columns, graph)
   return {
-    sql: SQL.fromSelect(select),
+    sql: selectToSQL(select),
   }
 }
 
@@ -161,62 +161,6 @@ namespace Query {
   }
 }
 
-namespace SQL {
-  export function fromSelect(select: Query.Select) {
-    let sql = `select`
-    select.selectFieldNodes.forEach(fieldNode => {
-      forEachAlias(select.tableAliases.get(fieldNode.tableNode), tableAlias => {
-        const tableName = tableAlias || fieldNode.tableNode.table.name
-        sql += '\n, ' + tableName + '.' + fieldNode.field.name
-        const fieldAlias = select.fieldAliases.get(fieldNode)
-        if (fieldAlias) {
-          sql += ' as ' + fieldAlias
-        }
-      })
-    })
-    // first select column don't need to start with comma
-    sql = sql.replace(', ', '  ')
-    if (!select.fromTableNode) {
-      throw new Error('missing from table')
-    }
-    sql += '\nfrom ' + select.fromTableNode.table.name
-    for (const join of select.joinTables.values()) {
-      sql += fromJoin(select, join)
-    }
-    return sql
-  }
-  export function fromJoin(select: Query.Select, join: Query.Join): string {
-    const rightTableNode = join.rightFieldNode.tableNode
-    const leftTableNode = join.leftFieldNode.tableNode
-    let sql = ''
-    forEachAlias(select.tableAliases.get(rightTableNode), rightTableAlias => {
-      forEachAlias(select.tableAliases.get(leftTableNode), leftTableAlias => {
-        let rightTableName = rightTableNode.table.name
-        sql += '\ninner join ' + rightTableName
-        if (rightTableAlias) {
-          rightTableName = rightTableAlias
-          sql += ' as ' + rightTableName
-        }
-        sql += ' on ' + rightTableName + '.' + join.rightFieldNode.field.name
-        const leftTableName = leftTableAlias || leftTableNode.table.name
-        sql += ' = ' + leftTableName + '.' + join.leftFieldNode.field.name
-      })
-    })
-    return sql
-  }
-}
-
-function forEachAlias(
-  aliases: Set<string> | undefined,
-  eachFn: (alias: string | null) => void,
-) {
-  if (!aliases || aliases.size === 0) {
-    eachFn(null)
-    return
-  }
-  aliases.forEach(alias => eachFn(alias))
-}
-
 namespace Schema {
   export class Graph {
     private tableNodes: Map<string, TableNode>
@@ -281,4 +225,59 @@ namespace Schema {
     toFieldNode: FieldNode
     alias: string | null
   }
+}
+
+function forEachAlias(
+  aliases: Set<string> | undefined,
+  eachFn: (alias: string | null) => void,
+) {
+  if (!aliases || aliases.size === 0) {
+    eachFn(null)
+    return
+  }
+  aliases.forEach(alias => eachFn(alias))
+}
+
+function selectToSQL(select: Query.Select) {
+  let sql = `select`
+  select.selectFieldNodes.forEach(fieldNode => {
+    forEachAlias(select.tableAliases.get(fieldNode.tableNode), tableAlias => {
+      const tableName = tableAlias || fieldNode.tableNode.table.name
+      sql += '\n, ' + tableName + '.' + fieldNode.field.name
+      const fieldAlias = select.fieldAliases.get(fieldNode)
+      if (fieldAlias) {
+        sql += ' as ' + fieldAlias
+      }
+    })
+  })
+  // first select column don't need to start with comma
+  sql = sql.replace(', ', '  ')
+  if (!select.fromTableNode) {
+    throw new Error('missing from table')
+  }
+  sql += '\nfrom ' + select.fromTableNode.table.name
+  for (const join of select.joinTables.values()) {
+    sql += joinToSQL(select, join)
+  }
+  return sql
+}
+
+function joinToSQL(select: Query.Select, join: Query.Join): string {
+  const rightTableNode = join.rightFieldNode.tableNode
+  const leftTableNode = join.leftFieldNode.tableNode
+  let sql = ''
+  forEachAlias(select.tableAliases.get(rightTableNode), rightTableAlias => {
+    forEachAlias(select.tableAliases.get(leftTableNode), leftTableAlias => {
+      let rightTableName = rightTableNode.table.name
+      sql += '\ninner join ' + rightTableName
+      if (rightTableAlias) {
+        rightTableName = rightTableAlias
+        sql += ' as ' + rightTableName
+      }
+      sql += ' on ' + rightTableName + '.' + join.rightFieldNode.field.name
+      const leftTableName = leftTableAlias || leftTableNode.table.name
+      sql += ' = ' + leftTableName + '.' + join.leftFieldNode.field.name
+    })
+  })
+  return sql
 }
