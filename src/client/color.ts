@@ -3,42 +3,13 @@ import { ErdInputController } from './erd-input'
 const { random, floor } = Math
 
 export class ColorController {
-  textBgColor = new ColorInput(this.root, 'text-bg-color', {
-    getEffectiveColor: () =>
-      getComputedStyle(this.targets.editor).backgroundColor,
-    onColorChanged: color => this.inputController.setTextBgColor(color),
-  })
-  textColor = new ColorInput(this.root, 'text-color', {
-    getEffectiveColor: () => getComputedStyle(this.targets.input).color,
-    onColorChanged: color => this.inputController.setTextColor(color),
-  })
-  diagramBgColor = new ColorInput(this.root, 'diagram-bg-color', {
-    getEffectiveColor: () =>
-      getComputedStyle(this.targets.diagram).backgroundColor,
-    onColorChanged: color => this.inputController.setDiagramBgColor(color),
-  })
-  diagramTextColor = new ColorInput(this.root, 'diagram-text-color', {
-    getEffectiveColor: () =>
-      getComputedStyle(this.targets.diagram).backgroundColor,
-    onColorChanged: color => this.inputController.setDiagramTextColor(color),
-  })
-  tableBgColor = new ColorInput(this.root, 'table-bg-color', {
-    getEffectiveColor: () =>
-      getComputedStyle(this.targets.tableStub).backgroundColor,
-    onColorChanged: color => this.inputController.setTableBgColor(color),
-  })
-  tableTextColor = new ColorInput(this.root, 'table-text-color', {
-    getEffectiveColor: () => getComputedStyle(this.targets.tableStub).color,
-    onColorChanged: color => this.inputController.setTableTextColor(color),
-  })
-  inputs = [
-    this.textBgColor,
-    this.textColor,
-    this.diagramBgColor,
-    this.diagramTextColor,
-    this.tableBgColor,
-    this.tableTextColor,
-  ]
+  textBgColor: ColorInput
+  textColor: ColorInput
+  diagramBgColor: ColorInput
+  diagramTextColor: ColorInput
+  tableBgColor: ColorInput
+  tableTextColor: ColorInput
+  inputs: ColorInput[]
   constructor(
     public root: HTMLElement,
     public targets: {
@@ -49,6 +20,43 @@ export class ColorController {
     },
     public inputController: ErdInputController,
   ) {
+    this.textBgColor = new ColorInput(this.root, 'text-bg-color', {
+      getEffectiveColor: () =>
+        getComputedStyle(this.targets.editor).backgroundColor,
+      onColorChanged: color => this.inputController.setTextBgColor(color),
+    })
+    this.textColor = new ColorInput(this.root, 'text-color', {
+      getEffectiveColor: () => getComputedStyle(this.targets.input).color,
+      onColorChanged: color => this.inputController.setTextColor(color),
+    })
+    this.diagramBgColor = new ColorInput(this.root, 'diagram-bg-color', {
+      getEffectiveColor: () =>
+        getComputedStyle(this.targets.diagram).backgroundColor,
+      onColorChanged: color => this.inputController.setDiagramBgColor(color),
+    })
+    this.diagramTextColor = new ColorInput(this.root, 'diagram-text-color', {
+      getEffectiveColor: () =>
+        getComputedStyle(this.targets.diagram).backgroundColor,
+      onColorChanged: color => this.inputController.setDiagramTextColor(color),
+    })
+    this.tableBgColor = new ColorInput(this.root, 'table-bg-color', {
+      getEffectiveColor: () =>
+        getComputedStyle(this.targets.tableStub).backgroundColor,
+      onColorChanged: color => this.inputController.setTableBgColor(color),
+    })
+    this.tableTextColor = new ColorInput(this.root, 'table-text-color', {
+      getEffectiveColor: () => getComputedStyle(this.targets.tableStub).color,
+      onColorChanged: color => this.inputController.setTableTextColor(color),
+    })
+    this.inputs = [
+      this.textBgColor,
+      this.textColor,
+      this.diagramBgColor,
+      this.diagramTextColor,
+      this.tableBgColor,
+      this.tableTextColor,
+    ]
+
     this.initInputValues()
   }
   resetColors() {

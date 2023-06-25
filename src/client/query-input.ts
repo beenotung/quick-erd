@@ -6,7 +6,7 @@ import { showCopyResult } from './copy'
 
 const separator = '-'.repeat(10)
 
-export function parseColumns(part: string) {
+export function parseColumns(part: string): Column[] {
   return part
     .split('\n')
     .map(line => line.trim().split('.'))
@@ -49,15 +49,17 @@ function isColumnsSame(newColumns: Column[], oldColumns: Column[]): boolean {
 }
 
 export class QueryOutputControl {
-  private checkbox = this.fieldset.querySelector(
-    'input[type=checkbox]',
-  ) as HTMLInputElement
+  private checkbox: HTMLInputElement
 
   constructor(
     private fieldset: HTMLFieldSetElement,
     private queryInputController: QueryInputController,
     private getText: () => string | undefined,
   ) {
+    this.checkbox = this.fieldset.querySelector(
+      'input[type=checkbox]',
+    ) as HTMLInputElement
+
     const id = this.fieldset.id
     const key = id + 'Enabled'
     const stored = new StoredBoolean(key, true)
@@ -85,28 +87,33 @@ export class QueryOutputControl {
 }
 
 export class QueryInputController {
-  private columns = parseColumns(this.getParts()[0])
-  private resultRowType = new QueryOutputControl(
-    querySelector(document.body, '#resultRowType'),
-    this,
-    () => this.getQuery().tsType,
-  )
-  private sqlQuery = new QueryOutputControl(
-    querySelector(document.body, '#sqlQuery'),
-    this,
-    () => this.getQuery().sql,
-  )
-  private knexQuery = new QueryOutputControl(
-    querySelector(document.body, '#knexQuery'),
-    this,
-    () => this.getQuery().knex,
-  )
+  private columns: Column[]
+  private resultRowType: QueryOutputControl
+  private sqlQuery: QueryOutputControl
+  private knexQuery: QueryOutputControl
   private lastQuery?: ReturnType<typeof generateQuery>
   constructor(
     private input: HTMLTextAreaElement,
     private stored: StoredString,
     private getTableList: () => ParseResult['table_list'],
-  ) {}
+  ) {
+    this.columns = parseColumns(this.getParts()[0])
+    this.resultRowType = new QueryOutputControl(
+      querySelector(document.body, '#resultRowType'),
+      this,
+      () => this.getQuery().tsType,
+    )
+    this.sqlQuery = new QueryOutputControl(
+      querySelector(document.body, '#sqlQuery'),
+      this,
+      () => this.getQuery().sql,
+    )
+    this.knexQuery = new QueryOutputControl(
+      querySelector(document.body, '#knexQuery'),
+      this,
+      () => this.getQuery().knex,
+    )
+  }
 
   copy(text: string) {
     const input = this.input

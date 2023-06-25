@@ -30,7 +30,7 @@ export class DiagramController {
   tableMap = new Map<string, TableController>()
   maxZIndex = 0
   zoom = new StoredNumber('zoom', 1)
-  barRadius = this.calcBarRadius()
+  barRadius: number
 
   isDetailMode = new StoredBoolean('is_detail_mode', true)
 
@@ -48,6 +48,7 @@ export class DiagramController {
     public colorController: ColorController,
     public queryController: QueryInputController,
   ) {
+    this.barRadius = this.calcBarRadius()
     this.fontSizeSpan = this.querySelector('#font-size')
     this.message = this.querySelector('.message')
     this.tablesContainer = new TablesContainer(
@@ -510,8 +511,8 @@ function isPointInside(rect: RectCorner, x: number, y: number): boolean {
 }
 
 class TableController {
-  translateX = new StoredNumber(this.data.name + '-x', 0)
-  translateY = new StoredNumber(this.data.name + '-y', 0)
+  translateX: StoredNumber
+  translateY: StoredNumber
   // self_field + table + other_field -> line
   _lineMap = new Map<string, LineController>()
   reverseLineSet = new Set<LineController>()
@@ -545,6 +546,9 @@ class TableController {
     public div: HTMLDivElement,
     public data: Table,
   ) {
+    this.translateX = new StoredNumber(this.data.name + '-x', 0)
+    this.translateY = new StoredNumber(this.data.name + '-y', 0)
+
     this.div.innerHTML = /* html */ `
 <div class='table-title'>${data.name}</div>
 <table>
@@ -811,9 +815,9 @@ type LineReference = {
   field: string
 }
 class LineController {
-  line = this.makePath()
-  head = this.makePath()
-  tail = this.makePath()
+  line: SVGPathElement
+  head: SVGPathElement
+  tail: SVGPathElement
 
   constructor(
     public diagram: DiagramController,
@@ -822,6 +826,9 @@ class LineController {
     public to: LineReference,
     public relation: RelationType,
   ) {
+    this.line = this.makePath()
+    this.head = this.makePath()
+    this.tail = this.makePath()
     this.render = this.render.bind(this)
     from.table.onMoveListenerSet.add(this.render)
     to.table.onMoveListenerSet.add(this.render)

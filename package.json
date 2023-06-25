@@ -41,7 +41,7 @@
     "type:module": "node set-type.js module",
     "type:commonjs": "node set-type.js commonjs",
     "build:client": "mkdir -p build/icons && run-p build:client:*",
-    "build:client:js": "esbuild --target=es2020 --bundle src/client/main.ts --outfile=build/main.js",
+    "build:client:js": "esbuild --target=es2022 --bundle src/client/main.ts --outfile=build/main.js",
     "build:client:css": "sass src/client/style.scss:build/style.css",
     "build:client:html": "cp src/client/index.html build/index.html",
     "build:client:icon": "cp lib/ionicons/*.svg build/icons/",
