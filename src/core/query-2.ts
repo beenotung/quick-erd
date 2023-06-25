@@ -19,11 +19,13 @@ namespace Query {
     fromTableNode?: Schema.TableNode
     joinTables = new Map<Schema.TableNode, Join>()
     tableAliases = new Map<Schema.TableNode, Set<string>>()
+    fieldAliases = new Map<Schema.FieldNode, string>()
     constructor(columns: Column[], public graph: Schema.Graph) {
       this.selectFieldNodes = columns.map(column =>
         graph.getTable(column.table).getField(column.field),
       )
       this.findConnections()
+      this.deduplicateFieldNames()
     }
     findConnections() {
       const pendingFieldNodes = new Set(this.selectFieldNodes)
@@ -53,9 +55,7 @@ namespace Query {
         referenceByFieldNode,
         referenceBy,
       ] of selectTableNode.referenceByFields) {
-        if (!this.selectFieldNodes.includes(referenceByFieldNode)) {
-          continue
-        }
+        if (!this.selectFieldNodes.includes(referenceByFieldNode)) continue
         if (
           referenceByFieldNode.tableNode == this.fromTableNode ||
           this.joinTables.has(referenceByFieldNode.tableNode)
@@ -104,6 +104,31 @@ namespace Query {
         this.tableAliases.set(tableNode, new Set([alias]))
       }
     }
+    deduplicateFieldNames() {
+      const fieldNodesByName = new Map<string, Set<Schema.FieldNode>>()
+      this.selectFieldNodes.forEach(fieldNode => {
+        const name = fieldNode.field.name
+        const fieldNodes = fieldNodesByName.get(name)
+        if (fieldNodes) {
+          fieldNodes.add(fieldNode)
+        } else {
+          fieldNodesByName.set(name, new Set([fieldNode]))
+        }
+      })
+      for (const fieldNodes of fieldNodesByName.values()) {
+        if (fieldNodes.size < 2) continue
+        fieldNodes.forEach(fieldNode => {
+          forEachAlias(
+            this.tableAliases.get(fieldNode.tableNode),
+            tableAlias => {
+              const tableName = tableAlias || fieldNode.tableNode.table.name
+              const fieldAlias = tableName + '_' + fieldNode.field.name
+              this.fieldAliases.set(fieldNode, fieldAlias)
+            },
+          )
+        })
+      }
+    }
   }
   export class DisconnectedError extends Error {
     constructor(public pendingFieldNodes: Schema.FieldNode[]) {
@@ -143,6 +168,10 @@ namespace SQL {
       forEachAlias(select.tableAliases.get(fieldNode.tableNode), tableAlias => {
         const tableName = tableAlias || fieldNode.tableNode.table.name
         sql += '\n, ' + tableName + '.' + fieldNode.field.name
+        const fieldAlias = select.fieldAliases.get(fieldNode)
+        if (fieldAlias) {
+          sql += ' as ' + fieldAlias
+        }
       })
     })
     // first select column don't need to start with comma

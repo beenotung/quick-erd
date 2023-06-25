@@ -53,4 +53,39 @@ inner join user as courier on courier.id = shipment.courier_id
 `.trim(),
     )
   })
+
+  it('should alias column name when duplicated', () => {
+    const schema_text = `
+product
+-------
+id
+name text
+category_id fk
+
+category
+--------
+id
+name text
+`.trim()
+    const query_text = `
+product.id
+product.name
+product.category_id
+category.name
+`.trim()
+    const table_list = parse(schema_text).table_list
+    const columns = parseColumns(parseParts(query_text)[0])
+    const query = generateQuery(columns, table_list)
+    expect(query.sql.trim()).to.equals(
+      /* sql */ `
+select
+  product.id
+, product.name as product_name
+, product.category_id
+, category.name as category_name
+from product
+inner join category on category.id = product.category_id
+`.trim(),
+    )
+  })
 })
