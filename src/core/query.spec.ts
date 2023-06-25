@@ -1,11 +1,11 @@
 import { expect } from 'chai'
 import { parseColumns, parseParts } from '../client/query-input'
-import { Table, parse } from './ast'
-import { Column } from './query'
+import { parse } from './ast'
 import { generateQuery } from './query-2'
 
 describe('query builder TestSuit', () => {
-  const schema_text = `
+  it('should join tables according to selected columns', () => {
+    const schema_text = `
 user
 ----
 id
@@ -28,20 +28,15 @@ id
 order_id fk
 courier_id fk >0- user
 `.trim()
-  const query_text = `
+    const query_text = `
 product.name
 order.product_id
 shipment.order_id
 shipment.courier_id
 user.username
 `.trim()
-  let table_list: Table[]
-  let columns: Column[]
-  before(() => {
-    table_list = parse(schema_text).table_list
-    columns = parseColumns(parseParts(query_text)[0])
-  })
-  it('should join tables according to selected columns', () => {
+    const table_list = parse(schema_text).table_list
+    const columns = parseColumns(parseParts(query_text)[0])
     const query = generateQuery(columns, table_list)
     expect(query.sql.trim()).to.equals(
       /* sql */ `
