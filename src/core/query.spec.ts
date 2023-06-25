@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { parseColumns, parseParts } from '../client/query-input'
 import { parse } from './ast'
-import { generateQuery } from './query-2'
+import { generateQuery } from './query'
 
 describe('query builder TestSuit', () => {
   it('should join tables according to selected columns', () => {

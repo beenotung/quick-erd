@@ -1,5 +1,5 @@
 import { ParseResult } from '../core/ast'
-import { Column, findColumnIndex, generateQuery } from '../core/query'
+import { Column, generateQuery } from '../core/query'
 import { StoredBoolean, StoredString } from './storage'
 import { querySelector } from './dom'
 import { showCopyResult } from './copy'
@@ -48,6 +48,15 @@ function isColumnsSame(newColumns: Column[], oldColumns: Column[]): boolean {
   return true
 }
 
+function findColumnIndex(
+  columns: Column[],
+  table: string,
+  field: string,
+): number {
+  return columns.findIndex(
+    column => column.table === table && column.field === field,
+  )
+}
 export class QueryOutputControl {
   private checkbox: HTMLInputElement
 
