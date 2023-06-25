@@ -247,6 +247,7 @@ function forEachAlias(
 }
 
 function selectToSQL(select: Query.Select): string {
+  if (select.finalSelectFields.length === 0) return ''
   let sql = `select`
   select.finalSelectFields.forEach(field => {
     sql += '\n, ' + field.tableName + '.' + field.fieldName
