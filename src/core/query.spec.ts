@@ -88,4 +88,41 @@ inner join category on category.id = product.category_id
 `.trim(),
     )
   })
+
+  it.skip('should the table field multiple times when joined by multiple foreign keys', () => {
+    const schema_text = `
+post
+----
+id
+author_id fk user >- user
+editor_id fk user >- user
+
+user
+----
+id
+username text
+`.trim()
+    const query_text = `
+post.id
+post.author_id
+post.editor_id
+user.username
+`.trim()
+    const table_list = parse(schema_text).table_list
+    const columns = parseColumns(parseParts(query_text)[0])
+    const query = generateQuery(columns, table_list)
+    expect(query.sql.trim()).to.equals(
+      /* sql */ `
+select
+  post.id
+, post.author_id
+, post.editor_id
+, author.username as author_username
+, editor.username as editor_username
+from product
+inner join user as author on author.id = post.author_id
+inner join user as editor on editor.id = post.editor_id
+`.trim(),
+    )
+  })
 })
