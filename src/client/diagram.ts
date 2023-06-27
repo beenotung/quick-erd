@@ -645,6 +645,12 @@ class TableController {
   <td class='table-field-type'>${type}</td>
   <td class='table-field-null'>${null_text}</td>
 `
+        if (type.match(/^enum\(/i)) {
+          const td =
+            tr.querySelector<HTMLTableCellElement>('.table-field-type')!
+          td.title = type
+          td.textContent = 'enum'
+        }
 
         const checkbox = tr.querySelector(
           'input[type=checkbox]',
