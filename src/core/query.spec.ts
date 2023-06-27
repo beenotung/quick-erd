@@ -139,7 +139,7 @@ knex
     )
   })
 
-  it.skip('should the table field multiple times when joined by multiple foreign keys', () => {
+  it.skip('should join the table field multiple times when joined by multiple foreign keys', () => {
     const schema_text = `
 post
 ----
@@ -169,7 +169,7 @@ select
 , post.editor_id
 , author.username as author_username
 , editor.username as editor_username
-from product
+from post
 inner join user as author on author.id = post.author_id
 inner join user as editor on editor.id = post.editor_id
 `.trim(),
