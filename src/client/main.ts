@@ -252,7 +252,7 @@ reply
 -----
 id pk
 # column "{table}_id" ends with "fk" will be interpreted as implicitly referencing to
-# "{table}.id" with ">-" relationship
+# "{table}.id" with ">0-" relationship
 post_id fk # e.g. post_id references to post.id
 user_id fk
 reply_id null fk # it's fine to include other modifiers in the middle
