@@ -41,41 +41,41 @@ user.username
     expect(query.tsType.trim()).to.equals(
       `
 export type Row = {
-  name: string
-  product_id: number
   order_id: number
   courier_id: number
-  username: string
+  product_id: number
+  courier_username: string
+  product_name: string
 }
 `.trim(),
     )
     expect(query.sql.trim()).to.equals(
       /* sql */ `
 select
-  product.name
-, order.product_id
-, shipment.order_id
+  shipment.order_id
 , shipment.courier_id
-, courier.username
-from product
-inner join order on order.product_id = product.id
-inner join shipment on shipment.order_id = order.id
+, order.product_id
+, courier.username as courier_username
+, product.name as product_name
+from shipment
+inner join order on order.id = shipment.order_id
 inner join user as courier on courier.id = shipment.courier_id
+inner join product on product.id = order.product_id
 `.trim(),
     )
     expect(query.knex.trim()).to.equals(
       `
 knex
-  .from('product')
-  .innerJoin('order', 'order.product_id', 'product.id')
-  .innerJoin('shipment', 'shipment.order_id', 'order.id')
+  .from('shipment')
+  .innerJoin('order', 'order.id', 'shipment.order_id')
   .innerJoin('user as courier', 'courier.id', 'shipment.courier_id')
+  .innerJoin('product', 'product.id', 'order.product_id')
   .select(
-    'product.name',
-    'order.product_id',
     'shipment.order_id',
     'shipment.courier_id',
-    'courier.username',
+    'order.product_id',
+    'courier.username as courier_username',
+    'product.name as product_name',
   )
 `.trim(),
     )
@@ -106,7 +106,7 @@ category.name
     expect(query.tsType.trim()).to.equals(
       `
 export type Row = {
-  id: number
+  product_id: number
   product_name: string
   category_id: number
   category_name: string
@@ -116,7 +116,7 @@ export type Row = {
     expect(query.sql.trim()).to.equals(
       /* sql */ `
 select
-  product.id
+  product.id as product_id
 , product.name as product_name
 , product.category_id
 , category.name as category_name
@@ -130,7 +130,7 @@ knex
   .from('product')
   .innerJoin('category', 'category.id', 'product.category_id')
   .select(
-    'product.id',
+    'product.id as product_id',
     'product.name as product_name',
     'product.category_id',
     'category.name as category_name',
@@ -139,7 +139,7 @@ knex
     )
   })
 
-  it.skip('should join the table field multiple times when joined by multiple foreign keys', () => {
+  it('should select the table field multiple times with alias when joined by multiple foreign keys', () => {
     const schema_text = `
 post
 ----
@@ -161,10 +161,21 @@ user.username
     const table_list = parse(schema_text).table_list
     const columns = parseColumns(parseParts(query_text)[0])
     const query = generateQuery(columns, table_list)
+    expect(query.tsType.trim()).to.equals(
+      `
+export type Row = {
+  post_id: number
+  author_id: number
+  editor_id: number
+  author_username: string
+  editor_username: string
+}
+`.trim(),
+    )
     expect(query.sql.trim()).to.equals(
       /* sql */ `
 select
-  post.id
+  post.id as post_id
 , post.author_id
 , post.editor_id
 , author.username as author_username
@@ -172,6 +183,21 @@ select
 from post
 inner join user as author on author.id = post.author_id
 inner join user as editor on editor.id = post.editor_id
+`.trim(),
+    )
+    expect(query.knex.trim()).to.equals(
+      `
+knex
+  .from('post')
+  .innerJoin('user as author', 'author.id', 'post.author_id')
+  .innerJoin('user as editor', 'editor.id', 'post.editor_id')
+  .select(
+    'post.id as post_id',
+    'post.author_id',
+    'post.editor_id',
+    'author.username as author_username',
+    'editor.username as editor_username',
+  )
 `.trim(),
     )
   })

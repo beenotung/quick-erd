@@ -1,4 +1,4 @@
-import { Field, ParseResult, Table } from './ast'
+import type * as ast from './ast'
 import { toTsType } from './ts-type'
 
 export type Column = {
@@ -6,12 +6,17 @@ export type Column = {
   field: string
 }
 
-export function generateQuery(
-  columns: Column[],
-  tableList: ParseResult['table_list'],
-) {
-  const graph = new Schema.Graph(tableList)
-  const select = new Query.Select(columns, graph)
+export function generateQuery(columns: Column[], tableList: ast.Table[]) {
+  const schema = buildSchema(tableList)
+  const selection = makeJoinSelection(schema, columns)
+  markFieldAliases(selection.selectedFields)
+  const fromTable = makeFrom(selection)
+  const joins = makeJoins(fromTable, selection)
+  const select = makeExpandedSelectFields(
+    fromTable,
+    joins,
+    selection.selectedFields,
+  )
   return {
     tsType: selectToTsType(select),
     sql: selectToSQL(select),
@@ -19,337 +24,321 @@ export function generateQuery(
   }
 }
 
-namespace Query {
-  export class Select {
-    private selectFieldNodes: Schema.FieldNode[]
-    fromTableNode?: Schema.TableNode
-    joinTables = new Map<Schema.TableNode, Join>()
-    tableAliases = new Map<Schema.TableNode, Set<string>>()
-    fieldAliases = new Map<Schema.FieldNode, string>()
-    finalSelectFields: SelectField[] = []
-    constructor(columns: Column[], public graph: Schema.Graph) {
-      this.selectFieldNodes = columns.map(column =>
-        graph.getTable(column.table).getField(column.field),
-      )
-      this.findConnections()
-      this.deduplicateFieldNames()
-      this.makeSelectFields()
-    }
-    findConnections() {
-      const pendingFieldNodes = new Set(this.selectFieldNodes)
-      for (; pendingFieldNodes.size > 0; ) {
-        const oldCount = pendingFieldNodes.size
-        pendingFieldNodes.forEach(fieldNode => {
-          if (this.findConnection(fieldNode)) {
-            pendingFieldNodes.delete(fieldNode)
-          }
-        })
-        const newCount = pendingFieldNodes.size
-        if (oldCount != newCount) continue
-        throw new DisconnectedError(Array.from(pendingFieldNodes))
-      }
-    }
-    findConnection(selectFieldNode: Schema.FieldNode): boolean {
-      const selectTableNode = selectFieldNode.tableNode
-      if (!this.fromTableNode) {
-        this.fromTableNode = selectTableNode
-        return true
-      }
-      if (this.fromTableNode == selectTableNode) return true
-      if (this.joinTables.has(selectTableNode)) return true
+type Schema = {
+  tables: Map<string, Table>
+}
 
-      // reference by connected table
-      for (const [
-        referenceByFieldNode,
-        referenceBy,
-      ] of selectTableNode.referenceByFields) {
-        if (!this.selectFieldNodes.includes(referenceByFieldNode)) continue
-        if (
-          referenceByFieldNode.tableNode == this.fromTableNode ||
-          this.joinTables.has(referenceByFieldNode.tableNode)
-        ) {
-          const join: Join = {
-            leftFieldNode: referenceBy.fromFieldNode,
-            rightFieldNode: referenceBy.toFieldNode,
-          }
-          this.joinTables.set(selectTableNode, join)
-          if (referenceBy.alias) {
-            this.addTableAlias(selectTableNode, referenceBy.alias)
-          }
-          return true
-        }
-      }
+type Table = {
+  name: string
+  fields: Map<string, Field>
+}
 
-      const referenceTo = selectFieldNode.reference
-      if (!referenceTo) return false
+type Field = {
+  table: Table
+  name: string
+  ts_type: string
+  reference: ast.ForeignKeyReference | undefined
+  alias: string | null
+}
 
-      // reference to connected table
-      if (
-        referenceTo.toFieldNode.tableNode == this.fromTableNode ||
-        this.joinTables.has(referenceTo.toFieldNode.tableNode)
-      ) {
-        const join: Join = {
-          leftFieldNode: referenceTo.toFieldNode,
-          rightFieldNode: referenceTo.fromFieldNode,
-        }
-        this.joinTables.set(selectTableNode, join)
-        if (referenceTo.alias) {
-          this.addTableAlias(
-            referenceTo.fromFieldNode.tableNode,
-            referenceTo.alias,
-          )
-        }
-        return true
-      }
-
-      return false
-    }
-    addTableAlias(tableNode: Schema.TableNode, alias: string) {
-      const aliases = this.tableAliases.get(tableNode)
-      if (aliases) {
-        aliases.add(alias)
-      } else {
-        this.tableAliases.set(tableNode, new Set([alias]))
-      }
-    }
-    deduplicateFieldNames() {
-      const fieldNodesByName = new Map<string, Set<Schema.FieldNode>>()
-      this.selectFieldNodes.forEach(fieldNode => {
-        const name = fieldNode.field.name
-        const fieldNodes = fieldNodesByName.get(name)
-        if (fieldNodes) {
-          fieldNodes.add(fieldNode)
-        } else {
-          fieldNodesByName.set(name, new Set([fieldNode]))
-        }
-      })
-      for (const fieldNodes of fieldNodesByName.values()) {
-        if (fieldNodes.size < 2) continue
-        fieldNodes.forEach(fieldNode => {
-          forEachAlias(
-            this.tableAliases.get(fieldNode.tableNode),
-            tableAlias => {
-              const tableName = tableAlias || fieldNode.tableNode.table.name
-              const fieldAlias = tableName + '_' + fieldNode.field.name
-              this.fieldAliases.set(fieldNode, fieldAlias)
-            },
-          )
-        })
-      }
-    }
-    makeSelectFields() {
-      this.selectFieldNodes.forEach(fieldNode => {
-        forEachAlias(this.tableAliases.get(fieldNode.tableNode), tableAlias => {
-          this.finalSelectFields.push({
-            tableName: tableAlias || fieldNode.tableNode.table.name,
-            fieldNode: fieldNode,
-            alias: this.fieldAliases.get(fieldNode) || null,
-          })
-        })
-      })
-    }
+function getTable(schema: Schema, name: string): Table {
+  const table = schema.tables.get(name)
+  if (!table) {
+    throw new Error(`Table ${name} not found`)
   }
-  export class DisconnectedError extends Error {
-    constructor(public pendingFieldNodes: Schema.FieldNode[]) {
-      super(
-        'failed to connect some tables: ' +
-          Array.from(
-            new Set(
-              pendingFieldNodes.map(
-                fieldNode => fieldNode.tableNode.table.name,
-              ),
-            ),
-          ).join(', '),
-      )
-    }
-  }
-  export interface SelectField {
-    tableName: string
-    fieldNode: Schema.FieldNode
-    alias: string | null
-  }
+  return table
+}
 
-  export interface Join {
-    leftFieldNode: Schema.FieldNode
-    rightFieldNode: Schema.FieldNode
+function getField(table: Table, name: string): Field {
+  const field = table.fields.get(name)
+  if (!field) {
+    throw new Error(`Field ${name} not found`)
+  }
+  return field
+}
+
+function buildSchema(tableList: ast.Table[]): Schema {
+  const tables = new Map<string, Table>()
+  for (const table of tableList) {
+    tables.set(table.name, buildTable(table))
+  }
+  return { tables }
+}
+
+function buildTable(ast_table: ast.Table): Table {
+  const fields: Map<string, Field> = new Map()
+  const table: Table = {
+    name: ast_table.name,
+    fields,
+  }
+  for (const field of ast_table.field_list) {
+    fields.set(field.name, buildField(table, field))
+  }
+  return table
+}
+
+function buildField(table: Table, field: ast.Field): Field {
+  let ts_type = toTsType(field.type)
+  if (field.is_null) {
+    ts_type = 'null | ' + ts_type
+  }
+  return {
+    table,
+    name: field.name,
+    ts_type,
+    reference: field.references,
+    alias: field.name.endsWith('_id')
+      ? null
+      : makeFieldAlias(table.name, field.name),
   }
 }
 
-namespace Schema {
-  export class Graph {
-    private tableNodes: Map<string, TableNode>
-    constructor(table_list: Table[]) {
-      this.tableNodes = new Map(
-        table_list.map(table => [table.name, new TableNode(this, table)]),
-      )
-      this.tableNodes.forEach(table => table.applyReferences())
+type Selection = {
+  joins: Join[]
+  selectedTables: Set<Table>
+  selectedFields: Field[]
+}
+
+type Join = {
+  left: Field
+  right: Field
+  as: string | null
+}
+
+function makeJoinSelection(schema: Schema, columns: Column[]): Selection {
+  const joins: Join[] = []
+  const selectedTables = new Set<Table>()
+  const selectedFields: Field[] = []
+  for (const column of columns) {
+    const table = getTable(schema, column.table)
+    const field = getField(table, column.field)
+    selectedTables.add(table)
+    selectedFields.push(field)
+    if (field.reference) {
+      const reference = makeReference(schema, field.reference)
+      joins.push({
+        left: field,
+        right: reference,
+        as: makeAsTableAlias(field, reference.table),
+      })
     }
-    getTable(name: string) {
-      const table = this.tableNodes.get(name)
-      if (!table) throw new Error(`Table not found, name: "${name}"`)
+  }
+  return {
+    joins: removeUnnecessaryJoins(joins, selectedTables),
+    selectedTables,
+    selectedFields,
+  }
+}
+
+function makeReference(schema: Schema, reference: ast.ForeignKeyReference) {
+  const table = getTable(schema, reference.table)
+  const field = getField(table, reference.field)
+  return field
+}
+
+function makeAsTableAlias(field: Field, table: Table): string | null {
+  const asTable = field.name.replace(/_id$/, '')
+  return asTable == table.name ? null : asTable
+}
+
+function removeUnnecessaryJoins(joins: Join[], selectedTables: Set<Table>) {
+  return joins.filter(
+    join =>
+      selectedTables.has(join.left.table) &&
+      selectedTables.has(join.right.table),
+  )
+}
+
+function markFieldAliases(selectedFields: Field[]): void {
+  const fieldsByName = countFieldNames(selectedFields)
+  for (const fields of fieldsByName.values()) {
+    if (fields.length > 1) {
+      for (const field of fields) {
+        field.alias = makeFieldAlias(field.table.name, field.name)
+      }
+    }
+  }
+}
+
+function countFieldNames(selectedFields: Field[]): Map<string, Field[]> {
+  const fieldsByName = new Map<string, Field[]>()
+  for (const field of selectedFields) {
+    const fields = fieldsByName.get(field.name)
+    if (fields) {
+      fields.push(field)
+    } else {
+      fieldsByName.set(field.name, [field])
+    }
+  }
+  return fieldsByName
+}
+
+function makeFieldAlias(tableName: string, fieldName: string): string {
+  return tableName + '_' + fieldName
+}
+
+function makeFrom(selection: Selection): Table {
+  const rightTables = new Set<Table>()
+  for (const join of selection.joins) {
+    rightTables.add(join.right.table)
+  }
+  for (const table of selection.selectedTables) {
+    if (!rightTables.has(table)) {
       return table
     }
   }
+  throw new Error('Cannot determine left-most table to select from')
+}
 
-  export class TableNode {
-    private fieldNodes: Map<string, FieldNode>
-    referenceByFields = new Map<FieldNode, Reference>()
-    constructor(public graph: Graph, public table: Table) {
-      this.fieldNodes = new Map(
-        table.field_list.map(field => [
-          field.name,
-          new FieldNode(graph, this, field),
-        ]),
-      )
-    }
-    applyReferences() {
-      this.fieldNodes.forEach(field => field.applyReference())
-    }
-    getField(name: string) {
-      const field = this.fieldNodes.get(name)
-      if (!field) throw new Error(`Field not found, name: "${name}"`)
-      return field
-    }
-  }
-
-  export class FieldNode {
-    reference?: Reference
-    constructor(
-      public graph: Graph,
-      public tableNode: TableNode,
-      public field: Field,
-    ) {}
-    applyReference() {
-      const reference = this.field.references
-      if (!reference) return
-      const refTable = this.graph.getTable(reference.table)
-      const refField = refTable.getField(reference.field)
-      const alias = this.field.name.replace(/_id$/, '')
-      this.reference = {
-        fromFieldNode: this,
-        toFieldNode: refField,
-        alias: alias == refField.tableNode.table.name ? null : alias,
+function makeJoins(fromTable: Table, selection: Selection): Join[] {
+  const joins: Join[] = []
+  const pendingJoins = new Set<Join>(selection.joins)
+  const connectedTables = new Set<Table>()
+  connectedTables.add(fromTable)
+  for (;;) {
+    const oldPendingCount = pendingJoins.size
+    for (const join of pendingJoins) {
+      if (connectedTables.has(join.left.table)) {
+        joins.push(join)
+        pendingJoins.delete(join)
+        connectedTables.add(join.right.table)
       }
-      refTable.referenceByFields.set(this, this.reference)
     }
+    const newPendingCount = pendingJoins.size
+    if (newPendingCount == 0) break
+    if (newPendingCount < oldPendingCount) continue
+    throw new JoinError(Array.from(pendingJoins))
   }
+  return joins
+}
 
-  export interface Reference {
-    fromFieldNode: FieldNode
-    toFieldNode: FieldNode
-    alias: string | null
+class JoinError extends Error {
+  constructor(public pendingJoins: Join[]) {
+    super(
+      `Cannot determine join order, pending joined: ${Array.from(pendingJoins)
+        .map(join => {
+          const left = join.left.table.name
+          const right = join.right.table.name
+          return join.as
+            ? `${left} join ${right} as ${join.as}`
+            : `${left} join ${right}`
+        })
+        .join(', ')}`,
+    )
   }
 }
 
-function forEachAlias(
-  aliases: Set<string> | undefined,
-  eachFn: (alias: string | null) => void,
-) {
-  if (!aliases || aliases.size === 0) {
-    eachFn(null)
-    return
+type Select = {
+  fromTable: Table
+  joins: Join[]
+  expandedSelectFields: ExpandedSelectField[]
+}
+
+type ExpandedSelectField = {
+  table: string
+  field: string
+  ts_type: string
+  table_alias: string | null
+  field_alias: string | null
+}
+
+function makeExpandedSelectFields(
+  fromTable: Table,
+  joins: Join[],
+  selectedFields: Field[],
+): Select {
+  const expandedSelectFields: ExpandedSelectField[] = []
+  const pickFromTable = (table: Table, asTable: string | null) => {
+    for (const field of selectedFields) {
+      if (field.table == table) {
+        expandedSelectFields.push({
+          table: table.name,
+          field: field.name,
+          ts_type: field.ts_type,
+          table_alias: asTable,
+          field_alias: asTable
+            ? makeFieldAlias(asTable, field.name)
+            : field.alias,
+        })
+      }
+    }
   }
-  aliases.forEach(alias => eachFn(alias))
+  pickFromTable(fromTable, null)
+  for (const join of joins) {
+    pickFromTable(join.right.table, join.as)
+  }
+  return { fromTable, joins, expandedSelectFields }
 }
 
-function selectToTsType(select: Query.Select): string {
-  let tsType = 'export type Row = {'
-
-  select.finalSelectFields.forEach(selectField => {
-    const name = selectField.alias || selectField.fieldNode.field.name
-    let type = toTsType(selectField.fieldNode.field.type)
-    if (selectField.fieldNode.field.is_null) {
-      type = 'null | ' + type
-    }
-    tsType += `\n  ${name}: ${type}`
-  })
-
-  tsType += '\n}'
-  return tsType
+function selectToTsType(select: Select): string {
+  let code = 'export type Row = {'
+  for (const field of select.expandedSelectFields) {
+    const name = field.field_alias || field.field
+    code += `\n  ${name}: ${field.ts_type}`
+  }
+  code += '\n}'
+  return code
 }
 
-function selectToSQL(select: Query.Select): string {
-  if (select.finalSelectFields.length === 0) return ''
-  let sql = `select`
-  select.finalSelectFields.forEach(selectField => {
-    sql +=
-      '\n, ' + selectField.tableName + '.' + selectField.fieldNode.field.name
-    if (selectField.alias) {
-      sql += ' as ' + selectField.alias
+function selectToSQL(select: Select): string {
+  if (select.expandedSelectFields.length == 0) return ''
+  let sql = 'select'
+  for (const field of select.expandedSelectFields) {
+    const table_name = field.table_alias || field.table
+    sql += '\n, ' + table_name + '.' + field.field
+    if (field.field_alias) {
+      sql += ' as ' + field.field_alias
     }
-  })
+  }
   // first select column don't need to start with comma
-  sql = sql.replace(', ', '  ')
-  if (!select.fromTableNode) {
-    throw new Error('missing from table')
-  }
-  sql += '\nfrom ' + select.fromTableNode.table.name
-  for (const join of select.joinTables.values()) {
-    sql += joinToSQL(select, join)
+  sql = sql.replace(',', ' ') // re
+  sql += '\nfrom ' + select.fromTable.name
+  for (const join of select.joins) {
+    sql += '\n' + joinToSQL(join)
   }
   return sql
 }
 
-function joinToSQL(select: Query.Select, join: Query.Join): string {
-  const rightTableNode = join.rightFieldNode.tableNode
-  const leftTableNode = join.leftFieldNode.tableNode
-  let sql = ''
-  forEachAlias(select.tableAliases.get(rightTableNode), rightTableAlias => {
-    forEachAlias(select.tableAliases.get(leftTableNode), leftTableAlias => {
-      let rightTableName = rightTableNode.table.name
-      sql += '\ninner join ' + rightTableName
-      if (rightTableAlias) {
-        rightTableName = rightTableAlias
-        sql += ' as ' + rightTableName
-      }
-      sql += ' on ' + rightTableName + '.' + join.rightFieldNode.field.name
-      const leftTableName = leftTableAlias || leftTableNode.table.name
-      sql += ' = ' + leftTableName + '.' + join.leftFieldNode.field.name
-    })
-  })
+function joinToSQL(join: Join): string {
+  let rightTable: string = join.right.table.name
+  let sql = 'inner join ' + rightTable
+  if (join.as) {
+    rightTable = join.as
+    sql += ' as ' + rightTable
+  }
+  sql += ' on ' + rightTable + '.' + join.right.name
+  sql += ' = ' + join.left.table.name + '.' + join.left.name
   return sql
 }
 
-function selectToKnex(select: Query.Select): string {
-  if (select.finalSelectFields.length === 0) return ''
-  let knex = `knex`
-  if (!select.fromTableNode) {
-    throw new Error('missing from table')
+function selectToKnex(select: Select): string {
+  if (select.expandedSelectFields.length == 0) return ''
+  let knex = 'knex'
+  knex += `\n  .from('${select.fromTable.name}')`
+  for (const join of select.joins) {
+    knex += `\n  ` + joinToKnex(join)
   }
-  knex += `\n  .from('${select.fromTableNode.table.name}')`
-  for (const join of select.joinTables.values()) {
-    knex += joinToKnex(select, join)
-  }
-  knex += `\n  .select(`
-  select.finalSelectFields.forEach(selectField => {
-    let field = selectField.tableName + '.' + selectField.fieldNode.field.name
-    if (selectField.alias) {
-      field += ' as ' + selectField.alias
+  knex += '\n  .select('
+  for (const field of select.expandedSelectFields) {
+    const table_name = field.table_alias || field.table
+    knex += "\n    '" + table_name + '.' + field.field
+    if (field.field_alias) {
+      knex += ' as ' + field.field_alias
     }
-    knex += `\n    '${field}',`
-  })
-  knex += `\n  )`
+    knex += "',"
+  }
+  knex += '\n  )'
   return knex
 }
 
-function joinToKnex(select: Query.Select, join: Query.Join): string {
-  const rightTableNode = join.rightFieldNode.tableNode
-  const leftTableNode = join.leftFieldNode.tableNode
-  let knex = ''
-  forEachAlias(select.tableAliases.get(rightTableNode), rightTableAlias => {
-    forEachAlias(select.tableAliases.get(leftTableNode), leftTableAlias => {
-      let rightTableName = rightTableNode.table.name
-      knex += `\n  .innerJoin('${rightTableName}`
-      if (rightTableAlias) {
-        rightTableName = rightTableAlias
-        knex += ` as ${rightTableName}`
-      }
-      knex += `'`
-      knex += `, '${rightTableName}.${join.rightFieldNode.field.name}'`
-      const leftTableName = leftTableAlias || leftTableNode.table.name
-      knex += `, '${leftTableName}.${join.leftFieldNode.field.name}'`
-      knex += `)`
-    })
-  })
+function joinToKnex(join: Join): string {
+  let rightTable: string = join.right.table.name
+  let knex = ".innerJoin('" + rightTable
+  if (join.as) {
+    rightTable = join.as
+    knex += ' as ' + rightTable
+  }
+  knex += "', '" + rightTable + '.' + join.right.name
+  knex += "', '" + join.left.table.name + '.' + join.left.name + "')"
   return knex
 }
