@@ -157,6 +157,7 @@ main {
     right: 0;
     display: block;
     outline: 1px solid lightgrey;
+    z-index: 1;
   }
   svg {
     position: absolute;
