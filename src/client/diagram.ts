@@ -871,6 +871,68 @@ class LineController {
     const fromRect = fromDiv.getBoundingClientRect()
     const toRect = toDiv.getBoundingClientRect()
 
+    if ('dev') {
+      const barRatio = 1 / 2
+      const marginRatio = barRatio * 2
+      const barRadius = this.diagram.barRadius
+
+      const relationLinkGap = barRadius * barRatio
+
+      const { from, to } = calcRelationLinkDirection(
+        fromRect,
+        toRect,
+        relationLinkGap,
+      )
+
+      from.x -= diagramRect.left
+      to.x -= diagramRect.left
+
+      from.y -= diagramRect.top
+      to.y -= diagramRect.top
+
+      const x_sign = sign(to.x - from.x)
+      const x_gap = x_sign * barRadius * barRatio
+
+      const first = this.relation[0]
+      const last = this.relation[this.relation.length - 1]
+      const skipHead = this.relation.startsWith('>0') || first === '0'
+      const skipTail = this.relation.endsWith('0<') || last === '0'
+
+      const link_from_x = from.x + from.gap_sign * relationLinkGap
+      const link_from_y = from.y
+
+      const link_to_x = to.x + to.gap_sign * relationLinkGap
+      const link_to_y = to.y
+
+      const link_mid_x = (link_from_x + link_to_x) / 2
+
+      this.line.setAttributeNS(
+        null,
+        'd',
+        // `M ${link_from_x} ${link_from_y} L ${link_to_x} ${link_to_y}`,
+        `M ${link_from_x} ${link_from_y} C ${link_mid_x} ${link_from_y}, ${link_mid_x} ${link_to_y}, ${link_to_x} ${link_to_y}`,
+      )
+
+      // renderRelationBar({
+      //   path: this.head,
+      //   from_x: from.x,
+      //   from_y: from.y,
+      //   border_x: from.x + x_sign * barRadius * barRatio,
+      //   barRadius: barRadius,
+      //   type: this.relation.startsWith('>0')
+      //     ? 'zero-or-many'
+      //     : first === '>'
+      //     ? 'many'
+      //     : first === '0'
+      //     ? 'zero'
+      //     : first === '-'
+      //     ? 'one'
+      //     : 'default',
+      // })
+
+      return
+    }
+
     type Config = {
       from: number
       to: number
@@ -1046,5 +1108,58 @@ function renderRelationBar({
     }
     default:
       path.setAttributeNS(null, 'd', ``)
+  }
+}
+
+function calcRelationLinkDirection(
+  fromRect: DOMRect,
+  toRect: DOMRect,
+  relationLinkGap: number,
+) {
+  const from_y = fromRect.top + fromRect.height / 2
+  const to_y = toRect.top + toRect.height / 2
+  if (fromRect.right + relationLinkGap < toRect.left - relationLinkGap) {
+    return {
+      from: {
+        x: fromRect.right,
+        y: from_y,
+        gap_sign: +1,
+      },
+      to: {
+        x: toRect.left,
+        y: to_y,
+        gap_sign: -1,
+      },
+    }
+  }
+  if (toRect.right + relationLinkGap < fromRect.left - relationLinkGap) {
+    return {
+      from: {
+        x: fromRect.left,
+        y: from_y,
+        gap_sign: -1,
+      },
+      to: {
+        x: toRect.right,
+        y: to_y,
+        gap_sign: +1,
+      },
+    }
+  }
+  const right_dx = abs(fromRect.right - toRect.right)
+  const left_dx = abs(fromRect.left - toRect.left)
+  const dir = right_dx < left_dx ? 'right' : 'left'
+  const gap_sign = right_dx < left_dx ? +1 : -1
+  return {
+    from: {
+      x: fromRect[dir],
+      y: from_y,
+      gap_sign,
+    },
+    to: {
+      x: toRect[dir],
+      y: to_y,
+      gap_sign,
+    },
   }
 }
