@@ -871,18 +871,55 @@ class LineController {
     const fromRect = fromDiv.getBoundingClientRect()
     const toRect = toDiv.getBoundingClientRect()
 
-    if ('dev') {
-      const barRatio = 1 / 2
-      const marginRatio = barRatio * 2
+    if ('dev2') {
       const barRadius = this.diagram.barRadius
+      const gap = barRadius / 2
+      const bar = barRadius / 2
+      const bar2 = (barRadius / 2) * 3
+      const margin = barRadius
 
-      const relationLinkGap = barRadius * barRatio
+      if (fromRect.right + gap < toRect.left - gap) {
+        // from field
+        const f_x = fromRect.right - diagramRect.left
+        const f_y = fromRect.top + fromRect.height / 2 - diagramRect.top
 
-      const { from, to } = calcRelationLinkDirection(
-        fromRect,
-        toRect,
-        relationLinkGap,
-      )
+        // to field
+        const t_x = toRect.left - diagramRect.left
+        const t_y = toRect.top + toRect.height / 2 - diagramRect.top
+
+        // bars
+        const f_b_x = f_x + gap
+        const f_m_x = f_x + gap * 2
+        const t_m_x = t_x - gap * 2
+        const t_b_x = t_x - gap
+
+        let path = ''
+
+        // from field
+        path += ` M ${f_x} ${f_y}`
+        path += ` L ${f_b_x} ${f_y}`
+
+        // relation link
+        path += `C ${f_m_x} ${f_y}`
+        path += `  ${t_m_x} ${t_y}`
+        path += `  ${t_b_x} ${t_y}`
+
+        // to field
+        path += ` L ${t_x} ${t_y}`
+
+        this.line.setAttributeNS(null, 'd', path.trim())
+
+        console.log('ok?')
+      }
+      console.log('done?')
+
+      return
+    }
+
+    if ('dev') {
+      const gap = this.diagram.barRadius / 2
+
+      const { from, to, mid } = calcRelationLinkDirection(fromRect, toRect, gap)
 
       from.x -= diagramRect.left
       to.x -= diagramRect.left
@@ -890,28 +927,33 @@ class LineController {
       from.y -= diagramRect.top
       to.y -= diagramRect.top
 
-      const x_sign = sign(to.x - from.x)
-      const x_gap = x_sign * barRadius * barRatio
-
       const first = this.relation[0]
       const last = this.relation[this.relation.length - 1]
       const skipHead = this.relation.startsWith('>0') || first === '0'
       const skipTail = this.relation.endsWith('0<') || last === '0'
 
-      const link_from_x = from.x + from.gap_sign * relationLinkGap
-      const link_from_y = from.y
+      let path = ''
 
-      const link_to_x = to.x + to.gap_sign * relationLinkGap
-      const link_to_y = to.y
+      // add from-relation pointer
+      path += ` M ${from.x} ${from.y}`
+      path += ` L ${from.x + from.gap_sign * gap} ${from.y}`
 
-      const link_mid_x = (link_from_x + link_to_x) / 2
+      // add relation line
+      let x1 = from.x + from.gap_sign * gap
+      let x2 = to.x + to.gap_sign * gap
+      let x_mid = (x1 + x2) / 2
 
-      this.line.setAttributeNS(
-        null,
-        'd',
-        // `M ${link_from_x} ${link_from_y} L ${link_to_x} ${link_to_y}`,
-        `M ${link_from_x} ${link_from_y} C ${link_mid_x} ${link_from_y}, ${link_mid_x} ${link_to_y}, ${link_to_x} ${link_to_y}`,
-      )
+      let y1 = from.y
+      let y2 = to.y
+      let y_mid = (y1 + y2) / 2
+
+      path += ` L ${x_mid} ${y_mid}`
+
+      // add to-relation pointer
+      path += ` L ${to.x + to.gap_sign * gap} ${to.y}`
+      path += ` L ${to.x} ${to.y}`
+
+      this.line.setAttributeNS(null, 'd', path.trim())
 
       // renderRelationBar({
       //   path: this.head,
@@ -1114,52 +1156,78 @@ function renderRelationBar({
 function calcRelationLinkDirection(
   fromRect: DOMRect,
   toRect: DOMRect,
-  relationLinkGap: number,
+  gap: number,
 ) {
   const from_y = fromRect.top + fromRect.height / 2
   const to_y = toRect.top + toRect.height / 2
-  if (fromRect.right + relationLinkGap < toRect.left - relationLinkGap) {
-    return {
-      from: {
-        x: fromRect.right,
-        y: from_y,
-        gap_sign: +1,
-      },
-      to: {
-        x: toRect.left,
-        y: to_y,
-        gap_sign: -1,
-      },
+  if (fromRect.right + gap < toRect.left - gap) {
+    const from = {
+      x: fromRect.right,
+      y: from_y,
+      gap_sign: +1,
     }
+    const to = {
+      x: toRect.left,
+      y: to_y,
+      gap_sign: -1,
+    }
+    const mid = {
+      x: (from.x + gap + to.x - gap) / 2,
+      y: (from.y + to.y) / 2,
+    }
+    return { from, to, mid }
   }
-  if (toRect.right + relationLinkGap < fromRect.left - relationLinkGap) {
-    return {
-      from: {
-        x: fromRect.left,
-        y: from_y,
-        gap_sign: -1,
-      },
-      to: {
-        x: toRect.right,
-        y: to_y,
-        gap_sign: +1,
-      },
+  if (toRect.right + gap < fromRect.left - gap) {
+    const from = {
+      x: fromRect.left,
+      y: from_y,
+      gap_sign: -1,
     }
+    const to = {
+      x: toRect.right,
+      y: to_y,
+      gap_sign: +1,
+    }
+    const mid = {
+      x: (from.x + to.x) / 2,
+      y: (from.y + to.y) / 2,
+    }
+    return { from, to, mid }
   }
   const right_dx = abs(fromRect.right - toRect.right)
   const left_dx = abs(fromRect.left - toRect.left)
-  const dir = right_dx < left_dx ? 'right' : 'left'
-  const gap_sign = right_dx < left_dx ? +1 : -1
-  return {
-    from: {
-      x: fromRect[dir],
+  if (right_dx < left_dx) {
+    const from = {
+      x: fromRect.right,
       y: from_y,
-      gap_sign,
-    },
-    to: {
-      x: toRect[dir],
+      gap_sign: +1,
+    }
+    const to = {
+      x: toRect.right,
       y: to_y,
-      gap_sign,
-    },
+      gap_sign: +1,
+    }
+    const mid = {
+      x: (from.x + to.x) / 2,
+      y: (from.y + to.y) / 2,
+    }
+    return { from, to, mid }
+  }
+  {
+    const from = {
+      x: fromRect.left,
+      y: from_y,
+      gap_sign: -1,
+    }
+    const to = {
+      x: toRect.left,
+      y: to_y,
+      gap_sign: -1,
+    }
+    const mid = {
+      x: (from.x + to.x) / 2,
+      y: (from.y + to.y) / 2,
+    }
+    return { from, to, mid }
   }
 }
