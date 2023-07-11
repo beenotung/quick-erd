@@ -874,44 +874,92 @@ class LineController {
     if ('dev2') {
       const barRadius = this.diagram.barRadius
       const gap = barRadius / 2
-      const bar = barRadius / 2
-      const bar2 = (barRadius / 2) * 3
-      const margin = barRadius
+      const margin = gap * 2
+
+      const from_y = fromRect.top + fromRect.height / 2 - diagramRect.top
+      const to_y = toRect.top + toRect.height / 2 - diagramRect.top
+
+      let from_x: number
+      let to_x: number
+
+      let from_bar_x: number
+      let from_margin_x: number
+      let to_margin_x: number
+      let to_bar_x: number
 
       if (fromRect.right + gap < toRect.left - gap) {
-        // from field
-        const f_x = fromRect.right - diagramRect.left
-        const f_y = fromRect.top + fromRect.height / 2 - diagramRect.top
+        /**
+         * [from]---[to]
+         */
+        from_x = fromRect.right - diagramRect.left
+        to_x = toRect.left - diagramRect.left
 
-        // to field
-        const t_x = toRect.left - diagramRect.left
-        const t_y = toRect.top + toRect.height / 2 - diagramRect.top
+        from_bar_x = from_x + gap
+        from_margin_x = from_x + margin
+        to_margin_x = to_x - margin
+        to_bar_x = to_x - gap
+      } else if (toRect.right + gap < fromRect.left - gap) {
+        /**
+         * [to]---[from]
+         */
+        from_x = fromRect.left - diagramRect.left
+        to_x = toRect.right - diagramRect.left
 
-        // bars
-        const f_b_x = f_x + gap
-        const f_m_x = f_x + gap * 2
-        const t_m_x = t_x - gap * 2
-        const t_b_x = t_x - gap
+        from_bar_x = from_x - gap
+        from_margin_x = from_x - margin
+        to_margin_x = to_x + margin
+        to_bar_x = to_x + gap
+      } else {
+        const right_dist = abs(fromRect.right - toRect.right)
+        const left_dist = abs(fromRect.left - toRect.left)
+        if (right_dist < left_dist) {
+          /**
+           * [from]-
+           *        \
+           *        |
+           *        /
+           *   [to]-
+           */
+          from_x = fromRect.right - diagramRect.left
+          to_x = toRect.right - diagramRect.left
 
-        let path = ''
+          from_bar_x = from_x + gap
+          from_margin_x = from_x + margin
+          to_margin_x = to_x + margin
+          to_bar_x = to_x + gap
+        } else {
+          /**
+           *  -[from]
+           * /
+           * |
+           * \
+           *  -[to]
+           */
+          from_x = fromRect.left - diagramRect.left
+          to_x = toRect.left - diagramRect.left
 
-        // from field
-        path += ` M ${f_x} ${f_y}`
-        path += ` L ${f_b_x} ${f_y}`
-
-        // relation link
-        path += `C ${f_m_x} ${f_y}`
-        path += `  ${t_m_x} ${t_y}`
-        path += `  ${t_b_x} ${t_y}`
-
-        // to field
-        path += ` L ${t_x} ${t_y}`
-
-        this.line.setAttributeNS(null, 'd', path.trim())
-
-        console.log('ok?')
+          from_bar_x = from_x - gap
+          from_margin_x = from_x - margin
+          to_margin_x = to_x - margin
+          to_bar_x = to_x - gap
+        }
       }
-      console.log('done?')
+
+      let path = ''
+
+      // from field
+      path += ` M ${from_x} ${from_y}`
+      path += ` L ${from_bar_x} ${from_y}`
+
+      // relation link
+      path += `C ${from_margin_x} ${from_y}`
+      path += `  ${to_margin_x} ${to_y}`
+      path += `  ${to_bar_x} ${to_y}`
+
+      // to field
+      path += ` L ${to_x} ${to_y}`
+
+      this.line.setAttributeNS(null, 'd', path.trim())
 
       return
     }
