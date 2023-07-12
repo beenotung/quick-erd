@@ -10,7 +10,7 @@ import { ErdInputController } from './erd-input'
 import { StoredBoolean, StoredNumber } from './storage'
 import { QueryInputController } from './query-input'
 import { Column } from '../core/query'
-const { abs, sign } = Math
+const { abs, sign, min, max } = Math
 
 type Rect = {
   left: number
@@ -923,10 +923,12 @@ class LineController {
           from_x = fromRect.right - diagramRect.left
           to_x = toRect.right - diagramRect.left
 
-          from_bar_x = from_x + gap
-          from_margin_x = from_x + margin
-          to_margin_x = to_x + margin
-          to_bar_x = to_x + gap
+          let edge_x = max(from_x, to_x)
+
+          from_bar_x = edge_x + gap
+          from_margin_x = edge_x + margin
+          to_margin_x = edge_x + margin
+          to_bar_x = edge_x + gap
         } else {
           /**
            *  -[from]
@@ -938,10 +940,12 @@ class LineController {
           from_x = fromRect.left - diagramRect.left
           to_x = toRect.left - diagramRect.left
 
-          from_bar_x = from_x - gap
-          from_margin_x = from_x - margin
-          to_margin_x = to_x - margin
-          to_bar_x = to_x - gap
+          let edge_x = min(from_x, to_x)
+
+          from_bar_x = edge_x - gap
+          from_margin_x = edge_x - margin
+          to_margin_x = edge_x - margin
+          to_bar_x = edge_x - gap
         }
       }
 
