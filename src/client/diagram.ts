@@ -887,6 +887,9 @@ class LineController {
       let to_margin_x: number
       let to_bar_x: number
 
+      let from_bar_border_x: number
+      let to_bar_border_x: number
+
       if (fromRect.right + gap < toRect.left - gap) {
         /**
          * [from]---[to]
@@ -898,6 +901,9 @@ class LineController {
         from_margin_x = from_x + margin
         to_margin_x = to_x - margin
         to_bar_x = to_x - gap
+
+        from_bar_border_x = from_x + gap
+        to_bar_border_x = to_x - gap
       } else if (toRect.right + gap < fromRect.left - gap) {
         /**
          * [to]---[from]
@@ -909,6 +915,9 @@ class LineController {
         from_margin_x = from_x - margin
         to_margin_x = to_x + margin
         to_bar_x = to_x + gap
+
+        from_bar_border_x = from_x - gap
+        to_bar_border_x = to_x + gap
       } else {
         const right_dist = abs(fromRect.right - toRect.right)
         const left_dist = abs(fromRect.left - toRect.left)
@@ -929,6 +938,9 @@ class LineController {
           from_margin_x = edge_x + margin
           to_margin_x = edge_x + margin
           to_bar_x = edge_x + gap
+
+          from_bar_border_x = from_x + gap
+          to_bar_border_x = to_x + gap
         } else {
           /**
            *  -[from]
@@ -946,6 +958,9 @@ class LineController {
           from_margin_x = edge_x - margin
           to_margin_x = edge_x - margin
           to_bar_x = edge_x - gap
+
+          from_bar_border_x = from_x - gap
+          to_bar_border_x = to_x - gap
         }
       }
 
@@ -964,6 +979,44 @@ class LineController {
       path += ` L ${to_x} ${to_y}`
 
       this.line.setAttributeNS(null, 'd', path.trim())
+
+      const relation = this.relation
+      const first = relation[0]
+      const last = relation[this.relation.length - 1]
+
+      renderRelationBar({
+        path: this.head,
+        from_x,
+        from_y,
+        border_x: from_bar_border_x,
+        barRadius,
+        type: relation.startsWith('>0')
+          ? 'zero-or-many'
+          : first === '>'
+          ? 'many'
+          : first === '0'
+          ? 'zero'
+          : first === '-'
+          ? 'one'
+          : 'default',
+      })
+
+      renderRelationBar({
+        path: this.tail,
+        from_x: to_x,
+        from_y: to_y,
+        border_x: to_bar_border_x,
+        barRadius,
+        type: relation.endsWith('0<')
+          ? 'zero-or-many'
+          : last === '<'
+          ? 'many'
+          : last === '0'
+          ? 'zero'
+          : last === '-'
+          ? 'one'
+          : 'default',
+      })
 
       return
     }
