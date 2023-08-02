@@ -89,8 +89,9 @@ class Parser implements ParseResult {
       const name = match[1]
       const x = +match[2]
       const y = +match[3]
+      const color = match[4]
       const table = this.table_list.find(table => table.name == name)
-      if (table) table.position = { x, y }
+      if (table) table.position = { x, y, color }
     })
   }
   peekLine(): string {
@@ -302,7 +303,7 @@ function parseAll<T>(fn: () => T): T[] {
 export type Table = {
   name: string
   field_list: Field[]
-  position?: { x: number; y: number }
+  position?: { x: number; y: number; color?: string }
 }
 
 export type Field = {

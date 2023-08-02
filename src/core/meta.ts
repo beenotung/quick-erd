@@ -1,4 +1,5 @@
 export type Position = { x: number; y: number }
+export type TablePositionColor = { x: number; y: number; color?: string }
 
 export const zoomLineRegex = /# zoom: [0-9.]+/
 export const zoomValueRegex = /# zoom: ([0-9.]+)/
@@ -16,20 +17,23 @@ export function viewToLine(view: Position) {
   return `# view: (${x}, ${y})`
 }
 
-export const tableNameRegex = /# (\w+) \(([0-9-.]+), ([0-9-.]+)\)/
+export const tableNameRegex =
+  /# (\w+) \(([0-9-]+), ([0-9-]+),? ?(#[0-9a-f]+)?\)/
 export const tableNameRegex_g = new RegExp(
   tableNameRegex.toString().slice(1, -1),
   'g',
 )
 
 export function tableNameToRegex(name: string) {
-  return new RegExp(`# ${name} \\([0-9-]+, [0-9-]+\\)`)
+  return new RegExp(`# ${name} \\([0-9-]+, [0-9-]+[, #0-9a-f]*\\)`)
 }
 
-export function tableNameToLine(name: string, position: Position) {
+export function tableNameToLine(name: string, position: TablePositionColor) {
   const x = position.x.toFixed(0)
   const y = position.y.toFixed(0)
-  return `# ${name} (${x}, ${y})`
+  return position.color
+    ? `# ${name} (${x}, ${y}, ${position.color})`
+    : `# ${name} (${x}, ${y})`
 }
 
 export const textBgColorRegex = /# text-bg: (#\w+)/

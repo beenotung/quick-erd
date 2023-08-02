@@ -219,7 +219,25 @@ dialog[open] {
   padding: 0.5em;
   font-weight: bold;
   font-size: 1.1em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.table-name {
+  flex-grow: 1;
   text-align: center;
+}
+.table-color-container {
+  display: none;
+}
+[data-table]:hover .table-header {
+  padding: 0.35em;
+}
+[data-table]:hover .table-color-container {
+  display: unset;
+}
+[data-table]:hover input[type="color"] {
+  height: 2em;
 }
 .table-field-name {
   text-align: start;

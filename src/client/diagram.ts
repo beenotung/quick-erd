@@ -7,7 +7,7 @@ import {
 import { ColorController } from './color'
 import { querySelector } from './dom'
 import { ErdInputController } from './erd-input'
-import { StoredBoolean, StoredNumber } from './storage'
+import { StoredBoolean, StoredNumber, StoredString } from './storage'
 import { QueryInputController } from './query-input'
 import { Column } from '../core/query'
 const { abs, sign, min, max } = Math
@@ -395,6 +395,7 @@ export class DiagramController {
       this.inputController.setTablePosition(name, {
         x: table.translateX.value,
         y: table.translateY.value,
+        color: table.color.value,
       })
     }
   }
@@ -513,12 +514,15 @@ function isPointInside(rect: RectCorner, x: number, y: number): boolean {
 class TableController {
   translateX: StoredNumber
   translateY: StoredNumber
+  color: StoredString
   // self_field + table + other_field -> line
   _lineMap = new Map<string, LineController>()
   reverseLineSet = new Set<LineController>()
 
   onMoveListenerSet = new Set<(diagramRect: Rect) => void>()
 
+  tableHeader: HTMLDivElement
+  colorInput: HTMLInputElement
   tbody: HTMLTableSectionElement
   fieldMap = new Map<string, HTMLTableRowElement>()
   fieldCheckboxes = new Map<string, HTMLInputElement>()
@@ -548,14 +552,31 @@ class TableController {
   ) {
     this.translateX = new StoredNumber(this.data.name + '-x', 0)
     this.translateY = new StoredNumber(this.data.name + '-y', 0)
+    this.color = new StoredString(this.data.name + '-color', '')
 
     this.div.innerHTML = /* html */ `
-<div class='table-header'>${data.name}</div>
+<div class='table-header'>
+  <div class='table-name'>${data.name}</div>
+  <div class='table-color-container'><input type='color'></div>
+</div>
 <table>
   <tbody></tbody>
 </table>
 </div>
 `
+    this.tableHeader = this.div.querySelector('.table-header') as HTMLDivElement
+    this.colorInput = this.tableHeader.querySelector(
+      'input[type=color]',
+    ) as HTMLInputElement
+    this.colorInput.addEventListener('change', event => {
+      this.color.value = this.colorInput.value
+      this.diagram.inputController.setTablePosition(this.data.name, {
+        x: this.translateX.value,
+        y: this.translateY.value,
+        color: this.color.value,
+      })
+    })
+
     this.tbody = this.div.querySelector('tbody') as HTMLTableSectionElement
     this.div
       .querySelector('.table-header')
@@ -683,8 +704,14 @@ class TableController {
     ) {
       this.translateX.quickValue = data.position.x
       this.translateY.quickValue = data.position.y
+
+      this.tableHeader.style.backgroundColor = data.position.color || ''
       this.renderTransform(this.diagram.getDiagramRect())
     }
+
+    // apply table color from erd text
+    this.color.quickValue = data.position?.color || ''
+    this.colorInput.value = data.position?.color || ''
   }
 
   rerenderColumns() {
@@ -715,11 +742,14 @@ class TableController {
     const { name } = this.data
     const x = this.translateX
     const y = this.translateY
+    const color = this.color
     x.save()
     y.save()
+    color.save()
     this.diagram.inputController.setTablePosition(name, {
       x: x.value,
       y: y.value,
+      color: color.value,
     })
   }
 

@@ -17,6 +17,8 @@ import {
   tableTextColorToLine,
   diagramTextColorRegex,
   diagramTextColorToLine,
+  Position,
+  TablePositionColor,
 } from '../core/meta'
 import { showCopyResult } from './copy'
 import { querySelector } from './dom'
@@ -70,10 +72,10 @@ export class ErdInputController {
   setZoom(zoom: number) {
     this.updateLine(zoomLineRegex, zoomToLine(zoom))
   }
-  setViewPosition(view: { x: number; y: number }) {
+  setViewPosition(view: Position) {
     this.updateLine(viewLineRegex, viewToLine(view))
   }
-  setTablePosition(name: string, position: { x: number; y: number }) {
+  setTablePosition(name: string, position: TablePositionColor) {
     this.updateLine(tableNameToRegex(name), tableNameToLine(name, position))
   }
 
