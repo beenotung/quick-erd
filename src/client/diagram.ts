@@ -369,12 +369,12 @@ export class DiagramController {
     this.tablesContainer.resetView()
   }
   randomColor() {
-    this.div.querySelectorAll<HTMLDivElement>('.table-title').forEach(div => {
+    this.div.querySelectorAll<HTMLDivElement>('.table-header').forEach(div => {
       div.style.backgroundColor = this.colorController.randomTitleBgColor()
     })
   }
   resetColor() {
-    this.div.querySelectorAll<HTMLDivElement>('.table-title').forEach(div => {
+    this.div.querySelectorAll<HTMLDivElement>('.table-header').forEach(div => {
       div.style.backgroundColor = ''
     })
   }
@@ -550,7 +550,7 @@ class TableController {
     this.translateY = new StoredNumber(this.data.name + '-y', 0)
 
     this.div.innerHTML = /* html */ `
-<div class='table-title'>${data.name}</div>
+<div class='table-header'>${data.name}</div>
 <table>
   <tbody></tbody>
 </table>
@@ -558,7 +558,7 @@ class TableController {
 `
     this.tbody = this.div.querySelector('tbody') as HTMLTableSectionElement
     this.div
-      .querySelector('.table-title')
+      .querySelector('.table-header')
       ?.addEventListener('contextmenu', event => {
         event.preventDefault()
         this.diagram.inputController.selectTable(data.name)
