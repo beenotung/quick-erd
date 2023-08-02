@@ -931,7 +931,7 @@ class LineController {
         from_x = fromRect.right - diagramRect.left
         to_x = toRect.right - diagramRect.left
 
-        let edge_x = max(from_x, to_x)
+        const edge_x = max(from_x, to_x)
 
         from_bar_x = edge_x + gap
         from_margin_x = edge_x + margin
@@ -951,7 +951,7 @@ class LineController {
         from_x = fromRect.left - diagramRect.left
         to_x = toRect.left - diagramRect.left
 
-        let edge_x = min(from_x, to_x)
+        const edge_x = min(from_x, to_x)
 
         from_bar_x = edge_x - gap
         from_margin_x = edge_x - margin
@@ -1077,84 +1077,5 @@ function renderRelationBar({
     }
     default:
       path.setAttributeNS(null, 'd', ``)
-  }
-}
-
-function calcRelationLinkDirection(
-  fromRect: DOMRect,
-  toRect: DOMRect,
-  gap: number,
-) {
-  const from_y = fromRect.top + fromRect.height / 2
-  const to_y = toRect.top + toRect.height / 2
-  if (fromRect.right + gap < toRect.left - gap) {
-    const from = {
-      x: fromRect.right,
-      y: from_y,
-      gap_sign: +1,
-    }
-    const to = {
-      x: toRect.left,
-      y: to_y,
-      gap_sign: -1,
-    }
-    const mid = {
-      x: (from.x + gap + to.x - gap) / 2,
-      y: (from.y + to.y) / 2,
-    }
-    return { from, to, mid }
-  }
-  if (toRect.right + gap < fromRect.left - gap) {
-    const from = {
-      x: fromRect.left,
-      y: from_y,
-      gap_sign: -1,
-    }
-    const to = {
-      x: toRect.right,
-      y: to_y,
-      gap_sign: +1,
-    }
-    const mid = {
-      x: (from.x + to.x) / 2,
-      y: (from.y + to.y) / 2,
-    }
-    return { from, to, mid }
-  }
-  const right_dx = abs(fromRect.right - toRect.right)
-  const left_dx = abs(fromRect.left - toRect.left)
-  if (right_dx < left_dx) {
-    const from = {
-      x: fromRect.right,
-      y: from_y,
-      gap_sign: +1,
-    }
-    const to = {
-      x: toRect.right,
-      y: to_y,
-      gap_sign: +1,
-    }
-    const mid = {
-      x: (from.x + to.x) / 2,
-      y: (from.y + to.y) / 2,
-    }
-    return { from, to, mid }
-  }
-  {
-    const from = {
-      x: fromRect.left,
-      y: from_y,
-      gap_sign: -1,
-    }
-    const to = {
-      x: toRect.left,
-      y: to_y,
-      gap_sign: -1,
-    }
-    const mid = {
-      x: (from.x + to.x) / 2,
-      y: (from.y + to.y) / 2,
-    }
-    return { from, to, mid }
   }
 }
