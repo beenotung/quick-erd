@@ -88,6 +88,14 @@ You can refer to `.env.example`
 
 Below are available commands in example.
 
+<details>
+<summary>Remarks to Windows user (click to expand)</summary>
+Windows users area recommended to use git bash to perform pipe operations.
+
+If you prefer to use PowerShell, you may need to replace `<` with `\<` to pipe file content as stdin.
+
+</details>
+
 **To reverse-engineer erd file from live database**:
 
 - `npx pg-to-erd > erd.txt`
