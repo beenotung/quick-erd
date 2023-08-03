@@ -139,10 +139,31 @@ export class ErdInputController {
     const fieldIndex = this.findFieldNameIndex(lastField, tableIndex)
     if (!fieldIndex) return
 
-    const lineStartIndex = input.value.indexOf('\n', fieldIndex.end + 1) + 1
+    let lineStartIndex = input.value.indexOf('\n', fieldIndex.end + 1)
+
+    if (lineStartIndex == -1) {
+      input.value += '\n'
+      lineStartIndex = input.value.length - 1
+    } else {
+      lineStartIndex++
+    }
+
+    const spaceCount = 5
+    const lineEndIndex = lineStartIndex + spaceCount
+
+    const spaceLine = ' '.repeat(spaceCount) + '\n'
+
+    if (
+      input.value.slice(lineStartIndex, lineStartIndex + spaceCount + 1) !=
+      spaceLine
+    ) {
+      const before = input.value.slice(0, lineStartIndex)
+      const after = input.value.slice(lineStartIndex)
+      input.value = before + ' '.repeat(spaceCount) + '\n' + after
+    }
 
     input.select()
-    input.setSelectionRange(lineStartIndex, lineStartIndex, 'forward')
+    input.setSelectionRange(lineStartIndex, lineEndIndex, 'forward')
   }
 
   private findTableNameIndex(table: string) {
@@ -156,13 +177,31 @@ export class ErdInputController {
     return { start, end }
   }
 
-  private findFieldNameIndex(field: string, tableIndex: SelectionRange) {
+  private findFieldNameIndex(
+    field: string,
+    tableIndex: SelectionRange,
+  ): SelectionRange | undefined {
     const text = this.input.value + ' '
-    let start = text.indexOf('\n' + field + ' ', tableIndex.end + 1)
-    if (start === -1) return
-    start += 1
-    const end = start + field.length
-    return { start, end }
+
+    const space_start = text.indexOf('\n' + field + ' ', tableIndex.end + 1)
+    const newline_start = text.indexOf('\n' + field + '\n', tableIndex.end + 1)
+
+    if (space_start == -1 && newline_start == -1) return
+
+    const space_range: SelectionRange = {
+      start: space_start + 1,
+      end: space_start + 1 + field.length,
+    }
+    const newline_range: SelectionRange = {
+      start: newline_start + 1,
+      end: newline_start + field.length,
+    }
+
+    if (space_start == -1) return newline_range
+
+    if (newline_start == -1) return space_range
+
+    return space_start < newline_start ? space_range : newline_range
   }
 }
 

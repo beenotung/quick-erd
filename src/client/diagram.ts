@@ -558,7 +558,7 @@ class TableController {
 
     this.div.innerHTML = /* html */ `
 <div class='table-header'>
-  <div class='table-name'>${data.name}</div>
+  <div class='table-name'>${this.data.name}</div>
   <div class='table-color-container'><input type='color'></div>
 </div>
 <table>
@@ -572,7 +572,7 @@ class TableController {
     this.tableHeader = this.div.querySelector('.table-header') as HTMLDivElement
     this.tableHeader.addEventListener('contextmenu', event => {
       event.preventDefault()
-      this.diagram.inputController.selectTable(data.name)
+      this.diagram.inputController.selectTable(this.data.name)
     })
     this.colorInput = this.tableHeader.querySelector(
       'input[type=color]',
@@ -594,11 +594,12 @@ class TableController {
       '.add-field-button',
     ) as HTMLButtonElement
     this.addFieldButton.addEventListener('click', () => {
-      let lastField = data.field_list[data.field_list.length - 1]?.name
+      const lastField =
+        this.data.field_list[this.data.field_list.length - 1]?.name
       if (!lastField) {
         this.showAddFieldMessage('Error: last field not detected')
       } else {
-        this.diagram.inputController.addField(data.name, lastField)
+        this.diagram.inputController.addField(this.data.name, lastField)
         this.showAddFieldMessage('Input new field name')
       }
     })
