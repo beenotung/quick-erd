@@ -568,7 +568,7 @@ class TableController {
     this.colorInput = this.tableHeader.querySelector(
       'input[type=color]',
     ) as HTMLInputElement
-    this.colorInput.addEventListener('input', event => {
+    this.colorInput.addEventListener('input', () => {
       const color = this.colorInput.value
       this.color.value = color
       this.tableHeader.style.backgroundColor = color
