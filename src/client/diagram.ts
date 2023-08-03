@@ -614,9 +614,6 @@ class TableController {
 
   getFieldElement(field: string) {
     return this.fieldMap.get(field)
-    // return this.div.querySelector<HTMLDivElement>(
-    //   `[data-table-field='${field}']`,
-    // )
   }
 
   render(data: Table) {
