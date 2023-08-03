@@ -264,6 +264,18 @@ dialog[open] {
 .table-field-type {
   border-left: 1px solid;
 }
+.table-footer {
+  display: none;
+}
+[data-table]:hover .table-footer {
+  border-top: 1px solid;
+  display: flex;
+  justify-content: center;
+}
+.table-footer button {
+  margin: 0.25rem;
+  padding: 0.3rem 2rem;
+}
 
 [data-mode="schema"] #queryInput,
 [data-mode="schema"] .output-controls {

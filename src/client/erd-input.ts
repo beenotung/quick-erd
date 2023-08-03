@@ -130,6 +130,21 @@ export class ErdInputController {
     input.setSelectionRange(fieldIndex.start, fieldIndex.end, 'forward')
   }
 
+  addField(table: string, lastField: string) {
+    const { input } = this
+
+    const tableIndex = this.findTableNameIndex(table)
+    if (!tableIndex) return
+
+    const fieldIndex = this.findFieldNameIndex(lastField, tableIndex)
+    if (!fieldIndex) return
+
+    const lineStartIndex = input.value.indexOf('\n', fieldIndex.end + 1) + 1
+
+    input.select()
+    input.setSelectionRange(lineStartIndex, lineStartIndex, 'forward')
+  }
+
   private findTableNameIndex(table: string) {
     const { input } = this
 

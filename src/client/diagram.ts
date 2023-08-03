@@ -527,6 +527,7 @@ class TableController {
   tbody: HTMLTableSectionElement
   fieldMap = new Map<string, HTMLTableRowElement>()
   fieldCheckboxes = new Map<string, HTMLInputElement>()
+  addFieldButton: HTMLButtonElement
 
   toFieldKey(own_field: string, table: string, other_field: string) {
     return `${own_field}:${table}.${other_field}`
@@ -563,9 +564,16 @@ class TableController {
 <table>
   <tbody></tbody>
 </table>
+<div class='table-footer'>
+  <button class='add-field-button' title='add field'>+</button>
+</div>
 </div>
 `
     this.tableHeader = this.div.querySelector('.table-header') as HTMLDivElement
+    this.tableHeader.addEventListener('contextmenu', event => {
+      event.preventDefault()
+      this.diagram.inputController.selectTable(data.name)
+    })
     this.colorInput = this.tableHeader.querySelector(
       'input[type=color]',
     ) as HTMLInputElement
@@ -581,12 +589,26 @@ class TableController {
     })
 
     this.tbody = this.div.querySelector('tbody') as HTMLTableSectionElement
-    this.div
-      .querySelector('.table-header')
-      ?.addEventListener('contextmenu', event => {
-        event.preventDefault()
-        this.diagram.inputController.selectTable(data.name)
-      })
+
+    this.addFieldButton = this.div.querySelector(
+      '.add-field-button',
+    ) as HTMLButtonElement
+    this.addFieldButton.addEventListener('click', () => {
+      let lastField = data.field_list[data.field_list.length - 1]?.name
+      if (!lastField) {
+        this.showAddFieldMessage('Error: last field not detected')
+      } else {
+        this.diagram.inputController.addField(data.name, lastField)
+        this.showAddFieldMessage('Input new field name')
+      }
+    })
+  }
+
+  showAddFieldMessage(message: string) {
+    this.addFieldButton.textContent = message
+    setTimeout(() => {
+      this.addFieldButton.textContent = '+'
+    }, 3500)
   }
 
   getFieldElement(field: string) {
