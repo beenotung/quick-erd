@@ -65,3 +65,29 @@ export const tableTextColorRegex = /# table-text: (#\w+)/
 export function tableTextColorToLine(color: string): string {
   return `# table-text: ${color}`
 }
+
+export type ColorDict<T> = {
+  textBgColor: T
+  textColor: T
+  diagramBgColor: T
+  diagramTextColor: T
+  tableBgColor: T
+  tableTextColor: T
+}
+
+export const colors: ColorDict<{
+  regex: RegExp
+  toLine: (color: string) => string
+}> = {
+  textBgColor: { regex: textBgColorRegex, toLine: textBgColorToLine },
+  textColor: { regex: textColorRegex, toLine: textColorToLine },
+  diagramBgColor: { regex: diagramBgColorRegex, toLine: diagramBgColorToLine },
+  diagramTextColor: {
+    regex: diagramTextColorRegex,
+    toLine: diagramTextColorToLine,
+  },
+  tableBgColor: { regex: tableBgColorRegex, toLine: tableBgColorToLine },
+  tableTextColor: { regex: tableTextColorRegex, toLine: tableTextColorToLine },
+}
+
+export type ColorName = keyof typeof colors

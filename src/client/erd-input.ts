@@ -1,24 +1,14 @@
 import {
-  textBgColorRegex,
-  textBgColorToLine,
   tableNameToLine,
   tableNameToRegex,
-  textColorRegex,
-  textColorToLine,
   viewLineRegex,
   viewToLine,
   zoomLineRegex,
   zoomToLine,
-  diagramBgColorToLine,
-  tableBgColorToLine,
-  tableBgColorRegex,
-  diagramBgColorRegex,
-  tableTextColorRegex,
-  tableTextColorToLine,
-  diagramTextColorRegex,
-  diagramTextColorToLine,
   Position,
   TablePositionColor,
+  ColorName,
+  colors,
 } from '../core/meta'
 import { showCopyResult } from './copy'
 import { querySelector } from './dom'
@@ -51,24 +41,15 @@ export class ErdInputController {
     })
   }
 
-  setTextBgColor(color: string) {
-    this.updateLine(textBgColorRegex, textBgColorToLine(color))
+  setColor(name: ColorName, color: string) {
+    let { regex, toLine } = colors[name]
+    this.updateLine(regex, toLine(color))
   }
-  setTextColor(color: string) {
-    this.updateLine(textColorRegex, textColorToLine(color))
+
+  resetColor() {
+    Object.values(colors).forEach(({ regex }) => this.updateLine(regex, ''))
   }
-  setDiagramBgColor(color: string) {
-    this.updateLine(diagramBgColorRegex, diagramBgColorToLine(color))
-  }
-  setDiagramTextColor(color: string) {
-    this.updateLine(diagramTextColorRegex, diagramTextColorToLine(color))
-  }
-  setTableBgColor(color: string) {
-    this.updateLine(tableBgColorRegex, tableBgColorToLine(color))
-  }
-  setTableTextColor(color: string) {
-    this.updateLine(tableTextColorRegex, tableTextColorToLine(color))
-  }
+
   setZoom(zoom: number) {
     this.updateLine(zoomLineRegex, zoomToLine(zoom))
   }

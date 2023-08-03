@@ -23,30 +23,36 @@ export class ColorController {
     this.textBgColor = new ColorInput(this.root, 'text-bg-color', {
       getEffectiveColor: () =>
         getComputedStyle(this.targets.editor).backgroundColor,
-      onColorChanged: color => this.inputController.setTextBgColor(color),
+      onColorChanged: color =>
+        this.inputController.setColor('textBgColor', color),
     })
     this.textColor = new ColorInput(this.root, 'text-color', {
       getEffectiveColor: () => getComputedStyle(this.targets.input).color,
-      onColorChanged: color => this.inputController.setTextColor(color),
+      onColorChanged: color =>
+        this.inputController.setColor('textColor', color),
     })
     this.diagramBgColor = new ColorInput(this.root, 'diagram-bg-color', {
       getEffectiveColor: () =>
         getComputedStyle(this.targets.diagram).backgroundColor,
-      onColorChanged: color => this.inputController.setDiagramBgColor(color),
+      onColorChanged: color =>
+        this.inputController.setColor('diagramBgColor', color),
     })
     this.diagramTextColor = new ColorInput(this.root, 'diagram-text-color', {
       getEffectiveColor: () =>
         getComputedStyle(this.targets.diagram).backgroundColor,
-      onColorChanged: color => this.inputController.setDiagramTextColor(color),
+      onColorChanged: color =>
+        this.inputController.setColor('diagramTextColor', color),
     })
     this.tableBgColor = new ColorInput(this.root, 'table-bg-color', {
       getEffectiveColor: () =>
         getComputedStyle(this.targets.tableStub).backgroundColor,
-      onColorChanged: color => this.inputController.setTableBgColor(color),
+      onColorChanged: color =>
+        this.inputController.setColor('tableBgColor', color),
     })
     this.tableTextColor = new ColorInput(this.root, 'table-text-color', {
       getEffectiveColor: () => getComputedStyle(this.targets.tableStub).color,
-      onColorChanged: color => this.inputController.setTableTextColor(color),
+      onColorChanged: color =>
+        this.inputController.setColor('tableTextColor', color),
     })
     this.inputs = [
       this.textBgColor,

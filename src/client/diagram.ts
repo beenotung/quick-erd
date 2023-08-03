@@ -369,14 +369,15 @@ export class DiagramController {
     this.tablesContainer.resetView()
   }
   randomColor() {
-    this.div.querySelectorAll<HTMLDivElement>('.table-header').forEach(div => {
-      div.style.backgroundColor = this.colorController.randomTitleBgColor()
+    this.tableMap.forEach(tableController => {
+      tableController.randomColor()
     })
   }
   resetColor() {
-    this.div.querySelectorAll<HTMLDivElement>('.table-header').forEach(div => {
-      div.style.backgroundColor = ''
+    this.tableMap.forEach(tableController => {
+      tableController.resetColor()
     })
+    this.inputController.resetColor()
   }
   exportJSON(json: any) {
     json.zoom = this.zoom.value
@@ -716,6 +717,25 @@ class TableController {
     this.color.quickValue = color
     this.colorInput.value = color
     this.tableHeader.style.backgroundColor = color
+  }
+
+  randomColor() {
+    const color = this.diagram.colorController.randomTitleBgColor()
+    this.applyColor(color)
+  }
+
+  resetColor() {
+    this.applyColor('')
+  }
+
+  applyColor(color: string) {
+    this.colorInput.value = color
+    this.tableHeader.style.backgroundColor = color
+    this.diagram.inputController.setTablePosition(this.data.name, {
+      x: this.data.position?.x || this.translateX.quickValue,
+      y: this.data.position?.y || this.translateY.quickValue,
+      color,
+    })
   }
 
   rerenderColumns() {
