@@ -568,12 +568,14 @@ class TableController {
     this.colorInput = this.tableHeader.querySelector(
       'input[type=color]',
     ) as HTMLInputElement
-    this.colorInput.addEventListener('change', event => {
-      this.color.value = this.colorInput.value
+    this.colorInput.addEventListener('input', event => {
+      const color = this.colorInput.value
+      this.color.value = color
+      this.tableHeader.style.backgroundColor = color
       this.diagram.inputController.setTablePosition(this.data.name, {
         x: this.translateX.value,
         y: this.translateY.value,
-        color: this.color.value,
+        color,
       })
     })
 
@@ -710,8 +712,10 @@ class TableController {
     }
 
     // apply table color from erd text
-    this.color.quickValue = data.position?.color || ''
-    this.colorInput.value = data.position?.color || ''
+    const color = data.position?.color || ''
+    this.color.quickValue = color
+    this.colorInput.value = color
+    this.tableHeader.style.backgroundColor = color
   }
 
   rerenderColumns() {
