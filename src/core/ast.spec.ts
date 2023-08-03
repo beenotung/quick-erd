@@ -311,7 +311,7 @@ name text
 
 # zoom: 0.890
 # view: (94, 292)
-# user (821, 369)
+# user (821, 369, #ff0000)
 # room (65, 708)
 `
     const ast = parse(text)
@@ -324,11 +324,19 @@ name text
 
     expectObjectKeys(ast.table_list[0], ['name', 'position'])
     expect(ast.table_list[0].name).to.equals('user')
-    expect(ast.table_list[0].position).to.deep.equals({ x: 821, y: 369 })
+    expect(ast.table_list[0].position).to.deep.equals({
+      x: 821,
+      y: 369,
+      color: '#ff0000',
+    })
 
     expectObjectKeys(ast.table_list[1], ['name', 'position'])
     expect(ast.table_list[1].name).to.equals('room')
-    expect(ast.table_list[1].position).to.deep.equals({ x: 65, y: 708 })
+    expect(ast.table_list[1].position).to.deep.equals({
+      x: 65,
+      y: 708,
+      color: undefined,
+    })
   })
 
   it('should not treat not null as column type', () => {
