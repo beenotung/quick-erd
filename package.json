@@ -23,14 +23,14 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "auto-migrate": "./dist/cli/auto-migrate.js",
-    "pg-to-erd": "./dist/cli/pg-to-erd.js",
-    "mysql-to-erd": "./dist/cli/mysql-to-erd.js",
-    "sqlite-to-erd": "./dist/cli/sqlite-to-erd.js",
-    "format-erd": "./dist/cli/format-erd.js",
-    "erd-to-sqlite": "./dist/cli/erd-to-sqlite.js",
-    "erd-to-proxy": "./dist/cli/erd-to-proxy.js",
-    "erd-to-knex": "./dist/cli/erd-to-knex.js"
+    "auto-migrate": "dist/cli/auto-migrate.js",
+    "pg-to-erd": "dist/cli/pg-to-erd.js",
+    "mysql-to-erd": "dist/cli/mysql-to-erd.js",
+    "sqlite-to-erd": "dist/cli/sqlite-to-erd.js",
+    "format-erd": "dist/cli/format-erd.js",
+    "erd-to-sqlite": "dist/cli/erd-to-sqlite.js",
+    "erd-to-proxy": "dist/cli/erd-to-proxy.js",
+    "erd-to-knex": "dist/cli/erd-to-knex.js"
   },
   "files": [
     "dist"
