@@ -565,7 +565,7 @@ class TableController {
   <tbody></tbody>
 </table>
 <div class='table-footer'>
-  <button class='add-field-button' title='add field'>+</button>
+  <button class='add-field-button' title='add column'>+</button>
 </div>
 </div>
 `
@@ -600,15 +600,17 @@ class TableController {
         this.showAddFieldMessage('Error: last field not detected')
       } else {
         this.diagram.inputController.addField(this.data.name, lastField)
-        this.showAddFieldMessage('Input new field name')
+        this.showAddFieldMessage('(please input new column)')
       }
     })
   }
 
   showAddFieldMessage(message: string) {
     this.addFieldButton.textContent = message
+    this.addFieldButton.classList.add('message-mode')
     setTimeout(() => {
       this.addFieldButton.textContent = '+'
+      this.addFieldButton.classList.remove('message-mode')
     }, 3500)
   }
 

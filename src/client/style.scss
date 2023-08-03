@@ -276,6 +276,11 @@ dialog[open] {
   margin: 0.25rem;
   padding: 0.3rem 2rem;
 }
+.table-footer button.message-mode {
+  background: none;
+  border: 0;
+  opacity: 0.5;
+}
 
 [data-mode="schema"] #queryInput,
 [data-mode="schema"] .output-controls {
