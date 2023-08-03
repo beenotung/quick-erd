@@ -145,17 +145,18 @@ export class QueryInputController {
     const tables = this.getTableList()
     const columns = this.columns
     const n = columns.length
-    columns.forEach(column => {
+    for (let i = 0; i < columns.length; i++) {
+      const column = columns[i]
       const table = tables.find(table => table.name === column.table)
       if (
         table &&
         table.field_list.some(field => field.name === column.field)
       ) {
-        return
+        continue
       }
-      const idx = columns.indexOf(column)
-      columns.splice(idx, 1)
-    })
+      columns.splice(i, 1)
+      i--
+    }
     if (columns.length === n) return
     this.update(columns, parts)
   }
