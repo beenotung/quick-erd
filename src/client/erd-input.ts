@@ -42,7 +42,7 @@ export class ErdInputController {
   }
 
   setColor(name: ColorName, color: string) {
-    let { regex, toLine } = colors[name]
+    const { regex, toLine } = colors[name]
     this.updateLine(regex, toLine(color))
   }
 
