@@ -143,7 +143,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       if (match.startsWith('(') && match.endsWith(')')) {
         match = match.slice(1, match.length - 1)
       }
-      const matches = match.match(/`?(.*?)`?\s*in.*\((.*)\)/i)
+      const matches = match.match(/"?`?(.*?)"?`?\s*in.*\((.*)\)/i)
       if (matches?.[1] === name) {
         type = 'enum(' + matches[2] + ')'
         type = formatEnum(type)

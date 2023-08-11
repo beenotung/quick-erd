@@ -421,7 +421,7 @@ CREATE UNIQUE INDEX \`user_username_unique\` on \`user\` (\`username\`)
 CREATE TABLE \`thread\` (
   \`id\` integer not null primary key autoincrement
 , \`status_1\` text check (\`status_1\` in ('active', 'pending')) not null
-, \`status_2\` text NOT NULL CHECK (\`status_2\` IN ('active', 'pending'))
+, "status_2" text NOT NULL CHECK ("status_2" IN ('active', 'pending'))
 )
 `,
       },
