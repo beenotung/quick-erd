@@ -420,8 +420,8 @@ CREATE UNIQUE INDEX \`user_username_unique\` on \`user\` (\`username\`)
         sql: /* sql */ `
 CREATE TABLE \`thread\` (
   \`id\` integer not null primary key autoincrement
-, \`status_1\` text check (\`status_1\` in ('active', 'pending')) not null
-, "status_2" text NOT NULL CHECK ("status_2" IN ('active', 'pending'))
+, \`status\` text check (\`status\` in ('active', 'pending')) not null
+, "visibility" text NOT NULL CHECK ("visibility" IN ('Public', 'Private', 'Unlisted'))
 )
 `,
       },
@@ -441,7 +441,7 @@ CREATE TABLE \`thread\` (
             references: undefined,
           },
           {
-            name: 'status_1',
+            name: 'status',
             type: "enum('active','pending')",
             is_null: false,
             is_primary_key: false,
@@ -451,8 +451,8 @@ CREATE TABLE \`thread\` (
             references: undefined,
           },
           {
-            name: 'status_2',
-            type: "enum('active','pending')",
+            name: 'visibility',
+            type: "enum('Public','Private','Unlisted')",
             is_null: false,
             is_primary_key: false,
             is_unique: false,

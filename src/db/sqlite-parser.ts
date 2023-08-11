@@ -138,8 +138,8 @@ export function parseCreateTable(sql: string): Field[] | null {
         rest = before + after.slice(default_value.length)
       }
     }
-    if (lower.match(/check.*in.*/i)) {
-      let match = lower.match(/check(.*)/i)?.[1].trim() || ''
+    if (lower.match(/check.*in.*/)) {
+      let match = rest.match(/check(.*)/i)?.[1].trim() || ''
       if (match.startsWith('(') && match.endsWith(')')) {
         match = match.slice(1, match.length - 1)
       }
@@ -151,7 +151,7 @@ export function parseCreateTable(sql: string): Field[] | null {
     }
     field_dict[name] = {
       name,
-      type: type.toLowerCase(),
+      type: type.startsWith('enum(') ? type : type.toLowerCase(),
       is_primary_key,
       is_null,
       is_unique,
