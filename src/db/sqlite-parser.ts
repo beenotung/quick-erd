@@ -138,12 +138,12 @@ export function parseCreateTable(sql: string): Field[] | null {
         rest = before + after.slice(default_value.length)
       }
     }
-    if (lower.match(/check.*in.*/)) {
-      let match = lower.match(/check(.*)/)?.[1].trim() || ''
+    if (lower.match(/check.*in.*/i)) {
+      let match = lower.match(/check(.*)/i)?.[1].trim() || ''
       if (match.startsWith('(') && match.endsWith(')')) {
         match = match.slice(1, match.length - 1)
       }
-      const matches = match.match(/`?(.*?)`?\s*in.*\((.*)\)/)
+      const matches = match.match(/`?(.*?)`?\s*in.*\((.*)\)/i)
       if (matches?.[1] === name) {
         type = 'enum(' + matches[2] + ')'
         type = formatEnum(type)
