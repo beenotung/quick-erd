@@ -220,7 +220,7 @@ The relation fields are also included based on the foreign key references.
 
 1. Run `npx erd-to-proxy < erd.txt > proxy.ts`
 
-This command generate the typescript types of each table and the schema for `proxySchema()` in [better-sqlite3-proxy](https://github.com/beenotung/better-sqlite3-proxy)
+This command generates the typescript types of each table and the schema for `proxySchema()` in [better-sqlite3-proxy](https://github.com/beenotung/better-sqlite3-proxy)
 
 The relation fields are also included based on the foreign key references.
 
@@ -237,7 +237,7 @@ The relation fields are also included based on the foreign key references.
 
 _Export Format_:
 
-The default behaviour is to generate a proxy as singleton with commonjs format.
+The default behavior is to generate a proxy as singleton with commonjs format.
 
 If a factory function is preferred, you can pass `--factory` in the argument, e.g. `npx erd-to-proxy --factory < erd.txt > proxy.ts`
 
