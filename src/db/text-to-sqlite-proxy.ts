@@ -10,7 +10,7 @@ export function textToSqliteProxy(
   const mode = options?.mode || 'singleton'
   const type = options?.type || 'commonjs'
 
-  let { tableTypes, proxyFields, schemaFields } = textToTypes(text)
+  const { tableTypes, proxyFields, schemaFields } = textToTypes(text)
 
   let code = ''
 
