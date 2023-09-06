@@ -29,6 +29,7 @@
     "sqlite-to-erd": "dist/cli/sqlite-to-erd.js",
     "format-erd": "dist/cli/format-erd.js",
     "erd-to-sqlite": "dist/cli/erd-to-sqlite.js",
+    "erd-to-types": "dist/cli/erd-to-types.js",
     "erd-to-proxy": "dist/cli/erd-to-proxy.js",
     "erd-to-knex": "dist/cli/erd-to-knex.js"
   },

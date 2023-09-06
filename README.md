@@ -16,7 +16,10 @@ https://quick-erd.surge.sh
 generate incremental migration:
 `auto-migrate`
 
-generate typed proxy:
+generate typescript types of each table:
+`erd-to-types`
+
+generate each table types and better-sqlite3-proxy schema:
 `erd-to-proxy`
 
 generate initial schema:
@@ -114,6 +117,10 @@ If you prefer to use PowerShell, you may need to replace `<` with `\<` to pipe f
 - `npx auto-migrate dev.sqlite3 < erd.txt`
 - `npx auto-migrate --rename pg < erd.txt`
 
+**To generate typescript types of each table**:
+
+- `npx erd-to-types < erd.txt > types.ts`
+
 **To generate types and proxy schema for better-sqlite3-proxy**:
 
 - `npx erd-to-proxy < erd.txt > proxy.ts`
@@ -200,6 +207,14 @@ For sqlite database, it also auto setup `db.ts` with `better-sqlite3` connection
 The `--rename` or `-r` flag enable table/column rename detection.
 
 If there are pending knex migrations not applied, it will show error message and stop running.
+
+#### Generate typescript types of each table
+
+1. Run `npx erd-to-types < erd.txt > types.ts`
+
+This command generates the the typescript types of each table.
+
+The relation fields are also included based on the foreign key references.
 
 #### Generate types and proxy schema for better-sqlite3-proxy
 
