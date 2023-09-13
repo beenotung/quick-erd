@@ -45,7 +45,7 @@ export function addNpmScripts(scripts: Record<string, string>) {
   const pkg: PackageJSON = readPackageJSON(file)
   const originalText = JSON.stringify(pkg, null, 2)
   pkg.scripts ||= {}
-  for (let key in scripts) {
+  for (const key in scripts) {
     if (!(key in pkg.scripts)) {
       pkg.scripts[key] = scripts[key]
     }

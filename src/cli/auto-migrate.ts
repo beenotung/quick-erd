@@ -5,13 +5,13 @@ import { readErdFromStdin } from '../utils/file'
 import {
   detectSrcDir,
   setupEnvFile,
+  setupNpmScripts,
   setupKnexFile,
   setupKnexMigration,
   setupSqlite,
 } from '../db/auto-migrate'
 import { loadKnex, loadSqliteKnex } from '../db/knex'
 import { env } from '../db/env'
-import { setupNpmScripts } from '../db/auto-migrate'
 
 /* eslint-disable no-console */
 
