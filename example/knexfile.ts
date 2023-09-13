@@ -57,5 +57,9 @@ switch (env.DB_CLIENT) {
     module.exports.development = module.exports.pg
     break
   default:
-    throw new Error('Unknown DB_CLIENT:' + env.DB_CLIENT)
+    if (env.DB_CLIENT.includes('sqlite')) {
+      module.exports.development = module.exports.sqlite
+      break
+    }
+    throw new Error('Unknown DB_CLIENT: ' + env.DB_CLIENT)
 }
