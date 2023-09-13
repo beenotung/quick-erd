@@ -4,7 +4,7 @@ import { Knex as KnexType } from 'knex'
 import { join } from 'path'
 import { inspect } from 'util'
 import { Field, ParseResult, Table } from '../core/ast'
-import { addDependencies, writeSrcFile } from '../utils/file'
+import { addDependencies, addNpmScripts, writeSrcFile } from '../utils/file'
 import { scanMysqlTableSchema } from './mysql-to-text'
 import { scanPGTableSchema } from './pg-to-text'
 import { sortTables } from './sort-tables'
@@ -49,6 +49,33 @@ toSafeMode(db)
 `
   writeSrcFile(dbTsFile, code)
   return
+}
+
+export function setupNpmScripts(options: {
+  srcDir: string
+  db_client: string
+  dbFile: string | undefined
+}) {
+  addDependencies('npm-run-all', '^4.1.5', 'dev')
+  let toFile = (filename: string): string => {
+    if (options.srcDir == '.') return filename
+    return join(options.srcDir, filename)
+  }
+  if (options.db_client.includes('sqlite')) {
+    let proxyFile = toFile('proxy.ts')
+    addNpmScripts({
+      'db': 'run-s db:update db:plan db:update',
+      'db:plan': `auto-migrate ${options.dbFile} < erd.txt`,
+      'db:update': `knex migrate:latest && erd-to-proxy < erd.txt > ${proxyFile}`,
+    })
+  } else {
+    let typesFile = toFile('types.ts')
+    addNpmScripts({
+      'db': 'run-s db:update db:plan db:update',
+      'db:plan': `auto-migrate ${options.db_client} < erd.txt`,
+      'db:update': `knex migrate:latest && erd-to-types < erd.txt > ${typesFile}`,
+    })
+  }
 }
 
 const defaultPorts: Record<string, number> = {

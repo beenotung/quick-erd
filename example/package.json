@@ -3,19 +3,26 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "db": "run-s db:update db:plan db:update",
+    "db:plan": "auto-migrate db.sqlite3 < sqlite-erd.txt",
+    "db:update": "knex migrate:latest && erd-to-proxy < sqlite-erd.txt > proxy.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "better-sqlite3": "^8.6.0",
     "better-sqlite3-proxy": "^2.4.1",
     "better-sqlite3-schema": "^3.1.2",
+    "knex": "^2.5.1",
     "mysql": "^2.18.1",
     "pg": "^8.11.0",
     "populate-env": "^2.0.0",
     "quick-erd": "link:.."
   },
   "devDependencies": {
-    "@types/integer": "^4.0.1"
+    "@types/integer": "^4.0.1",
+    "npm-run-all": "^4.1.5"
   }
 }

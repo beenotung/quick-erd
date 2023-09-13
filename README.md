@@ -200,7 +200,7 @@ erd-to-sqlite < erd.txt > migrations/000-create-tables.sql
 
    or `npx auto-migrate --rename pg < erd.txt`
 
-This command auto setup knex, then it generates incremental migration script for knex.
+This command auto setup knex and npm scripts, then it generates incremental migration script for knex.
 
 For sqlite database, it also auto setup `db.ts` with `better-sqlite3` connection using given database filename.
 

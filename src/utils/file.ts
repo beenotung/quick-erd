@@ -28,7 +28,7 @@ export function addDependencies(
   mode?: 'prod' | 'dev',
 ) {
   const file = 'package.json'
-  const pkg: PackageJSON = JSON.parse(readFileSync(file).toString())
+  const pkg: PackageJSON = readPackageJSON(file)
 
   const field = mode === 'dev' ? 'devDependencies' : 'dependencies'
   const deps = (pkg[field] = pkg[field] || {})
@@ -40,6 +40,22 @@ export function addDependencies(
   writeSrcFile(file, text)
 }
 
+export function addNpmScripts(scripts: Record<string, string>) {
+  const file = 'package.json'
+  const pkg: PackageJSON = readPackageJSON(file)
+  const originalText = JSON.stringify(pkg, null, 2)
+  pkg.scripts ||= {}
+  for (let key in scripts) {
+    if (!(key in pkg.scripts)) {
+      pkg.scripts[key] = scripts[key]
+    }
+  }
+  const newText = JSON.stringify(pkg, null, 2)
+  if (newText != originalText) {
+    writeSrcFile(file, newText)
+  }
+}
+
 export function readPackageJSON(file: string) {
   const pkg: PackageJSON = JSON.parse(readFileSync(file).toString())
   return pkg
@@ -49,4 +65,5 @@ export type PackageJSON = {
   type?: 'commonjs' | 'module'
   devDependencies?: Record<string, string>
   dependencies?: Record<string, string>
+  scripts?: Record<string, string>
 }

@@ -11,6 +11,7 @@ import {
 } from '../db/auto-migrate'
 import { loadKnex, loadSqliteKnex } from '../db/knex'
 import { env } from '../db/env'
+import { setupNpmScripts } from '../db/auto-migrate'
 
 /* eslint-disable no-console */
 
@@ -52,6 +53,7 @@ async function main() {
       setupSqlite({ srcDir, dbFile })
     }
   }
+  setupNpmScripts({ srcDir, db_client, dbFile })
   setupKnexFile({ srcDir, db_client })
   const knex = dbFile ? loadSqliteKnex(dbFile) : loadKnex(db_client)
   await setupKnexMigration({
