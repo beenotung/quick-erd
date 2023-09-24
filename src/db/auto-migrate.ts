@@ -1,7 +1,7 @@
 import { closest } from 'fastest-levenshtein'
-import { existsSync, mkdirSync, readdirSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync } from 'fs'
 import { Knex as KnexType } from 'knex'
-import { join } from 'path'
+import { basename, dirname, join } from 'path'
 import { inspect } from 'util'
 import { Field, ParseResult, Table } from '../core/ast'
 import { addDependencies, addNpmScripts, writeSrcFile } from '../utils/file'
@@ -75,6 +75,32 @@ export function setupNpmScripts(options: {
       'db:plan': `auto-migrate ${options.db_client} < erd.txt`,
       'db:update': `knex migrate:latest && erd-to-types < erd.txt > ${typesFile}`,
     })
+  }
+}
+
+export function setupGitIgnore(options: { dbFile: string | undefined }) {
+  if (!options.dbFile) return
+  const dir = dirname(options.dbFile)
+  const file = join(dir, '.gitignore')
+  let text = (existsSync(file) && readFileSync(file).toString()) || ''
+  const originalText = text
+  const lines = text
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+  const base = basename(options.dbFile)
+  if (lines.some(line => line == base + '*')) return
+  if (text && !text.endsWith('\n')) {
+    text += '\n'
+  }
+  const files = [base, base + '-shm', base + '-wal']
+  for (const file of files) {
+    if (!lines.includes(file)) {
+      text += file + '\n'
+    }
+  }
+  if (text != originalText) {
+    writeSrcFile(file, text)
   }
 }
 
