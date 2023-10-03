@@ -64,14 +64,14 @@ export function setupNpmScripts(options: {
   if (options.db_client.includes('sqlite')) {
     const proxyFile = toFile('proxy.ts')
     addNpmScripts({
-      'db': 'run-s db:update db:plan db:update',
+      'db:dev': 'run-s db:update db:plan db:update',
       'db:plan': `auto-migrate ${options.dbFile} < erd.txt`,
       'db:update': `knex migrate:latest && erd-to-proxy < erd.txt > ${proxyFile}`,
     })
   } else {
     const typesFile = toFile('types.ts')
     addNpmScripts({
-      'db': 'run-s db:update db:plan db:update',
+      'db:dev': 'run-s db:update db:plan db:update',
       'db:plan': `auto-migrate ${options.db_client} < erd.txt`,
       'db:update': `knex migrate:latest && erd-to-types < erd.txt > ${typesFile}`,
     })
