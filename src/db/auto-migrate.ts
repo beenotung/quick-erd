@@ -1,7 +1,7 @@
 import { closest } from 'fastest-levenshtein'
 import { existsSync, mkdirSync, readFileSync, readdirSync } from 'fs'
 import { Knex as KnexType } from 'knex'
-import { basename, dirname, join } from 'path'
+import { basename, dirname, extname, join } from 'path'
 import { inspect } from 'util'
 import { Field, ParseResult, Table } from '../core/ast'
 import { addDependencies, addNpmScripts, writeSrcFile } from '../utils/file'
@@ -95,7 +95,7 @@ export function setupGitIgnore(options: { dbFile: string | undefined }) {
   }
   const files = [base, base + '-shm', base + '-wal']
   for (const file of files) {
-    if (!lines.includes(file)) {
+    if (!lines.includes(file) && !lines.includes('*' + extname(file))) {
       text += file + '\n'
     }
   }
