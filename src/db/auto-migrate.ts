@@ -599,19 +599,23 @@ function alterSqliteField(
       `alter non-nullable column (${table.name}.${field.name}) is not supported in sqlite`,
     )
   }
-  const drop_unique = field.is_unique
-    ? `
+  let drop_lines = ''
+  let add_lines = ''
+  if (field.is_unique) {
+    drop_lines += `
     await knex.schema.alterTable('${table.name}', table => table.dropUnique(['${field.name}']))`
-    : ''
-  const add_unique = field.is_unique
-    ? `
+    add_lines += `
     await knex.schema.alterTable('${table.name}', table => table.unique(['${field.name}']))`
-    : ''
+  }
+  if (field.references) {
+    drop_lines += `
+    await knex.schema.alterTable('${table.name}', table => table.dropForeign(['${field.name}']))`
+  }
   const code = `
   {
-    const rows = await knex.select('id', '${field.name}').from('${table.name}')${drop_unique}
+    const rows = await knex.select('id', '${field.name}').from('${table.name}')${drop_lines}
     await knex.raw('alter table \`${table.name}\` drop column \`${field.name}\`')
-    await knex.raw("alter table \`${table.name}\` add column ${columnDefinition}")${add_unique}
+    await knex.raw("alter table \`${table.name}\` add column ${columnDefinition}")${add_lines}
     for (let row of rows) {
       await knex('${table.name}').update({ ${field.name}: row.${field.name} }).where({ id: row.id })
     }
@@ -620,8 +624,10 @@ function alterSqliteField(
 }
 function alterSqliteType(table: Table, field: Field): string {
   const col = wrapSqliteName(field.name)
-  const columnDefinition = `${col} ${field.type}`
-  return alterSqliteField(table, field, columnDefinition)
+  const quoted_field = { ...field, name: col }
+  quoted_field.is_unique = false
+  const body = toSqliteColumnSql(quoted_field)
+  return alterSqliteField(table, field, body)
 }
 function alterSqliteEnum(table: Table, field: Field): string {
   const col = wrapSqliteName(field.name)
