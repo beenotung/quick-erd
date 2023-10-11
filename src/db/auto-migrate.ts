@@ -379,8 +379,8 @@ export function generateAutoMigrate(options: {
           raw_up_lines.push(alterSqliteEnum(table, field))
           raw_down_lines.unshift(alterSqliteEnum(table, existing_field))
         } else if (is_sqlite) {
-          raw_up_lines.push(alterSqliteField(table, field))
-          raw_down_lines.unshift(alterSqliteField(table, existing_field))
+          raw_up_lines.push(alterSqliteType(table, field))
+          raw_down_lines.unshift(alterSqliteType(table, existing_field))
         } else {
           table_up_lines.push(alterType(field))
           table_down_lines.unshift(alterType(existing_field))
@@ -398,8 +398,13 @@ export function generateAutoMigrate(options: {
       }
 
       if (field.is_null !== existing_field.is_null) {
-        table_up_lines.push(alterNullable(field))
-        table_down_lines.unshift(alterNullable(existing_field))
+        if (is_sqlite) {
+          raw_up_lines.push(alterSqliteNullable(table, field))
+          raw_down_lines.unshift(alterSqliteNullable(table, existing_field))
+        } else {
+          table_up_lines.push(alterNullable(field))
+          table_down_lines.unshift(alterNullable(existing_field))
+        }
       }
 
       // add foreign key
@@ -584,40 +589,55 @@ ${mergeLines(table_down_lines)}
   return { up_lines, down_lines }
 }
 
-function alterSqliteField(table: Table, field: Field): string {
+function alterSqliteField(
+  table: Table,
+  field: Field,
+  columnDefinition: string,
+): string {
   if (!field.is_null) {
     throw new Error(
       `alter non-nullable column (${table.name}.${field.name}) is not supported in sqlite`,
     )
   }
+  const drop_unique = field.is_unique
+    ? `
+    await knex.schema.alterTable('${table.name}', table => table.dropUnique(['${field.name}']))`
+    : ''
+  const add_unique = field.is_unique
+    ? `
+    await knex.schema.alterTable('${table.name}', table => table.unique(['${field.name}']))`
+    : ''
   const code = `
   {
-    const rows = await knex.select('id', '${field.name}').from('${table.name}')
+    const rows = await knex.select('id', '${field.name}').from('${table.name}')${drop_unique}
     await knex.raw('alter table \`${table.name}\` drop column \`${field.name}\`')
-    await knex.raw("alter table \`${table.name}\` add column \`${field.name}\` ${field.type}")
+    await knex.raw("alter table \`${table.name}\` add column ${columnDefinition}")${add_unique}
     for (let row of rows) {
       await knex('${table.name}').update({ ${field.name}: row.${field.name} }).where({ id: row.id })
     }
   }`
   return '  ' + code.trim()
 }
+function alterSqliteType(table: Table, field: Field): string {
+  const col = wrapSqliteName(field.name)
+  const columnDefinition = `${col} ${field.type}`
+  return alterSqliteField(table, field, columnDefinition)
+}
 function alterSqliteEnum(table: Table, field: Field): string {
-  if (!field.is_null) {
-    throw new Error(
-      `alter non-nullable column (${table.name}.${field.name}) is not supported in sqlite`,
-    )
-  }
+  const col = wrapSqliteName(field.name)
   const values = field.type.replace(/enum/i, '')
-  const code = `
-  {
-    const rows = await knex.select('id', '${field.name}').from('${table.name}')
-    await knex.raw('alter table \`${table.name}\` drop column \`${field.name}\`')
-    await knex.raw("alter table \`${table.name}\` add column \`${field.name}\` text check (\`${field.name}\` in ${values})")
-    for (let row of rows) {
-      await knex('${table.name}').update({ ${field.name}: row.${field.name} }).where({ id: row.id })
-    }
-  }`
-  return '  ' + code.trim()
+  const columnDefinition = `${col} text check (${col} in ${values})`
+  return alterSqliteField(table, field, columnDefinition)
+}
+function alterSqliteNullable(table: Table, field: Field): string {
+  if (!field.is_null) {
+    const code = `
+  // FIXME: alter column (${table.name}.${field.name}) to be non-nullable not supported in sqlite
+  // you may set it to be non-nullable with sqlite browser manually
+`
+    return '  ' + code.trim()
+  }
+  return alterSqliteType(table, field)
 }
 function alterType(field: Field): string {
   let code = 'table'
