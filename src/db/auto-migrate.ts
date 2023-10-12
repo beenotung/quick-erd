@@ -282,6 +282,8 @@ export function generateAutoMigrate(options: {
   db_client: string
 }) {
   const is_sqlite = options.db_client.includes('sqlite')
+  const is_postgres =
+    options.db_client.includes('postgres') || options.db_client == 'pg'
   const up_lines: string[] = []
   const down_lines: string[] = []
 
@@ -371,13 +373,15 @@ export function generateAutoMigrate(options: {
         field.type !== existing_field.type ||
         field.is_unsigned !== existing_field.is_unsigned
       ) {
-        if (
-          is_sqlite &&
-          field.type.match(/^enum/i) &&
-          existing_field.type.match(/^enum/i)
-        ) {
+        const is_both_enum =
+          field.type.match(/^enum/i) && existing_field.type.match(/^enum/i)
+        if (is_sqlite && is_both_enum) {
           raw_up_lines.push(alterSqliteEnum(table, field))
           raw_down_lines.unshift(alterSqliteEnum(table, existing_field))
+        }
+        if (is_postgres && is_both_enum) {
+          table_up_lines.push(...alterPostgresEnum(table, field))
+          table_down_lines.unshift(...alterPostgresEnum(table, existing_field))
         } else if (is_sqlite) {
           raw_up_lines.push(alterSqliteType(table, field))
           raw_down_lines.unshift(alterSqliteType(table, existing_field))
@@ -644,6 +648,16 @@ function alterSqliteNullable(table: Table, field: Field): string {
     return '  ' + code.trim()
   }
   return alterSqliteType(table, field)
+}
+function alterPostgresEnum(table: Table, field: Field): string[] {
+  const lines: string[] = []
+  const name = `${table.name}_${field.name}_check`
+  const values = field.type.replace(/enum/i, '')
+  lines.push(`table.dropChecks('${name}')`)
+  lines.push(
+    `table.check(\`"${field.name}" in ${values}\`, undefined, '${name}')`,
+  )
+  return lines
 }
 function alterType(field: Field): string {
   let code = 'table'
