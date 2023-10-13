@@ -1,0 +1,24 @@
+###
+POST http://localhost:8080/user/login
+
+###
+POST http://localhost:8080/pets
+Content-Type: application/json
+
+{
+  "type": "cat"
+}
+
+###
+POST http://localhost:8080/pets
+Content-Type: application/json
+
+{
+  "type": "dog"
+}
+
+###
+GET http://localhost:8080/pets
+
+###
+GET http://localhost:8080/pets/search?type=cat
