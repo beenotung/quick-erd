@@ -1,0 +1,20 @@
+pet
+---
+id
+type text
+
+user
+----
+id
+username varchar(32)
+password_hash char(60)
+
+user_pet
+--------
+id
+user_id fk
+pet_id fk
+
+# pet (94, 291)
+# user (611, 245)
+# user_pet (345, 238)
