@@ -22,6 +22,9 @@ generate typescript types of each table:
 generate each table types and better-sqlite3-proxy schema:
 `erd-to-proxy`
 
+generate java jpa entities and repositories:
+`erd-to-spring`
+
 generate initial schema:
 `erd-to-sqlite`, `erd-to-knex`
 
@@ -125,6 +128,11 @@ If you prefer to use PowerShell, you may need to replace `<` with `\<` to pipe f
 
 - `npx erd-to-proxy < erd.txt > proxy.ts`
 - `npx erd-to-proxy --factory < erd.txt > proxy.ts`
+
+**To generate java jpa entities and repositories**:
+
+- `npx erd-to-spring pg < erd.txt`
+- `npx erd-to-spring h2 < erd.txt`
 
 **To format erd file**:
 
