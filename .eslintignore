@@ -1,4 +1,4 @@
 node_modules/
 dist/
 test/
-example/migrations/*.ts
+examples/node-project/migrations/*.ts
