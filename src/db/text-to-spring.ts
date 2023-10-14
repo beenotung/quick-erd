@@ -7,7 +7,6 @@ import { snake_to_camel, snake_to_Pascal } from '../utils/case'
 import { writeSrcFile, writeSrcFileIfNeeded } from '../utils/file'
 import { DBClient } from '../utils/cli'
 import { parseEnumValues } from '../core/enum'
-import { isErrored } from 'stream'
 
 export function textToSpring(dbClient: DBClient, text: string) {
   const result = parse(text)
