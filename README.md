@@ -1,6 +1,6 @@
 # quick-erd
 
-quick and easy text-based ERD editor with drag and drop visualization
+quick and easy text-based ERD editor with drag and drop visualization + code generator for migration, query, typescript types and orm entity
 
 [![npm Package Version](https://img.shields.io/npm/v/quick-erd)](https://www.npmjs.com/package/quick-erd)
 [![npm Package Downloads](https://img.shields.io/npm/dy/quick-erd)](https://www.npmtrends.com/quick-erd)
