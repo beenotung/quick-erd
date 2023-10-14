@@ -15,7 +15,7 @@ export function textToSpring(dbClient: DBClient, text: string) {
   let app = setupDirectories()
 
   for (let table of table_list) {
-    setupEntity(dbClient, app, table)
+    setupEntity(app, table)
     setupRepository(app, table)
   }
 }
@@ -95,11 +95,7 @@ function findSpringBootApplicationPackage(file: string) {
   }
 }
 
-function setupEntity(
-  dbClient: DBClient,
-  app: SpringBootApplication,
-  table: Table,
-) {
+function setupEntity(app: SpringBootApplication, table: Table) {
   let dir = join(app.dir, 'entity')
   let ClassName = snake_to_Pascal(table.name) + 'Entity'
   let file = join(dir, `${ClassName}.java`)
@@ -134,11 +130,6 @@ function setupEntity(
   private ${type.Class} ${fieldName};`
   }
 
-  let idAnnotation =
-    (idField && idField.type !== 'integer') || dbClient == 'postgresql'
-      ? `@GeneratedValue(strategy = GenerationType.IDENTITY)`
-      : `@GeneratedValue(strategy = GenerationType.AUTO)`
-
   let importLines = Array.from(imports).join('\n')
 
   importLines = `
@@ -163,7 +154,7 @@ ${importLines}
 @Table(name = "\`${table.name}\`")
 public class ${ClassName} {
   @Id
-  ${idAnnotation}
+  @GeneratedValue
   @Column
   private Long id;
 

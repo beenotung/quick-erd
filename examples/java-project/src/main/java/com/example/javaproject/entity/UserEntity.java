@@ -15,7 +15,7 @@ import jakarta.persistence.Enumerated;
 @Table(name = "`user`")
 public class UserEntity {
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue
   @Column
   private Long id;
 

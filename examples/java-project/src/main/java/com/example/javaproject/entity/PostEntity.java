@@ -16,7 +16,7 @@ import java.sql.Time;
 @Table(name = "`post`")
 public class PostEntity {
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue
   @Column
   private Long id;
 

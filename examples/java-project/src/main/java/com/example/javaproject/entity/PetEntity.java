@@ -13,7 +13,7 @@ import jakarta.persistence.Column;
 @Table(name = "`pet`")
 public class PetEntity {
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue
   @Column
   private Long id;
 
