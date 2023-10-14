@@ -15,6 +15,7 @@ export function textToSpring(dbClient: DBClient, text: string) {
 
   for (let table of table_list) {
     setupEntity(dbClient, app, table)
+    setupRepository(app, table)
   }
 }
 
@@ -144,5 +145,24 @@ public class ${ClassName} {
 `.trim() +
     `
 }`
+  writeSrcFile(file, code)
+}
+
+function setupRepository(app: SpringBootApplication, table: Table) {
+  let dir = join(app.dir, 'repository')
+  let ClassName = snake_to_Pascal(table.name)
+  let file = join(dir, `${ClassName}Repository.java`)
+
+  if (existsSync(file)) return
+
+  let code = `
+package ${app.package}.repository;
+
+import ${app.package}.entity.${ClassName}Entity;
+import org.springframework.data.repository.CrudRepository;
+
+public interface ${ClassName}Repository extends CrudRepository<${ClassName}Entity, Long> {
+}
+`
   writeSrcFile(file, code)
 }
