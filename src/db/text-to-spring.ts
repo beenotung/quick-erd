@@ -9,35 +9,12 @@ import { DBClient } from '../utils/cli'
 
 export function textToSpring(dbClient: DBClient, text: string) {
   const result = parse(text)
-  const table_list = sortTables(result.table_list).map(mapJavaTable)
+  const table_list = sortTables(result.table_list)
 
   let app = setupDirectories()
 
   for (let table of table_list) {
     setupEntity(dbClient, app, table)
-  }
-}
-
-type JavaTable = {
-  table: Table
-  name: {
-    snake_case: string
-    PascalCase: string
-    camelCase: string
-  }
-}
-
-function mapJavaTable(table: Table): JavaTable {
-  let snake_case = table.name
-  let PascalCase = snake_to_Pascal(snake_case)
-  let camelCase = snake_to_camel(snake_case)
-  return {
-    table,
-    name: {
-      snake_case,
-      PascalCase,
-      camelCase,
-    },
   }
 }
 
@@ -119,17 +96,17 @@ function findSpringBootApplicationPackage(file: string) {
 function setupEntity(
   dbClient: DBClient,
   app: SpringBootApplication,
-  table: JavaTable,
+  table: Table,
 ) {
   let dir = join(app.dir, 'entity')
-  let ClassName = table.name.PascalCase + 'Entity'
+  let ClassName = snake_to_Pascal(table.name) + 'Entity'
   let file = join(dir, `${ClassName}.java`)
 
   let idField: Field | undefined
 
   let body = ''
 
-  for (let field of table.table.field_list) {
+  for (let field of table.field_list) {
     if (field.name === 'id') {
       idField = field
       continue
@@ -156,7 +133,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "\`${table.table.name}\`")
+@Table(name = "\`${table.name}\`")
 public class ${ClassName} {
   @Id
   ${idAnnotation}
