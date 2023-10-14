@@ -1,3 +1,4 @@
+import { Table } from './../core/ast'
 import { TablePositionColor } from './../core/meta'
 import { execSync } from 'child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'fs'
@@ -9,17 +10,34 @@ export function textToSpring(text: string) {
   const result = parse(text)
   const table_list = sortTables(result.table_list)
 
-  setupDirectories()
+  let app = setupDirectories()
+
+  for (let table of table_list) {
+    setupModel(app, table)
+  }
 }
 
-function setupDirectories() {
+type JavaTable = {
+  table: Table
+  className: string
+  package: string
+}
+
+function mapJavaTable(table: Table): JavaTable {
+  let name = table.name
+  return {
+    table,
+    className: name.split('_').map(s => capitial),
+  }
+}
+
+function setupDirectories(): SpringBootApplication {
   let srcDir = findSrcDir()
   let app = findSpringBootApplication(srcDir)
   if (!app) {
     console.error('Error: failed to locate spring boot application package')
     process.exit(1)
   }
-  console.log('app:', app)
   initPackage(app, 'model')
   initPackage(app, 'controller')
   initPackage(app, 'service')
@@ -83,4 +101,10 @@ function findSpringBootApplicationPackage(file: string) {
     packageName ||= line.match(/^package ([\w\.]+);/)?.[1]
     if (isSpringApplication && packageName) return packageName
   }
+}
+
+function setupModel(app: SpringBootApplication, table: Table) {
+  let dir = join(app.dir, 'model')
+  let file = join(dir, '')
+  console.log('setupModel', { app, table: table.name })
 }
