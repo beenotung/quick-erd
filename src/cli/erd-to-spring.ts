@@ -23,7 +23,7 @@ if (!dbFile_or_client) {
   process.exit(1)
 }
 
-let dbClient = detectDBClient(dbFile_or_client)
+const dbClient = detectDBClient(dbFile_or_client)
 
 function main() {
   let text = ''

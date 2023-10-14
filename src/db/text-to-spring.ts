@@ -12,17 +12,17 @@ export function textToSpring(dbClient: DBClient, text: string) {
   const result = parse(text)
   const table_list = sortTables(result.table_list)
 
-  let app = setupDirectories()
+  const app = setupDirectories()
 
-  for (let table of table_list) {
+  for (const table of table_list) {
     setupEntity(app, table)
     setupRepository(app, table)
   }
 }
 
 function setupDirectories(): SpringBootApplication {
-  let srcDir = findSrcDir()
-  let app = findSpringBootApplication(srcDir)
+  const srcDir = findSrcDir()
+  const app = findSpringBootApplication(srcDir)
   if (!app) {
     console.error('Error: failed to locate spring boot application package')
     process.exit(1)
@@ -39,7 +39,7 @@ function setupDirectories(): SpringBootApplication {
 }
 
 function initPackage(app: SpringBootApplication, name: string) {
-  let dir = join(app.dir, name)
+  const dir = join(app.dir, name)
   mkdirSync(dir, { recursive: true })
 }
 
@@ -65,24 +65,24 @@ type SpringBootApplication = {
 function findSpringBootApplication(
   dir: string,
 ): SpringBootApplication | undefined {
-  for (let filename of readdirSync(dir)) {
-    let file = join(dir, filename)
-    let stat = statSync(file)
+  for (const filename of readdirSync(dir)) {
+    const file = join(dir, filename)
+    const stat = statSync(file)
     if (stat.isFile() && filename.endsWith('Application.java')) {
-      let packageName = findSpringBootApplicationPackage(file)
+      const packageName = findSpringBootApplicationPackage(file)
       if (packageName) {
         return { dir, package: packageName }
       }
     }
     if (stat.isDirectory()) {
-      let res = findSpringBootApplication(file)
+      const res = findSpringBootApplication(file)
       if (res) return res
     }
   }
 }
 
 function findSpringBootApplicationPackage(file: string) {
-  let code = readFileSync(file).toString()
+  const code = readFileSync(file).toString()
 
   let packageName: string | undefined
   let isSpringApplication = false
@@ -96,30 +96,27 @@ function findSpringBootApplicationPackage(file: string) {
 }
 
 function setupEntity(app: SpringBootApplication, table: Table) {
-  let dir = join(app.dir, 'entity')
-  let ClassName = snake_to_Pascal(table.name) + 'Entity'
-  let file = join(dir, `${ClassName}.java`)
-
-  let idField: Field | undefined
+  const dir = join(app.dir, 'entity')
+  const ClassName = snake_to_Pascal(table.name) + 'Entity'
+  const file = join(dir, `${ClassName}.java`)
 
   let body = ''
-  let imports = new Set<string>()
+  const imports = new Set<string>()
 
-  for (let field of table.field_list) {
+  for (const field of table.field_list) {
     if (field.name === 'id') {
-      idField = field
       continue
     }
-    let is_enum = field.type.match(/^enum/i)
+    const is_enum = field.type.match(/^enum/i)
     if (is_enum) {
       setupEnum(app, table, field)
       imports.add('import jakarta.persistence.EnumType;')
     }
-    let type = toJavaType(table, field)
+    const type = toJavaType(table, field)
     if (type.import) {
       imports.add(type.import)
     }
-    let fieldName = snake_to_camel(field.name)
+    const fieldName = snake_to_camel(field.name)
     let annotation = `@Column(name = "\`${field.name}\`", nullable = ${field.is_null})`
     if (is_enum) {
       annotation += '\n  @Enumerated(EnumType.STRING)'
@@ -143,7 +140,7 @@ import jakarta.persistence.Column;
 ${importLines}
 `.trim()
 
-  let code =
+  const code =
     `
 package ${app.package}.entity;
 
@@ -166,11 +163,11 @@ public class ${ClassName} {
 }
 
 function setupEnum(app: SpringBootApplication, table: Table, field: Field) {
-  let dir = join(app.dir, 'entity')
-  let ClassName = snake_to_Pascal(table.name) + snake_to_Pascal(field.name)
-  let file = join(dir, `${ClassName}.java`)
+  const dir = join(app.dir, 'entity')
+  const ClassName = snake_to_Pascal(table.name) + snake_to_Pascal(field.name)
+  const file = join(dir, `${ClassName}.java`)
 
-  let values = parseEnumValues(field.type)
+  const values = parseEnumValues(field.type)
 
   let code = `
 package ${app.package}.entity;
@@ -185,13 +182,13 @@ public enum ${ClassName} {`
 }
 
 function setupRepository(app: SpringBootApplication, table: Table) {
-  let dir = join(app.dir, 'repository')
-  let ClassName = snake_to_Pascal(table.name)
-  let file = join(dir, `${ClassName}Repository.java`)
+  const dir = join(app.dir, 'repository')
+  const ClassName = snake_to_Pascal(table.name)
+  const file = join(dir, `${ClassName}Repository.java`)
 
   if (existsSync(file)) return
 
-  let code = `
+  const code = `
 package ${app.package}.repository;
 
 import ${app.package}.entity.${ClassName}Entity;
@@ -207,7 +204,7 @@ export function toJavaType(
   table: Table,
   field: Field,
 ): { Class: string; import?: string } {
-  let type = field.type
+  const type = field.type
 
   if (
     type.match(/^varchar/i) ||

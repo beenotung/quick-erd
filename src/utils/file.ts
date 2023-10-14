@@ -24,7 +24,7 @@ export function writeSrcFile(file: string, code: string) {
 
 export function writeSrcFileIfNeeded(file: string, code: string) {
   try {
-    let oldCode = readFileSync(file).toString()
+    const oldCode = readFileSync(file).toString()
     if (oldCode.trim() == code.trim()) return
   } catch (error) {
     // this is new file
