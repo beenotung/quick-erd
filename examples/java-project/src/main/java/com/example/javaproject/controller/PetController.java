@@ -1,7 +1,7 @@
 package com.example.javaproject.controller;
 
 import com.example.javaproject.dto.CreatePetDTO;
-import com.example.javaproject.model.Pet;
+import com.example.javaproject.entity.PetEntity;
 import com.example.javaproject.service.PetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
@@ -14,17 +14,17 @@ public class PetController {
   PetService petService;
 
   @PostMapping
-  public Pet createPet(@RequestBody() CreatePetDTO createPetDTO) {
+  public PetEntity createPet(@RequestBody() CreatePetDTO createPetDTO) {
     return petService.createPet(createPetDTO);
   }
 
   @GetMapping("search")
-  public Pet searchPets(@Param("type") String type) {
+  public PetEntity searchPets(@Param("type") String type) {
     return petService.findPetByType(type);
   }
 
   @GetMapping
-  public Iterable<Pet> findAllPets() {
+  public Iterable<PetEntity> findAllPets() {
     return petService.findAllPets();
   }
 }
