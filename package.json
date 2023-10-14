@@ -31,7 +31,8 @@
     "erd-to-sqlite": "dist/cli/erd-to-sqlite.js",
     "erd-to-types": "dist/cli/erd-to-types.js",
     "erd-to-proxy": "dist/cli/erd-to-proxy.js",
-    "erd-to-knex": "dist/cli/erd-to-knex.js"
+    "erd-to-knex": "dist/cli/erd-to-knex.js",
+    "erd-to-spring": "dist/cli/erd-to-spring.js"
   },
   "files": [
     "dist"

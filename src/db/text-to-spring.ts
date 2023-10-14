@@ -1,33 +1,45 @@
 import { Table } from './../core/ast'
 import { TablePositionColor } from './../core/meta'
-import { execSync } from 'child_process'
+import { execSync, SpawnOptions } from 'child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'fs'
 import { join, resolve } from 'path'
 import { Field, parse } from '../core/ast'
 import { sortTables } from './sort-tables'
+import { snake_to_camel, snake_to_Pascal } from '../utils/case'
+import { writeSrcFile } from '../utils/file'
+import { DBClient } from '../utils/cli'
 
-export function textToSpring(text: string) {
+export function textToSpring(dbClient: DBClient, text: string) {
   const result = parse(text)
-  const table_list = sortTables(result.table_list)
+  const table_list = sortTables(result.table_list).map(mapJavaTable)
 
   let app = setupDirectories()
 
   for (let table of table_list) {
-    setupModel(app, table)
+    setupEntity(dbClient, app, table)
   }
 }
 
 type JavaTable = {
   table: Table
-  className: string
-  package: string
+  name: {
+    snake_case: string
+    PascalCase: string
+    camelCase: string
+  }
 }
 
 function mapJavaTable(table: Table): JavaTable {
-  let name = table.name
+  let snake_case = table.name
+  let PascalCase = snake_to_Pascal(snake_case)
+  let camelCase = snake_to_camel(snake_case)
   return {
     table,
-    className: name.split('_').map(s => capitial),
+    name: {
+      snake_case,
+      PascalCase,
+      camelCase,
+    },
   }
 }
 
@@ -42,7 +54,10 @@ function setupDirectories(): SpringBootApplication {
   initPackage(app, 'controller')
   initPackage(app, 'service')
   initPackage(app, 'repository')
+  initPackage(app, 'entity')
+  initPackage(app, 'projection')
   initPackage(app, 'dto')
+  initPackage(app, 'mapper')
   return app
 }
 
@@ -103,8 +118,56 @@ function findSpringBootApplicationPackage(file: string) {
   }
 }
 
-function setupModel(app: SpringBootApplication, table: Table) {
-  let dir = join(app.dir, 'model')
-  let file = join(dir, '')
-  console.log('setupModel', { app, table: table.name })
+function setupEntity(
+  dbClient: DBClient,
+  app: SpringBootApplication,
+  table: JavaTable,
+) {
+  let dir = join(app.dir, 'entity')
+  let ClassName = table.name.PascalCase + 'Entity'
+  let file = join(dir, `${ClassName}.java`)
+
+  let idField: Field | undefined
+
+  let body = ''
+
+  for (let field of table.table.field_list) {
+    if (field.name === 'id') {
+      idField = field
+      continue
+    }
+    let type = 'String'
+    let fieldName = snake_to_camel(field.name)
+    body += `
+
+  @Column(name = "\`${field.name}\`", nullable = false)
+  private ${type} ${fieldName};`
+  }
+
+  let idAnnotation =
+    (idField && idField.type !== 'integer') || dbClient == 'postgresql'
+      ? `@GeneratedValue(strategy = GenerationType.IDENTITY)`
+      : `@GeneratedValue(strategy = GenerationType.AUTO)`
+
+  let code =
+    `
+package ${app.package}.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Data
+@Table(name = "\`${table.table.name}\`")
+public class ${ClassName} {
+  @Id
+  ${idAnnotation}
+  @Column
+  private Long id;
+
+  ${body.trim()}
+`.trim() +
+    `
+}`
+  writeSrcFile(file, code)
 }
