@@ -20,7 +20,7 @@ post
 ----
 id
 user_id fk
-title varchar(50)
+title varchar(50) null
 content text
 post_at timestamp
 post_date date

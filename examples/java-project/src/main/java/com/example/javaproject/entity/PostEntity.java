@@ -23,8 +23,11 @@ public class PostEntity {
   @Column(name = "`user_id`", nullable = false)
   private Long userId;
 
-  @Column(name = "`title`", nullable = false)
+  @Column(name = "`title`", nullable = true)
   private String title;
+
+  @Column(name = "`content`", nullable = false)
+  private String content;
 
   @Column(name = "`post_at`", nullable = false)
   private Timestamp postAt;

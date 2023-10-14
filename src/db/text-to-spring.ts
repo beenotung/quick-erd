@@ -125,7 +125,7 @@ function setupEntity(
       imports.add(type.import)
     }
     let fieldName = snake_to_camel(field.name)
-    let annotation = `@Column(name = "\`${field.name}\`", nullable = false)`
+    let annotation = `@Column(name = "\`${field.name}\`", nullable = ${field.is_null})`
     if (is_enum) {
       annotation += '\n  @Enumerated(EnumType.STRING)'
     }
