@@ -22,6 +22,16 @@ export function writeSrcFile(file: string, code: string) {
   writeFileSync(file, code)
 }
 
+export function writeSrcFileIfNeeded(file: string, code: string) {
+  try {
+    let oldCode = readFileSync(file).toString()
+    if (oldCode.trim() == code.trim()) return
+  } catch (error) {
+    // this is new file
+  }
+  writeSrcFile(file, code)
+}
+
 export function addDependencies(
   name: string,
   version: string,

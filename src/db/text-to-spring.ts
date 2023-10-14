@@ -4,7 +4,7 @@ import { join, resolve } from 'path'
 import { Field, parse } from '../core/ast'
 import { sortTables } from './sort-tables'
 import { snake_to_camel, snake_to_Pascal } from '../utils/case'
-import { writeSrcFile } from '../utils/file'
+import { writeSrcFile, writeSrcFileIfNeeded } from '../utils/file'
 import { DBClient } from '../utils/cli'
 
 export function textToSpring(dbClient: DBClient, text: string) {
@@ -145,7 +145,7 @@ public class ${ClassName} {
 `.trim() +
     `
 }`
-  writeSrcFile(file, code)
+  writeSrcFileIfNeeded(file, code)
 }
 
 function setupRepository(app: SpringBootApplication, table: Table) {
