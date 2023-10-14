@@ -6,6 +6,8 @@ import { sortTables } from './sort-tables'
 import { snake_to_camel, snake_to_Pascal } from '../utils/case'
 import { writeSrcFile, writeSrcFileIfNeeded } from '../utils/file'
 import { DBClient } from '../utils/cli'
+import { parseEnumValues } from '../core/enum'
+import { isErrored } from 'stream'
 
 export function textToSpring(dbClient: DBClient, text: string) {
   const result = parse(text)
@@ -106,18 +108,31 @@ function setupEntity(
   let idField: Field | undefined
 
   let body = ''
+  let imports = new Set<string>()
 
   for (let field of table.field_list) {
     if (field.name === 'id') {
       idField = field
       continue
     }
-    let type = 'String'
+    let is_enum = field.type.match(/^enum/i)
+    if (is_enum) {
+      setupEnum(app, table, field)
+      imports.add('import jakarta.persistence.EnumType;')
+    }
+    let type = toJavaType(table, field)
+    if (type.import) {
+      imports.add(type.import)
+    }
     let fieldName = snake_to_camel(field.name)
+    let annotation = `@Column(name = "\`${field.name}\`", nullable = false)`
+    if (is_enum) {
+      annotation += '\n  @Enumerated(EnumType.STRING)'
+    }
     body += `
 
-  @Column(name = "\`${field.name}\`", nullable = false)
-  private ${type} ${fieldName};`
+  ${annotation}
+  private ${type.Class} ${fieldName};`
   }
 
   let idAnnotation =
@@ -125,12 +140,24 @@ function setupEntity(
       ? `@GeneratedValue(strategy = GenerationType.IDENTITY)`
       : `@GeneratedValue(strategy = GenerationType.AUTO)`
 
+  let importLines = Array.from(imports).join('\n')
+
+  importLines = `
+import lombok.Data;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+${importLines}
+`.trim()
+
   let code =
     `
 package ${app.package}.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
+${importLines}
 
 @Entity
 @Data
@@ -145,6 +172,25 @@ public class ${ClassName} {
 `.trim() +
     `
 }`
+  writeSrcFileIfNeeded(file, code)
+}
+
+function setupEnum(app: SpringBootApplication, table: Table, field: Field) {
+  let dir = join(app.dir, 'entity')
+  let ClassName = snake_to_Pascal(table.name) + snake_to_Pascal(field.name)
+  let file = join(dir, `${ClassName}.java`)
+
+  let values = parseEnumValues(field.type)
+
+  let code = `
+package ${app.package}.entity;
+
+public enum ${ClassName} {`
+
+  code += values.map(value => '\n  ' + value + ',').join('')
+
+  code += '\n}'
+
   writeSrcFileIfNeeded(file, code)
 }
 
@@ -165,4 +211,69 @@ public interface ${ClassName}Repository extends CrudRepository<${ClassName}Entit
 }
 `
   writeSrcFile(file, code)
+}
+
+export function toJavaType(
+  table: Table,
+  field: Field,
+): { Class: string; import?: string } {
+  let type = field.type
+
+  if (
+    type.match(/^varchar/i) ||
+    type.match(/^char/i) ||
+    type.match(/^string/i) ||
+    type.match(/^text/i)
+  ) {
+    return { Class: 'String' }
+  }
+
+  if (type.match(/^integer/i)) {
+    return { Class: 'Long' }
+  }
+
+  if (type.match(/^int/i)) {
+    return { Class: 'Integer' }
+  }
+
+  if (type.match(/^real/i)) {
+    return { Class: 'Double' }
+  }
+
+  if (type.match(/^float/i)) {
+    return { Class: 'Float' }
+  }
+
+  if (type.match(/^timestamp/i)) {
+    return {
+      Class: 'Timestamp',
+      import: 'import java.sql.Timestamp;',
+    }
+  }
+
+  if (type.match(/^date/i)) {
+    return {
+      Class: 'Date',
+      import: 'import java.sql.Date;',
+    }
+  }
+
+  if (type.match(/^time/i)) {
+    return {
+      Class: 'Time',
+      import: 'import java.sql.Time;',
+    }
+  }
+
+  if (type.match(/^enum/i)) {
+    return {
+      Class: snake_to_Pascal(table.name) + snake_to_Pascal(field.name),
+      import: 'import jakarta.persistence.Enumerated;',
+    }
+  }
+
+  console.error('Unknown Java class for field.type:', field.type)
+  return {
+    Class: snake_to_Pascal(field.type),
+  }
 }

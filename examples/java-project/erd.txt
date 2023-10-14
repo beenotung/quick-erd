@@ -8,12 +8,23 @@ user
 id
 username varchar(32)
 password_hash char(60)
+role enum(admin,vip,customer,staff)
 
 user_pet
 --------
 id
 user_id fk
 pet_id fk
+
+post
+----
+id
+user_id fk
+title varchar(50)
+content text
+post_at timestamp
+post_date date
+post_time time
 
 # pet (94, 291)
 # user (611, 245)

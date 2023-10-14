@@ -7,11 +7,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
+import java.sql.Timestamp;
+import java.sql.Date;
+import java.sql.Time;
 
 @Entity
 @Data
-@Table(name = "`user_pet`")
-public class UserPetEntity {
+@Table(name = "`post`")
+public class PostEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column
@@ -20,6 +23,15 @@ public class UserPetEntity {
   @Column(name = "`user_id`", nullable = false)
   private Long userId;
 
-  @Column(name = "`pet_id`", nullable = false)
-  private Long petId;
+  @Column(name = "`title`", nullable = false)
+  private String title;
+
+  @Column(name = "`post_at`", nullable = false)
+  private Timestamp postAt;
+
+  @Column(name = "`post_date`", nullable = false)
+  private Date postDate;
+
+  @Column(name = "`post_time`", nullable = false)
+  private Time postTime;
 }

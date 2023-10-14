@@ -1,7 +1,14 @@
 package com.example.javaproject.entity;
 
-import jakarta.persistence.*;
 import lombok.Data;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Data
@@ -17,4 +24,8 @@ public class UserEntity {
 
   @Column(name = "`password_hash`", nullable = false)
   private String passwordHash;
+
+  @Column(name = "`role`", nullable = false)
+  @Enumerated(EnumType.STRING)
+  private UserRole role;
 }
