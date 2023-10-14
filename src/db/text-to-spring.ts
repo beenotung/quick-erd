@@ -1,6 +1,4 @@
 import { Table } from './../core/ast'
-import { TablePositionColor } from './../core/meta'
-import { execSync, SpawnOptions } from 'child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'fs'
 import { join, resolve } from 'path'
 import { Field, parse } from '../core/ast'
