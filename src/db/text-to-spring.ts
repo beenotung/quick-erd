@@ -21,7 +21,9 @@ export function textToSpring(dbClient: DBClient, text: string) {
   }
 }
 
-function setupDirectories(package_name_list: string[]): SpringBootApplication {
+export function setupDirectories(
+  package_name_list: string[],
+): SpringBootApplication {
   const srcDir = findSrcDir()
   const app = findSpringBootApplication(srcDir)
   if (!app) {
