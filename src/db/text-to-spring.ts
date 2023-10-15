@@ -99,8 +99,9 @@ function setupEntity(app: SpringBootApplication, table: Table) {
   const ClassName = snake_to_Pascal(table.name) + 'Entity'
   const file = join(dir, `${ClassName}.java`)
 
-  let body = ''
   const imports = new Set<string>()
+  let fieldLines = ''
+  let methodLines = ''
 
   for (const field of table.field_list) {
     if (field.name === 'id') {
@@ -116,20 +117,29 @@ function setupEntity(app: SpringBootApplication, table: Table) {
       imports.add(type.import)
     }
     const fieldName = snake_to_camel(field.name)
+    const FieldName = snake_to_Pascal(field.name)
     let annotation = `@Column(name = "\`${field.name}\`", nullable = ${field.is_null})`
     if (is_enum) {
       annotation += '\n  @Enumerated(EnumType.STRING)'
     }
-    body += `
+    fieldLines += `
 
   ${annotation}
   private ${type.Class} ${fieldName};`
+    methodLines += `
+
+  public ${type.Class} get${FieldName}() {
+    return ${fieldName};
+  }
+
+  public void set${FieldName}(${type.Class} ${fieldName}) {
+    this.${fieldName} = ${fieldName};
+  }`
   }
 
   let importLines = Array.from(imports).join('\n')
 
   importLines = `
-import lombok.Data;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
@@ -145,7 +155,6 @@ package ${app.package}.entity;
 ${importLines}
 
 @Entity
-@Data
 @Table(name = "\`${table.name}\`")
 public class ${ClassName} {
   @Id
@@ -153,7 +162,17 @@ public class ${ClassName} {
   @Column
   private Long id;
 
-  ${body.trim()}
+  ${fieldLines.trim()}
+
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  ${methodLines.trim()}
 `.trim() +
     `
 }`
