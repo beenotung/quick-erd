@@ -12,7 +12,8 @@ export function textToSpring(dbClient: DBClient, text: string) {
   const result = parse(text)
   const table_list = sortTables(result.table_list)
 
-  const app = setupDirectories()
+  const package_name_list = ['entity', 'repository', 'projection']
+  const app = setupDirectories(package_name_list)
 
   for (const table of table_list) {
     setupEntity(app, table)
@@ -20,30 +21,25 @@ export function textToSpring(dbClient: DBClient, text: string) {
   }
 }
 
-function setupDirectories(): SpringBootApplication {
+function setupDirectories(package_name_list: string[]): SpringBootApplication {
   const srcDir = findSrcDir()
   const app = findSpringBootApplication(srcDir)
   if (!app) {
     console.error('Error: failed to locate spring boot application package')
     process.exit(1)
   }
-  initPackage(app, 'model')
-  initPackage(app, 'controller')
-  initPackage(app, 'service')
-  initPackage(app, 'repository')
-  initPackage(app, 'entity')
-  initPackage(app, 'projection')
-  initPackage(app, 'dto')
-  initPackage(app, 'mapper')
+  for (const name of package_name_list) {
+    initPackage(app, name)
+  }
   return app
 }
 
-function initPackage(app: SpringBootApplication, name: string) {
+export function initPackage(app: SpringBootApplication, name: string) {
   const dir = join(app.dir, name)
   mkdirSync(dir, { recursive: true })
 }
 
-function findSrcDir() {
+export function findSrcDir() {
   let rootDir = '.'
   let srcDir: string
   for (;;) {
@@ -58,11 +54,12 @@ function findSrcDir() {
   return srcDir
 }
 
-type SpringBootApplication = {
+export type SpringBootApplication = {
   dir: string
   package: string
 }
-function findSpringBootApplication(
+
+export function findSpringBootApplication(
   dir: string,
 ): SpringBootApplication | undefined {
   for (const filename of readdirSync(dir)) {
