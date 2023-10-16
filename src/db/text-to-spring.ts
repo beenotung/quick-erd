@@ -276,6 +276,10 @@ export function toJavaType(
     }
   }
 
+  if (type.match(/^boolean/i)) {
+    return { Class: 'Boolean' }
+  }
+
   console.error('Unknown Java class for field.type:', field.type)
   return {
     Class: snake_to_Pascal(field.type),
