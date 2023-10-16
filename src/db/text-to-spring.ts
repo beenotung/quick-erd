@@ -16,7 +16,7 @@ export function textToSpring(dbClient: DBClient, text: string) {
   const app = setupDirectories(package_name_list)
 
   for (const table of table_list) {
-    setupEntity(app, table)
+    setupEntity(dbClient, app, table)
     setupRepository(app, table)
   }
 }
@@ -94,7 +94,11 @@ function findSpringBootApplicationPackage(file: string) {
   }
 }
 
-function setupEntity(app: SpringBootApplication, table: Table) {
+function setupEntity(
+  dbClient: DBClient,
+  app: SpringBootApplication,
+  table: Table,
+) {
   const dir = join(app.dir, 'entity')
   const ClassName = snake_to_Pascal(table.name) + 'Entity'
   const file = join(dir, `${ClassName}.java`)
@@ -140,13 +144,14 @@ function setupEntity(app: SpringBootApplication, table: Table) {
   let importLines = Array.from(imports).join('\n')
 
   importLines = `
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 ${importLines}
 `.trim()
+
+  const idAnnotation =
+    dbClient == 'postgresql'
+      ? '@GeneratedValue(strategy = GenerationType.IDENTITY)'
+      : '@GeneratedValue'
 
   const code =
     `
@@ -158,7 +163,7 @@ ${importLines}
 @Table(name = "\`${table.name}\`")
 public class ${ClassName} {
   @Id
-  @GeneratedValue
+  ${idAnnotation}
   @Column
   private Long id;
 
