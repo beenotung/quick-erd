@@ -164,7 +164,7 @@ ${importLines}
 public class ${ClassName} {
   @Id
   ${idAnnotation}
-  @Column
+  @Column(name = "\`id\`")
   private Long id;
 
   ${fieldLines.trim()}

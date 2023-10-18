@@ -10,7 +10,7 @@ import java.sql.Time;
 public class PostEntity {
   @Id
   @GeneratedValue
-  @Column
+  @Column(name = "`id`")
   private Long id;
 
   @Column(name = "`user_id`", nullable = false)

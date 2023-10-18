@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class PetEntity {
   @Id
   @GeneratedValue
-  @Column
+  @Column(name = "`id`")
   private Long id;
 
   @Column(name = "`type`", nullable = false)
