@@ -5,27 +5,27 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "`pet`")
 public class PetEntity {
-  @Id
-  @GeneratedValue
-  @Column(name = "`id`")
-  private Long id;
+    @Id
+    @GeneratedValue
+    @Column(name = "`id`")
+    private Long id;
 
-  @Column(name = "`type`", nullable = false)
-  private String type;
+    @Column(name = "`type`", nullable = false)
+    private String type;
 
-  public Long getId() {
-    return id;
-  }
+    public Long getId() {
+        return id;
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-  public String getType() {
-    return type;
-  }
+    public String getType() {
+        return type;
+    }
 
-  public void setType(String type) {
-    this.type = type;
-  }
+    public void setType(String type) {
+        this.type = type;
+    }
 }

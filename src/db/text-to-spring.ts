@@ -124,21 +124,21 @@ function setupEntity(
     const FieldName = snake_to_Pascal(field.name)
     let annotation = `@Column(name = "\`${field.name}\`", nullable = ${field.is_null})`
     if (is_enum) {
-      annotation += '\n  @Enumerated(EnumType.STRING)'
+      annotation += '\n    @Enumerated(EnumType.STRING)'
     }
     fieldLines += `
 
-  ${annotation}
-  private ${type.Class} ${fieldName};`
+    ${annotation}
+    private ${type.Class} ${fieldName};`
     methodLines += `
 
-  public ${type.Class} get${FieldName}() {
-    return ${fieldName};
-  }
+    public ${type.Class} get${FieldName}() {
+        return ${fieldName};
+    }
 
-  public void set${FieldName}(${type.Class} ${fieldName}) {
-    this.${fieldName} = ${fieldName};
-  }`
+    public void set${FieldName}(${type.Class} ${fieldName}) {
+        this.${fieldName} = ${fieldName};
+    }`
   }
 
   let importLines = Array.from(imports).join('\n')
@@ -162,22 +162,22 @@ ${importLines}
 @Entity
 @Table(name = "\`${table.name}\`")
 public class ${ClassName} {
-  @Id
-  ${idAnnotation}
-  @Column(name = "\`id\`")
-  private Long id;
+    @Id
+    ${idAnnotation}
+    @Column(name = "\`id\`")
+    private Long id;
 
-  ${fieldLines.trim()}
+    ${fieldLines.trim()}
 
-  public Long getId() {
-    return id;
-  }
+    public Long getId() {
+        return id;
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-  ${methodLines.trim()}
+    ${methodLines.trim()}
 `.trim() +
     `
 }`
@@ -196,7 +196,7 @@ package ${app.package}.entity;
 
 public enum ${ClassName} {`
 
-  code += values.map(value => '\n  ' + value + ',').join('')
+  code += values.map(value => '\n    ' + value + ',').join('')
 
   code += '\n}'
 

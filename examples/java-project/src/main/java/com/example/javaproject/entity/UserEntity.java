@@ -7,50 +7,50 @@ import jakarta.persistence.Enumerated;
 @Entity
 @Table(name = "`user`")
 public class UserEntity {
-  @Id
-  @GeneratedValue
-  @Column(name = "`id`")
-  private Long id;
+    @Id
+    @GeneratedValue
+    @Column(name = "`id`")
+    private Long id;
 
-  @Column(name = "`username`", nullable = false)
-  private String username;
+    @Column(name = "`username`", nullable = false)
+    private String username;
 
-  @Column(name = "`password_hash`", nullable = false)
-  private String passwordHash;
+    @Column(name = "`password_hash`", nullable = false)
+    private String passwordHash;
 
-  @Column(name = "`role`", nullable = false)
-  @Enumerated(EnumType.STRING)
-  private UserRole role;
+    @Column(name = "`role`", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
-  public Long getId() {
-    return id;
-  }
+    public Long getId() {
+        return id;
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-  public String getUsername() {
-    return username;
-  }
+    public String getUsername() {
+        return username;
+    }
 
-  public void setUsername(String username) {
-    this.username = username;
-  }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-  public String getPasswordHash() {
-    return passwordHash;
-  }
+    public String getPasswordHash() {
+        return passwordHash;
+    }
 
-  public void setPasswordHash(String passwordHash) {
-    this.passwordHash = passwordHash;
-  }
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
 
-  public UserRole getRole() {
-    return role;
-  }
+    public UserRole getRole() {
+        return role;
+    }
 
-  public void setRole(UserRole role) {
-    this.role = role;
-  }
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
 }

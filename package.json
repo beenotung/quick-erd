@@ -39,7 +39,7 @@
   ],
   "scripts": {
     "start": "npm run build:client && serve-lite build",
-    "dev": "cd examples/java-project && ts-node ../../src/cli/erd-to-spring < erd.txt",
+    "dev": "cd examples/java-project && ts-node ../../src/cli/erd-to-spring h2 < erd.txt",
     "upload": "run-s clean build:client surge:all",
     "type:module": "node set-type.js module",
     "type:commonjs": "node set-type.js commonjs",
