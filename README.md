@@ -5,6 +5,8 @@ quick and easy text-based ERD editor with drag and drop visualization + code gen
 [![npm Package Version](https://img.shields.io/npm/v/quick-erd)](https://www.npmjs.com/package/quick-erd)
 [![npm Package Downloads](https://img.shields.io/npm/dy/quick-erd)](https://www.npmtrends.com/quick-erd)
 
+![banner](./assets/banner.webp)
+
 ## Quick Reference
 
 ### Web UI Diagram and Editor
