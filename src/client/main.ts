@@ -6,8 +6,9 @@ import { DiagramController } from './diagram'
 import { openDialog } from './dialog'
 import { ErdInputController } from './erd-input'
 import { normalize } from './normalize'
-import { cleanStorage, StoredString } from './storage'
+import { cleanStorage, StoredNumber, StoredString } from './storage'
 import { QueryInputController } from './query-input'
+import { autoLoadFromHash, compressAST } from './share'
 
 const root = document.querySelector(':root') as HTMLElement
 const editor = document.querySelector('#editor') as HTMLTextAreaElement
@@ -30,6 +31,12 @@ const erdText = new StoredString('erd', erdInput.value)
 const queryText = new StoredString('query', queryInput.value)
 const inputWidth = new StoredString('input_width', erdInput.style.width)
 const modeText = new StoredString('mode', 'schema')
+const zoomLevel = new StoredNumber('zoom', 1)
+const viewX = new StoredNumber('view:x', 0)
+const viewY = new StoredNumber('view:y', 0)
+const view = { x: viewX, y: viewY }
+
+autoLoadFromHash(erdText, zoomLevel, view)
 
 erdInput.value = erdText.value
 erdInput.style.width = inputWidth.value
@@ -55,6 +62,8 @@ const diagramController = new DiagramController(
   erdInputController,
   colorController,
   queryInputController,
+  zoomLevel,
+  view,
 )
 
 erdText.watch(text => {
@@ -162,16 +171,19 @@ document.querySelector('#export')?.addEventListener('click', () => {
   })
   dialog.querySelector('.confirm')?.addEventListener('click', () => {
     textarea.select()
-    if (document.execCommand('copy')) {
-      p.textContent = 'copied to clipboard'
-      p.style.color = 'green'
-    } else {
-      p.textContent =
-        'copy to clipboard is not supported, please copy it manually'
-      p.style.color = 'red'
-    }
+    copy(p)
   })
 })
+function copy(p: HTMLElement) {
+  if (document.execCommand('copy')) {
+    p.textContent = 'copied to clipboard'
+    p.style.color = 'green'
+  } else {
+    p.textContent =
+      'copy to clipboard is not supported, please copy it manually'
+    p.style.color = 'red'
+  }
+}
 
 document.querySelector('#import')?.addEventListener('click', () => {
   const dialog = openDialog(diagramController)
@@ -194,8 +206,7 @@ document.querySelector('#import')?.addEventListener('click', () => {
       if (zoom) {
         erdInput.value = ''
         parseErdInput()
-        diagramController.zoom.value = zoom
-        diagramController.applyFontSize()
+        diagramController.setFont(zoom)
       }
 
       Object.assign(localStorage, json)
@@ -271,6 +282,37 @@ function format() {
   colorController.flushToInputController()
   const result = parse(erdInput.value)
   erdInput.value = astToText(result) + '\n'
+}
+
+document.querySelector('#share')?.addEventListener('click', share)
+
+function share() {
+  diagramController.flushToInputController()
+  colorController.flushToInputController()
+  const ast = parse(erdInput.value)
+  const hash = compressAST(ast)
+  let url = location.origin
+  if (location.pathname !== '/') {
+    url += location.pathname
+  }
+  url += '#' + hash
+  const dialog = openDialog(diagramController)
+  dialog.innerHTML = /* html */ `
+<p>You can share this diagram with: <input class="share-url"></p>
+<button class='cancel'>Close</button>
+<button class='confirm'>Copy</button>
+<p class='share-message'></p>
+`
+  const input = dialog.querySelector('.share-url') as HTMLInputElement
+  input.value = url
+  const p = dialog.querySelector('.share-message') as HTMLDivElement
+  dialog.querySelector('.cancel')?.addEventListener('click', () => {
+    dialog.remove()
+  })
+  dialog.querySelector('.confirm')?.addEventListener('click', () => {
+    input.select()
+    copy(p)
+  })
 }
 
 document.querySelector('#normalize')?.addEventListener('click', showNormalize)

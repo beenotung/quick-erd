@@ -29,7 +29,7 @@ export class DiagramController {
 
   tableMap = new Map<string, TableController>()
   maxZIndex = 0
-  zoom = new StoredNumber('zoom', 1)
+  zoom: StoredNumber
   barRadius: number
 
   isDetailMode = new StoredBoolean('is_detail_mode', true)
@@ -47,6 +47,11 @@ export class DiagramController {
     public inputController: ErdInputController,
     public colorController: ColorController,
     public queryController: QueryInputController,
+    zoomLevel: StoredNumber,
+    view: {
+      x: StoredNumber
+      y: StoredNumber
+    },
   ) {
     this.barRadius = this.calcBarRadius()
     this.fontSizeSpan = this.querySelector('#font-size')
@@ -54,8 +59,10 @@ export class DiagramController {
     this.tablesContainer = new TablesContainer(
       this,
       this.querySelector('#tables-container'),
+      view,
     )
     this.controls = this.querySelector('.controls')
+    this.zoom = zoomLevel
     this.div.addEventListener('mousemove', ev => {
       if (this.onMouseMove) {
         this.onMouseMove(ev)
@@ -351,17 +358,18 @@ export class DiagramController {
   calcFontStep() {
     return Math.min(this.zoom.value * 0.1, 0.25)
   }
-  fontInc() {
-    this.zoom.value += this.calcFontStep()
+  setFont(zoom: number) {
+    this.zoom.value = zoom
     this.applyFontSize()
+  }
+  fontInc() {
+    this.setFont(this.zoom.value + this.calcFontStep())
   }
   fontDec() {
-    this.zoom.value -= this.calcFontStep()
-    this.applyFontSize()
+    this.setFont(this.zoom.value - this.calcFontStep())
   }
   fontReset() {
-    this.zoom.value = 1
-    this.applyFontSize()
+    this.setFont(1)
   }
   resetView() {
     this.isAutoMoving = false
@@ -422,11 +430,20 @@ export class DiagramController {
 }
 
 export class TablesContainer {
-  translateX = new StoredNumber('view:x', 0)
-  translateY = new StoredNumber('view:y', 0)
+  translateX: StoredNumber
+  translateY: StoredNumber
   onMouseMove: (ev: { clientX: number; clientY: number }) => void
 
-  constructor(public diagram: DiagramController, public div: HTMLDivElement) {
+  constructor(
+    public diagram: DiagramController,
+    public div: HTMLDivElement,
+    view: {
+      x: StoredNumber
+      y: StoredNumber
+    },
+  ) {
+    this.translateX = view.x
+    this.translateY = view.y
     this.div.style.transform = `translate(${this.translateX}px,${this.translateY}px)`
     this.diagram.inputController.setViewPosition({
       x: this.translateX.value,

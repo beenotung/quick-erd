@@ -31,7 +31,7 @@ export type ParseResult = {
   tableTextColor?: string
 }
 
-class Parser implements ParseResult {
+export class Parser implements ParseResult {
   table_list: Table[] = []
   line_list: string[] = []
   zoom?: number

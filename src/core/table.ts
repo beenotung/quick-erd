@@ -21,7 +21,7 @@ ${table.field_list.map(fieldToString).join('\n')}
 `
 }
 
-function fieldToString(field: Field): string {
+export function fieldToString(field: Field): string {
   let type = field.type
   if (type.match(/^enum/i)) {
     type = formatEnum(type)

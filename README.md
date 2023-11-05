@@ -64,6 +64,7 @@ format erd text:
   - [x] generate typescript type of query result
   - [x] copy selected part into clipboard
   - [x] support additional query (where / group-by / order-by / limit, e.t.c.)
+  - [x] support sharing diagram embedded in url
 
 ## Usage
 
