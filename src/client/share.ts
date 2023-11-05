@@ -1,6 +1,5 @@
 import { StoredNumber, StoredString } from './storage'
-import { Table } from './../../dist/core/ast.d'
-import { Field, Parser, ParseResult } from '../core/ast'
+import { Field, Parser, ParseResult, Table } from '../core/ast'
 import { astToText, fieldToString } from '../core/table'
 import { DiagramController } from './diagram'
 
