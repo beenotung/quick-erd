@@ -149,8 +149,8 @@ document.querySelector('#export')?.addEventListener('click', () => {
   dialog.innerHTML = /* html */ `
 <textarea cols=30></textarea>
 <p style='color: black'>not copied in clipboard</p>
-<button class='cancel'>close</button>
-<button class='confirm'>copy</button>
+<button class='cancel'>Close</button>
+<button class='confirm'>Copy</button>
 `
   const textarea = dialog.querySelector('textarea') as HTMLTextAreaElement
   const p = dialog.querySelector('p') as HTMLDivElement
@@ -178,8 +178,8 @@ document.querySelector('#import')?.addEventListener('click', () => {
   dialog.innerHTML = /* html */ `
 <textarea cols=30></textarea>
 <p style='color: black'>not imported yet</p>
-<button class='cancel'>close</button>
-<button class='confirm'>import</button>
+<button class='cancel'>Close</button>
+<button class='confirm'>Import</button>
 `
   const textarea = dialog.querySelector('textarea') as HTMLTextAreaElement
   const p = dialog.querySelector('p') as HTMLDivElement
@@ -220,8 +220,8 @@ document.querySelector('#load-example')?.addEventListener('click', () => {
   const dialog = openDialog(diagramController)
   dialog.innerHTML = /* html */ `
 <p>Confirm to overwrite existing content with example?</p>
-<button class='cancel'>cancel</button>
-<button class='danger'>confirm</button>
+<button class='cancel'>Cancel</button>
+<button class='danger'>Confirm</button>
 `
   dialog.querySelector('.cancel')?.addEventListener('click', () => {
     dialog.remove()
@@ -288,8 +288,8 @@ function showNormalize() {
 <input id="table" name="table" type="text">
 <br>
 <br>
-<button class='cancel'>close</button>
-<button class='confirm'>normalize</button>
+<button class='cancel'>Close</button>
+<button class='confirm'>Normalize</button>
 `
   dialog.querySelector('.cancel')?.addEventListener('click', () => {
     dialog.remove()
