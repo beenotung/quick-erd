@@ -1,7 +1,6 @@
 import { StoredNumber, StoredString } from './storage'
 import { Field, Parser, ParseResult, Table } from '../core/ast'
 import { astToText, fieldToString } from '../core/table'
-import { DiagramController } from './diagram'
 
 export function compressAST(ast: ParseResult): string {
   let hash = ''
