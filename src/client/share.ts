@@ -118,16 +118,37 @@ export function autoLoadFromHash(
 }
 
 function compressTable(table: Table): string {
-  return `${table.name}[${table.field_list.map(compressField).join('|')}]`
+  let body = table.field_list.map(compressField).join('|')
+  let position = table.position
+  let meta = ''
+  if (position) {
+    meta = '@' + position.x.toFixed(0) + ',' + position.y.toFixed(0)
+    if (position.color) {
+      meta += ',' + position.color.replace('#', '')
+    }
+  }
+  return `${table.name}[${body}${meta}]`
 }
 
 function decompressTable(parser: Parser, tableName: string, tableText: string) {
   parser.line_list.push(tableName)
   parser.line_list.push('-')
-  for (const text of tableText.split('|')) {
+  let [body, meta] = tableText.split('@')
+  for (const text of body.split('|')) {
     parser.line_list.push(decompressField(text))
   }
-  parser.table_list.push(parser.parseTable())
+  let table = parser.parseTable()
+  if (meta) {
+    let [x, y, color] = meta.split(',')
+    table.position = {
+      x: +x,
+      y: +y,
+    }
+    if (color) {
+      table.position.color = '#' + color
+    }
+  }
+  parser.table_list.push(table)
 }
 
 function compressField(field: Field): string {
