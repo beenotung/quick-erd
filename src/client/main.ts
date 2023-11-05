@@ -302,6 +302,7 @@ function share() {
 <button class='cancel'>Close</button>
 <button class='confirm'>Copy</button>
 <p class='share-message'></p>
+<p>Tips: You may shorten the url with <a href="https://t.ly" target="_blank">t.ly</a> or similar services.</p>
 `
   const input = dialog.querySelector('.share-url') as HTMLInputElement
   input.value = url
