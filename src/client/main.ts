@@ -132,6 +132,9 @@ function parseErdInput() {
   if (result.diagramBgColor) {
     colorController.diagramBgColor.applyParsedColor(result.diagramBgColor)
   }
+  if (result.diagramTextColor) {
+    colorController.diagramTextColor.applyParsedColor(result.diagramTextColor)
+  }
   if (result.tableBgColor) {
     colorController.tableBgColor.applyParsedColor(result.tableBgColor)
   }
