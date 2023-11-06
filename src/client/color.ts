@@ -38,8 +38,7 @@ export class ColorController {
         this.inputController.setColor('diagramBgColor', color),
     })
     this.diagramTextColor = new ColorInput(this.root, 'diagram-text-color', {
-      getEffectiveColor: () =>
-        getComputedStyle(this.targets.diagram).backgroundColor,
+      getEffectiveColor: () => getComputedStyle(this.targets.diagram).color,
       onColorChanged: color =>
         this.inputController.setColor('diagramTextColor', color),
     })
