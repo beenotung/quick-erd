@@ -1,3 +1,5 @@
 import Knex from 'knex'
 
-export let knex = Knex(require('./knexfile').development)
+/* eslint-disable @typescript-eslint/no-var-requires */
+
+export const knex = Knex(require('./knexfile').development)

@@ -3,11 +3,11 @@ import { Table } from '../core/ast'
 
 export async function scanMssqlTableSchema(knex: Knex): Promise<Table[]> {
   const table_list: Table[] = []
-  let table_rows = await knex
+  const table_rows = await knex
     .select('table_name')
     .from('information_schema.tables')
     .where({ table_type: 'BASE TABLE' })
-  for (let table_row of table_rows) {
+  for (const table_row of table_rows) {
     const table: Table = {
       name: table_row.table_name,
       field_list: [],
@@ -33,7 +33,7 @@ where table_name = ?
 `,
       [table.name],
     )
-    for (let column of result) {
+    for (const column of result) {
       let type = column.data_type
 
       /* check foreign key */
@@ -118,11 +118,11 @@ where con.is_disabled = 0
 `,
         [table.name, column.column_name],
       )
-      for (let row of result) {
-        let text = row.constraint_definition as string
-        let match = text.match(/=([\w'"]+)/g)
+      for (const row of result) {
+        const text = row.constraint_definition as string
+        const match = text.match(/=([\w'"]+)/g)
         if (!match) continue
-        let values = match.map(text => text.slice(1))
+        const values = match.map(text => text.slice(1))
         type = `enum(${values.join(',')})`
       }
 

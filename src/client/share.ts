@@ -118,8 +118,8 @@ export function autoLoadFromHash(
 }
 
 function compressTable(table: Table): string {
-  let body = table.field_list.map(compressField).join('|')
-  let position = table.position
+  const body = table.field_list.map(compressField).join('|')
+  const position = table.position
   let meta = ''
   if (position) {
     meta = '@' + position.x.toFixed(0) + ',' + position.y.toFixed(0)
@@ -133,13 +133,13 @@ function compressTable(table: Table): string {
 function decompressTable(parser: Parser, tableName: string, tableText: string) {
   parser.line_list.push(tableName)
   parser.line_list.push('-')
-  let [body, meta] = tableText.split('@')
+  const [body, meta] = tableText.split('@')
   for (const text of body.split('|')) {
     parser.line_list.push(decompressField(text))
   }
-  let table = parser.parseTable()
+  const table = parser.parseTable()
   if (meta) {
-    let [x, y, color] = meta.split(',')
+    const [x, y, color] = meta.split(',')
     table.position = {
       x: +x,
       y: +y,

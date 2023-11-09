@@ -284,7 +284,6 @@ export function generateAutoMigrate(options: {
   db_client: string
 }) {
   const { db_client } = options
-  const is_mssql = db_client.includes('mssql')
   const is_sqlite = db_client.includes('sqlite')
   const is_postgres = db_client.includes('postgres') || db_client == 'pg'
   const up_lines: string[] = []
