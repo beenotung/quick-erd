@@ -1,0 +1,63 @@
+# Visualize on https://erd.surge.sh
+# or https://quick-erd.surge.sh
+#
+# Relationship Types
+#  -    - one to one
+#  -<   - one to many
+#  >-   - many to one
+#  >-<  - many to many
+#  -0   - one to zero or one
+#  0-   - zero or one to one
+#  0-0  - zero or one to zero or one
+#  -0<  - one to zero or many
+#  >0-  - zero or many to one
+#
+////////////////////////////////////
+
+
+user
+----
+id int PK
+username varchar(64) unique
+domain varchar(32)
+created_at datetime
+updated_at datetime
+
+
+thread
+------
+id int PK
+user_id int FK >- user.id
+topic text
+status enum('active','pending')
+forum_id int FK >- forum.id
+created_at datetime
+updated_at datetime
+
+
+forum
+-----
+id int PK
+name text
+created_at datetime
+updated_at datetime
+level int NULL
+
+
+post
+----
+id int PK
+reply_id int NULL FK >- post.id
+user_id int FK >- user.id
+thread_id int FK >- thread.id
+content text
+created_at datetime
+updated_at datetime
+
+
+like
+----
+user_id int FK >- user.id
+post_id int FK >- post.id
+created_at datetime
+updated_at datetime

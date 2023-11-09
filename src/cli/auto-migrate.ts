@@ -43,6 +43,7 @@ async function main() {
   let dbFile: string | undefined
   switch (dbFile_or_client) {
     case 'mysql':
+    case 'mssql':
     case 'pg':
     case 'postgresql':
       db_client = dbFile_or_client

@@ -45,7 +45,7 @@ function parseEnum(
     value = value.match(/('.*')::text/)?.[1] || value
     return value
   })
-  return `enum(${values})`
+  return `enum(${values.join(',')})`
 }
 
 export async function scanPGTableSchema(knex: Knex): Promise<Table[]> {

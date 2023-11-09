@@ -7,7 +7,10 @@ const type_alias: Record<string, string> = {
   int: 'integer',
 }
 
-export function toKnexCreateColumnTypeCode(field: Field): string {
+export function toKnexCreateColumnTypeCode(
+  field: Field,
+  db_client: string,
+): string {
   let code = ''
   let type = field.type
 
@@ -18,7 +21,10 @@ export function toKnexCreateColumnTypeCode(field: Field): string {
       .replace(/\)$/, ']')
       .replace(/','/g, "', '")
 
-    code += `.enum('${field.name}', ${values})`
+    code +=
+      db_client == 'mssql'
+        ? `.string('${field.name}').checkIn(${values})`
+        : `.enum('${field.name}', ${values})`
     return code
   }
 
@@ -82,7 +88,10 @@ export function toKnexNullableCode(field: Field): string {
   return field.is_null ? `.nullable()` : `.notNullable()`
 }
 
-export function toKnexCreateColumnCode(field: Field): string {
+export function toKnexCreateColumnCode(
+  field: Field,
+  db_client: string,
+): string {
   let code = `
       table`
   if (field.is_primary_key) {
@@ -90,7 +99,7 @@ export function toKnexCreateColumnCode(field: Field): string {
     return code
   }
 
-  code += toKnexCreateColumnTypeCode(field)
+  code += toKnexCreateColumnTypeCode(field, db_client)
   code += toKnexNullableCode(field)
   code += toKnexDefaultValueCode(field)
 
@@ -105,7 +114,7 @@ export function toKnexCreateColumnCode(field: Field): string {
   return code
 }
 
-export function toKnexCreateTableCode(table: Table): string {
+export function toKnexCreateTableCode(table: Table, db_client: string): string {
   let code = ''
   const fields: Record<string, Field> = {}
   table.field_list.forEach(field => (fields[field.name] = field))
@@ -117,7 +126,7 @@ export function toKnexCreateTableCode(table: Table): string {
   if (!(await knex.schema.hasTable('${table.name}'))) {
     await knex.schema.createTable('${table.name}', table => {`
   Object.values(fields).forEach(field => {
-    code += toKnexCreateColumnCode(field)
+    code += toKnexCreateColumnCode(field, db_client)
   })
   if (!fields.created_at && !fields.updated_at && !fields.timestamp) {
     code += `
@@ -129,7 +138,7 @@ export function toKnexCreateTableCode(table: Table): string {
   return code
 }
 
-export function textToKnex(text: string): string {
+export function textToKnex(text: string, db_client: string): string {
   const result = parse(text)
 
   let code = `
@@ -141,7 +150,7 @@ export async function up(knex: Knex): Promise<void> {`
 
   table_list.forEach((table, i) => {
     if (i > 0) code += `\n`
-    code += toKnexCreateTableCode(table)
+    code += toKnexCreateTableCode(table, db_client)
   })
 
   code += `

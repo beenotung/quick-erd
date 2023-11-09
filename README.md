@@ -40,9 +40,10 @@ format erd text:
 
 - [x] text-based erd editor
 - [x] import from existing postgresql schema
-- [x] generate (initial) database schema migration
+- [x] generate database schema migration
   - [x] knex migrate script
   - [x] sqlite migrate statements
+  - [x] support mysql, mssql, pg, sqlite
 - [x] published as npx script
 - [x] web-based schema visualization
   - [x] zoom in/out
@@ -113,7 +114,7 @@ If you prefer to use PowerShell, you may need to replace `<` with `\<` to pipe f
 
 **To generate initial database migration script from erd file**:
 
-- `npx erd-to-knex < erd.txt > migrations/001-create-tables.ts`
+- `npx erd-to-knex pg < erd.txt > migrations/001-create-tables.ts`
 - `npx erd-to-sqlite < erd.txt > migrations/001-create-tables.sql`
 
 **To generate incremental database migration script from erd file and live database**:
@@ -173,9 +174,11 @@ Supported schema format includes: [knex](https://github.com/knex/knex) and [bett
 
 ##### Export as Knex Migration Script
 
-1. Run `erd-to-knex < erd.txt > migrate.ts`
+1. Run `erd-to-knex pg < erd.txt > migrate.ts`
 
-You can save the erd text into a file, then load it as stdin. e.g. `erd-to-knex < erd.txt`
+You need to specify the db_client. e.g. `pg`, `mysql`, `mssql`, or `sqlite`
+
+You can save the erd text into a file, then load it as stdin. e.g. `erd-to-knex pg < erd.txt`
 
 Also, you can save the result into a knex migration script. e.g.
 
@@ -184,7 +187,7 @@ Also, you can save the result into a knex migration script. e.g.
 mkdir -p migrations
 
 # read from erd.txt, save to migrations/YYYYmmddHHMMSS-create-tables.ts
-erd-to-knex < erd.txt > migrations/$(date +"%Y%m%d%H%M%S")-create-tables.ts
+erd-to-knex pg < erd.txt > migrations/$(date +"%Y%m%d%H%M%S")-create-tables.ts
 ```
 
 ##### Export as Sqlite Migration Script

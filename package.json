@@ -76,7 +76,8 @@
     "dotenv": "^16.3.1",
     "knex": "^2.5.0",
     "mysql": "^2.18.1",
-    "pg": "^8.11.1"
+    "pg": "^8.11.1",
+    "tedious": "^16.6.0"
   },
   "devDependencies": {
     "@types/chai": "^4.3.5",

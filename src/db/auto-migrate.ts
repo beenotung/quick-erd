@@ -17,6 +17,8 @@ import {
   toKnexNullableCode,
 } from './text-to-knex'
 import { toSqliteColumnSql } from './text-to-sqlite'
+import { scanMssqlTableSchema } from './mssql-to-text'
+import { parseEnumValues } from '../core/enum'
 
 export function detectSrcDir() {
   for (const dir of ['src', 'server']) {
@@ -281,9 +283,10 @@ export function generateAutoMigrate(options: {
   detect_rename: boolean
   db_client: string
 }) {
-  const is_sqlite = options.db_client.includes('sqlite')
-  const is_postgres =
-    options.db_client.includes('postgres') || options.db_client == 'pg'
+  const { db_client } = options
+  const is_mssql = db_client.includes('mssql')
+  const is_sqlite = db_client.includes('sqlite')
+  const is_postgres = db_client.includes('postgres') || db_client == 'pg'
   const up_lines: string[] = []
   const down_lines: string[] = []
 
@@ -337,7 +340,7 @@ export function generateAutoMigrate(options: {
     up_lines.push(
       `  await knex.schema.dropTableIfExists('${existing_table_name}')`,
     )
-    down_lines.push(toKnexCreateTableCode(existing_table))
+    down_lines.push(toKnexCreateTableCode(existing_table, db_client))
   }
 
   // detect new / modified tables
@@ -348,7 +351,7 @@ export function generateAutoMigrate(options: {
     )
     if (!existing_table) {
       if (renamed_tables.includes(name)) return
-      up_lines.push(toKnexCreateTableCode(table))
+      up_lines.push(toKnexCreateTableCode(table, db_client))
       down_lines.unshift(`  await knex.schema.dropTableIfExists('${name}')`)
       return
     }
@@ -360,11 +363,31 @@ export function generateAutoMigrate(options: {
     const removed_columns: Field[] = []
     function compareColumn(field: Field, existing_field: Field) {
       // avoid non-effective migration
-      // don't distinct datetime timestamp
+      // don't distinct datetime and timestamp
       // knex translates 'timestamp' into 'datetime' for sqlite db when running schema query builder
       if (
         (field.type === 'datetime' && existing_field.type == 'timestamp') ||
         (existing_field.type === 'datetime' && field.type == 'timestamp')
+      ) {
+        field.type = existing_field.type
+      }
+
+      // avoid non-effective migration
+      // don't distinct int and integer
+      if (
+        (field.type === 'int' && existing_field.type == 'integer') ||
+        (existing_field.type === 'int' && field.type == 'integer')
+      ) {
+        field.type = existing_field.type
+      }
+
+      // avoid non-effective migration
+      // don't distinct enum values ordering
+      if (
+        field.type.match(/^enum/i) &&
+        existing_field.type.match(/^enum/i) &&
+        parseEnumValues(field.type).sort().join() ==
+          parseEnumValues(existing_field.type).sort().join()
       ) {
         field.type = existing_field.type
       }
@@ -375,6 +398,7 @@ export function generateAutoMigrate(options: {
       ) {
         const is_both_enum =
           field.type.match(/^enum/i) && existing_field.type.match(/^enum/i)
+
         if (is_sqlite && is_both_enum) {
           raw_up_lines.push(alterSqliteEnum(table, field))
           raw_down_lines.unshift(alterSqliteEnum(table, existing_field))
@@ -386,8 +410,8 @@ export function generateAutoMigrate(options: {
           raw_up_lines.push(alterSqliteType(table, field))
           raw_down_lines.unshift(alterSqliteType(table, existing_field))
         } else {
-          table_up_lines.push(alterType(field))
-          table_down_lines.unshift(alterType(existing_field))
+          table_up_lines.push(alterType(field, db_client))
+          table_down_lines.unshift(alterType(existing_field, db_client))
         }
       }
 
@@ -539,7 +563,7 @@ export function generateAutoMigrate(options: {
       } else {
         /* knex version */
         const name = inspect(field.name)
-        options.table_add_lines.push(toKnexCreateColumnCode(field))
+        options.table_add_lines.push(toKnexCreateColumnCode(field, db_client))
         options.table_drop_lines.unshift(`table.dropColumn(${name})`)
       }
     }
@@ -659,9 +683,9 @@ function alterPostgresEnum(table: Table, field: Field): string[] {
   )
   return lines
 }
-function alterType(field: Field): string {
+function alterType(field: Field, db_client: string): string {
   let code = 'table'
-  code += toKnexCreateColumnTypeCode(field)
+  code += toKnexCreateColumnTypeCode(field, db_client)
   code += toKnexNullableCode(field)
   code += toKnexDefaultValueCode(field)
   code += '.alter()'
@@ -719,6 +743,10 @@ async function loadTableList(
 
   if (db_client.includes('mysql')) {
     return await scanMysqlTableSchema(knex)
+  }
+
+  if (db_client.includes('mssql')) {
+    return await scanMssqlTableSchema(knex)
   }
 
   throw new Error('unknown db_client: ' + db_client)

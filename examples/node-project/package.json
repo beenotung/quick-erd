@@ -20,7 +20,8 @@
     "mysql": "^2.18.1",
     "pg": "^8.11.0",
     "populate-env": "^2.0.0",
-    "quick-erd": "link:../.."
+    "quick-erd": "link:../..",
+    "tedious": "^16.6.0"
   },
   "devDependencies": {
     "@types/integer": "^4.0.1",

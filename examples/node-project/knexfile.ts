@@ -26,6 +26,24 @@ module.exports = {
     },
   },
 
+  mssql: {
+    client: 'mssql',
+    connection: {
+      database: env.DB_NAME,
+      user: env.DB_USERNAME,
+      password: env.DB_PASSWORD,
+      server: env.DB_HOST,
+    },
+    pool: {
+      min: 2,
+      max: 10,
+    },
+    migrations: {
+      tableName: 'knex_migrations',
+    },
+    debug: true,
+  },
+
   pg: {
     client: 'postgresql',
     connection: {
@@ -51,6 +69,9 @@ switch (env.DB_CLIENT) {
     break
   case 'mysql':
     module.exports.development = module.exports.mysql
+    break
+  case 'mssql':
+    module.exports.development = module.exports.mssql
     break
   case 'pg':
   case 'postgresql':
