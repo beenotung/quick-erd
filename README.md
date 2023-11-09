@@ -31,7 +31,7 @@ generate initial schema:
 `erd-to-sqlite`, `erd-to-knex`
 
 reverse-engineer erd text:
-`pg-to-erd`, `mysql-to-erd`, `sqlite-to-erd`
+`pg-to-erd`, `mysql-to-erd`, `mssql-to-erd`, `sqlite-to-erd`
 
 format erd text:
 `format-erd`
@@ -110,6 +110,7 @@ If you prefer to use PowerShell, you may need to replace `<` with `\<` to pipe f
 
 - `npx pg-to-erd > erd.txt`
 - `npx mysql-to-erd > erd.txt`
+- `npx mssql-to-erd > erd.txt`
 - `npx sqlite-to-erd dev.sqlite3 > erd.txt`
 
 **To generate initial database migration script from erd file**:
@@ -121,6 +122,7 @@ If you prefer to use PowerShell, you may need to replace `<` with `\<` to pipe f
 
 - `npx auto-migrate pg < erd.txt`
 - `npx auto-migrate mysql < erd.txt`
+- `npx auto-migrate mssql < erd.txt`
 - `npx auto-migrate dev.sqlite3 < erd.txt`
 - `npx auto-migrate --rename pg < erd.txt`
 
@@ -159,6 +161,8 @@ rm erd.tmp
 For Postgresql schema: Run `pg-to-erd`
 
 For Mysql/MariaDB schema: Run `mysql-to-erd`
+
+For MSSQL (Microsoft SQL Server) schema: Run `mssql-to-erd`
 
 For Sqlite schema: Run `sqlite-to-erd SQLITE_FILENAME`
 
@@ -209,6 +213,8 @@ erd-to-sqlite < erd.txt > migrations/000-create-tables.sql
 1. Run `npx auto-migrate dev.sqlite3 < erd.txt`
 
    or `npx auto-migrate mysql < erd.txt`
+
+   or `npx auto-migrate mssql < erd.txt`
 
    or `npx auto-migrate pg < erd.txt`
 
