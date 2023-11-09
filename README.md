@@ -43,7 +43,7 @@ format erd text:
 - [x] generate database schema migration
   - [x] knex migrate script
   - [x] sqlite migrate statements
-  - [x] support mysql, mssql, pg, sqlite
+  - [x] support postgres, mysql, mssql, sqlite
 - [x] published as npx script
 - [x] web-based schema visualization
   - [x] zoom in/out
