@@ -573,6 +573,15 @@ class TableController {
     this.translateY = new StoredNumber(this.data.name + '-y', 0)
     this.color = new StoredString(this.data.name + '-color', '')
 
+    this.div.addEventListener('mouseenter', () => {
+      let diagramRect = this.diagram.getDiagramRect()
+      this.renderLinesTransform(diagramRect)
+    })
+    this.div.addEventListener('mouseleave', () => {
+      let diagramRect = this.diagram.getDiagramRect()
+      this.renderLinesTransform(diagramRect)
+    })
+
     this.div.innerHTML = /* html */ `
 <div class='table-header'>
   <div class='table-name'>${this.data.name}</div>
