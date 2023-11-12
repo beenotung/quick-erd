@@ -63,11 +63,6 @@ export function setupNpmScripts(options: {
   db_client: string
   dbFile: string | undefined
 }) {
-  addDependencies('npm-run-all', '^4.1.5', 'dev')
-  const toFile = (filename: string): string => {
-    if (options.srcDir == '.') return filename
-    return join(options.srcDir, filename)
-  }
   const scripts = readNpmScripts()
   function hasScript(pattern: string): boolean {
     return Object.values(scripts).some(script => script.includes(pattern))
@@ -77,6 +72,11 @@ export function setupNpmScripts(options: {
     (hasScript('erd-to-proxy') || hasScript('erd-to-types'))
   ) {
     return
+  }
+  addDependencies('npm-run-all', '^4.1.5', 'dev')
+  const toFile = (filename: string): string => {
+    if (options.srcDir == '.') return filename
+    return join(options.srcDir, filename)
   }
   if (options.db_client.includes('sqlite')) {
     const proxyFile = toFile('proxy.ts')
