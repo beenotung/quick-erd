@@ -574,11 +574,11 @@ class TableController {
     this.color = new StoredString(this.data.name + '-color', '')
 
     this.div.addEventListener('mouseenter', () => {
-      let diagramRect = this.diagram.getDiagramRect()
+      const diagramRect = this.diagram.getDiagramRect()
       this.renderLinesTransform(diagramRect)
     })
     this.div.addEventListener('mouseleave', () => {
-      let diagramRect = this.diagram.getDiagramRect()
+      const diagramRect = this.diagram.getDiagramRect()
       this.renderLinesTransform(diagramRect)
     })
 
