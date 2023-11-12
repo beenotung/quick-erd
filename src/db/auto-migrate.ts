@@ -68,15 +68,9 @@ export function setupNpmScripts(options: {
     if (options.srcDir == '.') return filename
     return join(options.srcDir, filename)
   }
-  let scripts = readNpmScripts()
+  const scripts = readNpmScripts()
   function hasScript(pattern: string): boolean {
-    for (let key in scripts) {
-      let script = scripts[key]
-      if (script.includes(pattern)) {
-        return true
-      }
-    }
-    return false
+    return Object.values(scripts).some(script => script.includes(pattern))
   }
   if (
     hasScript('auto-migrate') &&
