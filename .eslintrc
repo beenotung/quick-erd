@@ -1,7 +1,7 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "eslint-plugin-import"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
@@ -20,7 +20,7 @@
     "no-var": "error",
     "prefer-const": "error",
     "no-duplicate-imports": "off",
-    "@typescript-eslint/no-duplicate-imports": ["error"],
+    "import/no-duplicates": ["error"],
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-namespace": "off",
