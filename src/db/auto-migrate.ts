@@ -100,6 +100,7 @@ export function setupGitIgnore(options: { dbFile: string | undefined }) {
   const dir = dirname(options.dbFile)
   const file = join(dir, '.gitignore')
   let text = (existsSync(file) && readFileSync(file).toString()) || ''
+  if (options.dbFile.includes('.sqlite3') && text.includes('*.sqlite3*')) return
   const originalText = text
   const lines = text
     .split('\n')
