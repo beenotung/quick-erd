@@ -50,6 +50,12 @@ export function addDependencies(
   writeSrcFile(file, text)
 }
 
+export function readNpmScripts(): Record<string, string> {
+  const file = 'package.json'
+  const pkg: PackageJSON = readPackageJSON(file)
+  return pkg.scripts || {}
+}
+
 export function addNpmScripts(scripts: Record<string, string>) {
   const file = 'package.json'
   const pkg: PackageJSON = readPackageJSON(file)

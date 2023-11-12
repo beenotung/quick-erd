@@ -4,7 +4,12 @@ import { Knex as KnexType } from 'knex'
 import { basename, dirname, extname, join } from 'path'
 import { inspect } from 'util'
 import { Field, ParseResult, Table } from '../core/ast'
-import { addDependencies, addNpmScripts, writeSrcFile } from '../utils/file'
+import {
+  addDependencies,
+  addNpmScripts,
+  readNpmScripts,
+  writeSrcFile,
+} from '../utils/file'
 import { scanMysqlTableSchema } from './mysql-to-text'
 import { scanPGTableSchema } from './pg-to-text'
 import { sortTables } from './sort-tables'
@@ -62,6 +67,22 @@ export function setupNpmScripts(options: {
   const toFile = (filename: string): string => {
     if (options.srcDir == '.') return filename
     return join(options.srcDir, filename)
+  }
+  let scripts = readNpmScripts()
+  function hasScript(pattern: string): boolean {
+    for (let key in scripts) {
+      let script = scripts[key]
+      if (script.includes(pattern)) {
+        return true
+      }
+    }
+    return false
+  }
+  if (
+    hasScript('auto-migrate') &&
+    (hasScript('erd-to-proxy') || hasScript('erd-to-types'))
+  ) {
+    return
   }
   if (options.db_client.includes('sqlite')) {
     const proxyFile = toFile('proxy.ts')
