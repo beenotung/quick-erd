@@ -2,7 +2,10 @@ abstract class StoredValue<T> {
   private _value: T
   protected abstract encode(value: T): string
   protected abstract decode(text: string): T
-  constructor(protected key: string, protected defaultValue: T) {
+  constructor(
+    protected key: string,
+    protected defaultValue: T,
+  ) {
     const text = localStorage.getItem(key)
     this._value = text == null ? defaultValue : this.decode(text)
   }

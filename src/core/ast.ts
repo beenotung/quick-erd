@@ -277,7 +277,10 @@ export class Parser implements ParseResult {
 }
 class NonEmptyLineError extends Error {}
 class LineError extends Error {
-  constructor(public line: string, message?: string) {
+  constructor(
+    public line: string,
+    message?: string,
+  ) {
     super(message)
   }
 }
