@@ -26,11 +26,11 @@ cd quick-erd
 # step 3: install the dependencies
 npm install
 
-# step 4: build and start the web ui
+# step 4 (MacOS/Linux): build and start the web ui
 npm start
+# step 4 (Windows): build and start the web ui
+node web-ui
 ```
-
-**Remark**: Some windows user reported they faced error on step 4, you can run `node web-ui` in the project directory, it will run step 3 and step 4 in more compatible manner.
 
 ### npx cli
 
