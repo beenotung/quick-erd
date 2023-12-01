@@ -251,7 +251,7 @@ ${makeGuide(location.origin)}
 user
 ----
 id pk
-username varchar(64)
+username varchar(64) unique
 
 
 post
