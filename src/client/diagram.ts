@@ -262,14 +262,14 @@ export class DiagramController {
           rect.top < diagramRect.top
             ? +1
             : rect.bottom > diagramRect.bottom
-            ? -1
-            : 0
+              ? -1
+              : 0
         rect.force.x =
           rect.left < diagramRect.left
             ? +1
             : rect.right > diagramRect.right
-            ? -1
-            : 0
+              ? -1
+              : 0
 
         // calculate force with other tables
         tables.forEach(other => {
@@ -1094,12 +1094,12 @@ class LineController {
       type: relation.startsWith('>0')
         ? 'zero-or-many'
         : first === '>'
-        ? 'many'
-        : first === '0'
-        ? 'zero'
-        : first === '-'
-        ? 'one'
-        : 'default',
+          ? 'many'
+          : first === '0'
+            ? 'zero'
+            : first === '-'
+              ? 'one'
+              : 'default',
     })
 
     renderRelationBar({
@@ -1111,12 +1111,12 @@ class LineController {
       type: relation.endsWith('0<')
         ? 'zero-or-many'
         : last === '<'
-        ? 'many'
-        : last === '0'
-        ? 'zero'
-        : last === '-'
-        ? 'one'
-        : 'default',
+          ? 'many'
+          : last === '0'
+            ? 'zero'
+            : last === '-'
+              ? 'one'
+              : 'default',
     })
   }
 }

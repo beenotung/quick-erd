@@ -92,8 +92,8 @@ function nextPart(sql: string) {
     endIdx1 === -1
       ? endIdx2
       : endIdx2 === -1
-      ? endIdx1
-      : Math.min(endIdx1, endIdx2)
+        ? endIdx1
+        : Math.min(endIdx1, endIdx2)
   sql = sql.slice(endIdx).trim()
   return sql
 }
