@@ -303,3 +303,14 @@ dialog[open] {
   display: block;
   width: 100%;
 }
+
+#nightowl-switcher-default {
+  left: calc(100vw - 80px) !important;
+  top: 6.5rem !important;
+}
+
+@media screen and (max-width: 800px) {
+  #nightowl-switcher-default {
+    top: 9rem !important;
+  }
+}
