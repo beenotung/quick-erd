@@ -4,7 +4,7 @@ import {
   RelationType,
   Table,
 } from '../core/ast'
-import { ColorController } from './color'
+import { ColorController, calcTextColor } from './color'
 import { querySelector } from './dom'
 import { ErdInputController } from './erd-input'
 import { StoredBoolean, StoredNumber, StoredString } from './storage'
@@ -607,6 +607,7 @@ class TableController {
       const color = this.colorInput.value
       this.color.value = color
       this.tableHeader.style.backgroundColor = color
+      this.tableHeader.style.color = calcTextColor(color)
       this.diagram.inputController.setTablePosition(this.data.name, {
         x: this.translateX.value,
         y: this.translateY.value,

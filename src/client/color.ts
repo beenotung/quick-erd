@@ -1,3 +1,4 @@
+import { rgb_to_oklab, range } from 'oklab.ts/dist/oklab'
 import { querySelector } from './dom'
 import { ErdInputController } from './erd-input'
 const { random, floor } = Math
@@ -188,4 +189,13 @@ function randomBrightColor() {
   const g = randomBrightHex()
   const b = randomBrightHex()
   return '#' + r + g + b
+}
+
+export function calcTextColor(backgroundColorHex: string) {
+  const r = parseInt(backgroundColorHex.slice(1, 3), 16)
+  const g = parseInt(backgroundColorHex.slice(3, 5), 16)
+  const b = parseInt(backgroundColorHex.slice(5, 7), 16)
+  const oklab = rgb_to_oklab({ r, g, b })
+  const l = (oklab.L - range.L.min) / range.L.range
+  return l < 0.75 ? '#fff' : '#000'
 }
