@@ -146,6 +146,9 @@ function makeReference(schema: Schema, reference: ast.ForeignKeyReference) {
 
 function makeAsTableAlias(field: Field, table: Table): string | null {
   const asTable = field.name.replace(/_id$/, '')
+  if (field.reference?.table == field.table.name) {
+    return asTable == table.name ? asTable + '2' : asTable
+  }
   return asTable == table.name ? null : asTable
 }
 
@@ -188,6 +191,7 @@ function makeFieldAlias(tableName: string, fieldName: string): string {
 function makeFrom(selection: Selection): Table {
   const rightTables = new Set<Table>()
   for (const join of selection.joins) {
+    if (join.left.table == join.right.table) continue
     rightTables.add(join.right.table)
   }
   for (const table of selection.selectedTables) {
