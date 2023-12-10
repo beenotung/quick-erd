@@ -6,17 +6,25 @@ export type Column = {
   field: string
 }
 
+function emptySelect(): Select {
+  return {
+    fromTable: { name: '', fields: new Map() },
+    joins: [],
+    expandedSelectFields: [],
+  }
+}
+
 export function generateQuery(columns: Column[], tableList: ast.Table[]) {
   const schema = buildSchema(tableList)
   const selection = makeJoinSelection(schema, columns)
-  markFieldAliases(selection.selectedFields)
-  const fromTable = makeFrom(selection)
-  const joins = makeJoins(fromTable, selection)
-  const select = makeExpandedSelectFields(
-    fromTable,
-    joins,
-    selection.selectedFields,
-  )
+  function makeSelect(): Select {
+    if (selection.selectedFields.length === 0) return emptySelect()
+    markFieldAliases(selection.selectedFields)
+    const fromTable = makeFrom(selection)
+    const joins = makeJoins(fromTable, selection)
+    return makeExpandedSelectFields(fromTable, joins, selection.selectedFields)
+  }
+  const select = makeSelect()
   return {
     tsType: selectToTsType(select),
     sql: selectToSQL(select),
