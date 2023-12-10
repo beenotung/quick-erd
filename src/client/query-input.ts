@@ -237,4 +237,8 @@ export class QueryInputController {
       column => column.table === table && column.field === field,
     )
   }
+
+  removeAllColumns() {
+    this.update([], this.getParts())
+  }
 }

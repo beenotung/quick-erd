@@ -389,6 +389,15 @@ document.querySelector('#reset-zoom')?.addEventListener('click', () => {
   diagramController.resetView()
 })
 
+document.querySelector('#unselect-all')?.addEventListener('click', () => {
+  queryInputController.removeAllColumns()
+  diagram
+    .querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
+    .forEach(input => {
+      input.checked = false
+    })
+})
+
 function switchMode(mode: string) {
   document.body.dataset.mode = mode
   modeText.value = mode
