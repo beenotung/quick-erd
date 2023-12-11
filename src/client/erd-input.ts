@@ -182,10 +182,10 @@ export class ErdInputController {
     const fieldIndex = this.findFieldNameIndex(fromField.oldName, tableIndex)
     if (!fieldIndex) return
 
-    let text = this.input.value
-    let before = text.slice(0, fieldIndex.start)
-    let middle = fromField.newName
-    let after = text
+    const text = this.input.value
+    const before = text.slice(0, fieldIndex.start)
+    const middle = fromField.newName
+    const after = text
       .slice(fieldIndex.start + fromField.oldName.length)
       .split('\n')
     after[0] = after[0].replace(

@@ -1,5 +1,4 @@
 import {
-  Field,
   ForeignKeyReference,
   ParseResult,
   RelationType,
@@ -704,7 +703,7 @@ class TableController {
   }
 
   renameField(oldName: string, newName: string) {
-    let tr = this.fieldMap.get(oldName)
+    const tr = this.fieldMap.get(oldName)
     if (!tr) throw new Error('field not found, name: ' + oldName)
     this.fieldMap.delete(oldName)
     this.fieldMap.set(newName, tr)
@@ -986,7 +985,7 @@ class TableController {
   }
 
   getSelectedFields() {
-    let fields: string[] = []
+    const fields: string[] = []
     this.fieldCheckboxes.forEach((checkbox, field) => {
       if (checkbox.checked) {
         fields.push(field)
