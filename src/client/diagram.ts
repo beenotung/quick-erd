@@ -162,6 +162,7 @@ export class DiagramController {
     this.tableMap.set(table.name, controller)
     controller.render(table)
     controller.renderTransform(diagramRect)
+    return controller
   }
 
   render({ table_list, view, zoom }: ParseResult) {
@@ -185,10 +186,14 @@ export class DiagramController {
 
     const newTableMap = new Map(table_list.map(table => [table.name, table]))
 
+    const removedTableControllers: TableController[] = []
+    const newTableControllers: TableController[] = []
+
     // remove old table
     this.tableMap.forEach((table, name) => {
       if (!newTableMap.has(name)) {
         this.remove(table)
+        removedTableControllers.push(table)
       }
     })
 
@@ -196,13 +201,25 @@ export class DiagramController {
 
     // add new tables or update existing tables
     newTableMap.forEach((table, name) => {
-      const controller = this.tableMap.get(name)
+      let controller = this.tableMap.get(name)
       if (controller) {
         controller.render(table)
       } else {
-        this.add(table, diagramRect)
+        controller = this.add(table, diagramRect)
+        newTableControllers.push(controller)
       }
     })
+
+    // restore table color and position if renaming
+    if (
+      removedTableControllers.length === 1 &&
+      newTableControllers.length === 1
+    ) {
+      const removedTableController = removedTableControllers[0]
+      const newTableController = newTableControllers[0]
+
+      newTableController.restoreMetadata(removedTableController, diagramRect)
+    }
 
     // draw line
     this.tableMap.forEach(table => {
@@ -778,6 +795,7 @@ class TableController {
   }
 
   applyColor(color: string) {
+    this.color.value = color
     this.colorInput.value = color
     this.tableHeader.style.backgroundColor = color
     this.diagram.inputController.setTablePosition(this.data.name, {
@@ -899,9 +917,10 @@ class TableController {
     this._lineMap.clear()
     this.fieldMap.clear()
     // eslint-disable-next-line no-constant-condition
-    if (!'preserve position') {
+    if (!'preserve metadata') {
       this.translateX.remove()
       this.translateY.remove()
+      this.color.remove()
     }
     this.diagram.inputController.removeTable(this.data.name)
   }
@@ -916,6 +935,26 @@ class TableController {
     this.fieldCheckboxes.forEach((checkbox, field) => {
       checkbox.checked = fields.includes(field)
     })
+  }
+
+  getSelectedFields() {
+    let fields: string[] = []
+    this.fieldCheckboxes.forEach((checkbox, field) => {
+      if (checkbox.checked) {
+        fields.push(field)
+      }
+    })
+    return fields
+  }
+
+  restoreMetadata(ref: TableController, diagramRect: Rect) {
+    this.applyColor(ref.color.value)
+
+    this.translateX.value = ref.translateX.value
+    this.translateY.value = ref.translateY.value
+    this.renderTransform(diagramRect)
+
+    this.applySelectedFields(ref.getSelectedFields())
   }
 }
 
