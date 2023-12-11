@@ -241,4 +241,14 @@ export class QueryInputController {
   removeAllColumns() {
     this.update([], this.getParts())
   }
+
+  renameTable(from: string, to: string) {
+    const parts = this.getParts()
+    for (const column of this.columns) {
+      if (column.table === from) {
+        column.table = to
+      }
+    }
+    this.update(this.columns, parts)
+  }
 }

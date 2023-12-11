@@ -1,4 +1,5 @@
 import {
+  Field,
   ForeignKeyReference,
   ParseResult,
   RelationType,
@@ -215,10 +216,11 @@ export class DiagramController {
       removedTableControllers.length === 1 &&
       newTableControllers.length === 1
     ) {
-      const removedTableController = removedTableControllers[0]
-      const newTableController = newTableControllers[0]
-
-      newTableController.restoreMetadata(removedTableController, diagramRect)
+      this.renameTable(
+        removedTableControllers[0],
+        newTableControllers[0],
+        diagramRect,
+      )
     }
 
     // draw line
@@ -227,6 +229,45 @@ export class DiagramController {
     })
 
     this.controls.style.zIndex = this.getSafeZIndex().toString()
+  }
+
+  renameTable(
+    oldTableController: TableController,
+    newTableController: TableController,
+    diagramRect: Rect,
+  ) {
+    newTableController.restoreMetadata(oldTableController)
+    newTableController.renderTransform(diagramRect)
+
+    const oldTableName = oldTableController.data.name
+    const newTableName = newTableController.data.name
+    this.queryController.renameTable(oldTableName, newTableName)
+
+    this.tableMap.forEach(table => {
+      table.data.field_list.forEach(field => {
+        if (
+          field.references?.table === oldTableName &&
+          field.name === oldTableName + '_id'
+        ) {
+          const newFieldName = newTableName + '_id'
+          this.inputController.renameField({
+            fromTable: table.data.name,
+            fromField: {
+              oldName: field.name,
+              newName: newFieldName,
+            },
+            toTable: {
+              oldName: field.references.table,
+              newName: newTableName,
+            },
+          })
+          table.renameField(field.name, newFieldName)
+          field.name = newFieldName
+          field.references.table = newTableName
+          table.render(table.data)
+        }
+      })
+    })
   }
 
   renderLines() {
@@ -662,6 +703,13 @@ class TableController {
     return this.fieldMap.get(field)
   }
 
+  renameField(oldName: string, newName: string) {
+    let tr = this.fieldMap.get(oldName)
+    if (!tr) throw new Error('field not found, name: ' + oldName)
+    this.fieldMap.delete(oldName)
+    this.fieldMap.set(newName, tr)
+  }
+
   render(data: Table) {
     this.data = data
 
@@ -947,12 +995,11 @@ class TableController {
     return fields
   }
 
-  restoreMetadata(ref: TableController, diagramRect: Rect) {
+  restoreMetadata(ref: TableController) {
     this.applyColor(ref.color.value)
 
     this.translateX.value = ref.translateX.value
     this.translateY.value = ref.translateY.value
-    this.renderTransform(diagramRect)
 
     this.applySelectedFields(ref.getSelectedFields())
   }

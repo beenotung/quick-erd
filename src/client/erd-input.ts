@@ -166,6 +166,37 @@ export class ErdInputController {
     input.setSelectionRange(lineStartIndex, lineEndIndex, 'forward')
   }
 
+  renameField(args: {
+    fromTable: string
+    fromField: { oldName: string; newName: string }
+    toTable: {
+      oldName: string
+      newName: string
+    }
+  }) {
+    const { fromTable, fromField, toTable } = args
+
+    const tableIndex = this.findTableNameIndex(fromTable)
+    if (!tableIndex) return
+
+    const fieldIndex = this.findFieldNameIndex(fromField.oldName, tableIndex)
+    if (!fieldIndex) return
+
+    let text = this.input.value
+    let before = text.slice(0, fieldIndex.start)
+    let middle = fromField.newName
+    let after = text
+      .slice(fieldIndex.start + fromField.oldName.length)
+      .split('\n')
+    after[0] = after[0].replace(
+      toTable.oldName + '.id',
+      toTable.newName + '.id',
+    )
+    // TODO redraw ref line
+
+    this.setValue(before + middle + after.join('\n'))
+  }
+
   private findTableNameIndex(table: string) {
     const { input } = this
 
