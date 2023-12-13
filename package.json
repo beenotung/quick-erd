@@ -81,6 +81,7 @@
     "tedious": "^16.6.1"
   },
   "peerDependencies": {
+    "dotenv": "^16.3.1",
     "knex": "^2 || ^3"
   },
   "devDependencies": {
