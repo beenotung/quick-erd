@@ -152,9 +152,12 @@ function decompressTable(parser: Parser, tableName: string, tableText: string) {
 }
 
 function compressField(field: Field): string {
-  return fieldToString(field).replaceAll(' ', '+')
+  return fieldToString(field)
+    .replaceAll(' ', '+')
+    .replaceAll('>', ')')
+    .replaceAll('<', '(')
 }
 
 function decompressField(text: string): string {
-  return text.replaceAll('+', ' ')
+  return text.replaceAll('+', ' ').replaceAll(')', '>').replaceAll('(', '<')
 }
