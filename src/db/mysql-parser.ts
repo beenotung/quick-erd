@@ -212,6 +212,13 @@ function parseColumnStatement(sql: string): Statement {
       continue
     }
 
+    /* parse null */
+    if (sql.startsWith('NULL')) {
+      not_null = false
+      sql = sql.slice('NULL'.length).trim()
+      continue
+    }
+
     /* parse default value */
     if (sql.startsWith('DEFAULT')) {
       sql = sql.slice('DEFAULT'.length).trim()
