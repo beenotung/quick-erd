@@ -12,9 +12,6 @@ export async function scanMssqlTableSchema(knex: Knex): Promise<Table[]> {
       name: table_row.table_name,
       field_list: [],
     }
-    if (table.name.startsWith('knex_migrations')) {
-      continue
-    }
     table_list.push(table)
 
     let result = await knex.raw(

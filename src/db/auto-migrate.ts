@@ -24,6 +24,7 @@ import {
 import { toSqliteColumnSql } from './text-to-sqlite'
 import { scanMssqlTableSchema } from './mssql-to-text'
 import { parseEnumValues } from '../core/enum'
+import { isInternalTable } from '../core/table'
 
 export function detectSrcDir() {
   for (const dir of ['src', 'server']) {
@@ -209,17 +210,6 @@ module.exports = config;
 }
 
 const migrations_dir = 'migrations'
-
-function isInternalTable(name: string): boolean {
-  switch (name) {
-    case 'knex_migrations':
-    case 'knex_migrations_lock':
-    case 'sqlite_sequence':
-      return true
-    default:
-      return false
-  }
-}
 
 function diffArray(aArray: string[], bArray: string[]): [string[], string[]] {
   const aSet = new Set(aArray)

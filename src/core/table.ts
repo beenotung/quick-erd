@@ -93,22 +93,28 @@ export function astToText(ast: ParseResult): string {
 }
 
 export function printTables(tables: Table[]) {
-  tables = skipTimestamps(tables)
+  tables = skipInternalFields(tables)
   const text = astToText({ table_list: tables })
   // eslint-disable-next-line no-console
   console.log(text)
 }
 
-const skip_tables = [
-  'knex_migrations',
-  'knex_migrations_lock',
-  'sqlite_sequence',
-]
+export function isInternalTable(name: string): boolean {
+  switch (name) {
+    case 'knex_migrations':
+    case 'knex_migrations_lock':
+    case 'sqlite_sequence':
+      return true
+    default:
+      return false
+  }
+}
+
 const skip_fields = ['created_at', 'updated_at']
 
-function skipTimestamps(tables: Table[]): Table[] {
+function skipInternalFields(tables: Table[]): Table[] {
   return tables
-    .filter(table => !skip_tables.includes(table.name))
+    .filter(table => !isInternalTable(table.name))
     .map(table => ({
       ...table,
       field_list: table.field_list.filter(

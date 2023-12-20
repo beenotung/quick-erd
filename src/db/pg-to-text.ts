@@ -59,9 +59,6 @@ export async function scanPGTableSchema(knex: Knex): Promise<Table[]> {
       name: table_row.tablename,
       field_list: [],
     }
-    if (table.name.startsWith('knex_migrations')) {
-      continue
-    }
     table_list.push(table)
     const result = await knex.raw(
       /* sql */ `
