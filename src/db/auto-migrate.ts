@@ -397,6 +397,12 @@ export function generateAutoMigrate(options: {
         field.type = existing_field.type
       }
 
+      // avoid non-effective migration
+      // don't distinct signed and unsigned in postgres
+      if (is_postgres) {
+        field.is_unsigned = existing_field.is_unsigned
+      }
+
       if (
         field.type !== existing_field.type ||
         field.is_unsigned !== existing_field.is_unsigned

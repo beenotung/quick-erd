@@ -2,13 +2,13 @@ import { expect } from 'chai'
 import { textToSqlite } from './text-to-sqlite'
 
 describe('text-to-sqlite TestSuit', () => {
-  it('should convert varchar to text', () => {
+  it('should preserve varchar', () => {
     const text = `
 user
 ----
 username varchar(32)
 `
-    expect(textToSqlite(text).up).to.contains('username text not null')
+    expect(textToSqlite(text).up).to.contains('username varchar(32) not null')
   })
 
   it('should support inline enum as column type', () => {

@@ -77,11 +77,8 @@ export function toSqliteColumnSql(field: Field): string {
   }
   let type = field.type
 
-  if (
-    type.match(/^varchar/i) ||
-    type.match(/^char/i) ||
-    type.match(/^string/i)
-  ) {
+  // TODO add check constraints for varchar and char
+  if (type.match(/^string/i)) {
     type = 'text'
   }
 
