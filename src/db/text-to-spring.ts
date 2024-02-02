@@ -41,19 +41,30 @@ export function initPackage(app: SpringBootApplication, name: string) {
   mkdirSync(dir, { recursive: true })
 }
 
-export function findSrcDir() {
+export function findDir(dirname: string) {
   let rootDir = '.'
   let srcDir: string
   for (;;) {
-    srcDir = join(rootDir, 'src')
+    srcDir = join(rootDir, dirname)
     if (existsSync(srcDir)) break
-    if (resolve(srcDir) == '/') {
-      console.error('Error: failed to locate the src directory of java project')
-      process.exit(1)
+    const newRootDir = join('..', rootDir)
+    if (resolve(newRootDir) == resolve(rootDir)) {
+      throw new Error(
+        `failed to locate the ${dirname} directory of java project`,
+      )
     }
-    rootDir = join('..', rootDir)
+    rootDir = newRootDir
   }
   return srcDir
+}
+
+export function findSrcDir() {
+  try {
+    return findDir('src')
+  } catch (error) {
+    console.error(`Error: failed to locate the src directory of java project`)
+    process.exit(1)
+  }
 }
 
 export type SpringBootApplication = {
