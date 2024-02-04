@@ -85,11 +85,13 @@
     "knex": "^2 || ^3"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.9",
     "@types/chai": "^4.3.11",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.16",
     "@typescript-eslint/eslint-plugin": "^6.20.0",
     "@typescript-eslint/parser": "^6.20.0",
+    "better-sqlite3": "^9.4.0",
     "chai": "^4.4.1",
     "esbuild": "^0.20.0",
     "eslint": "^8.56.0",
