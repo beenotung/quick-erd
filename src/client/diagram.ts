@@ -10,6 +10,7 @@ import { ErdInputController } from './erd-input'
 import { StoredBoolean, StoredNumber, StoredString } from './storage'
 import { QueryInputController } from './query-input'
 import { Column } from '../core/query'
+import { Position } from '../core/meta'
 const { abs, sign, min, max } = Math
 
 type Rect = {
@@ -114,6 +115,19 @@ export class DiagramController {
       right: rect.right,
       width: this.div.scrollWidth,
       height: this.div.scrollHeight,
+    }
+  }
+
+  getNewTablePosition(): Position {
+    let rect = this.getDiagramRect()
+    let view = {
+      x: this.tablesContainer.translateX.value,
+      y: this.tablesContainer.translateY.value,
+    }
+    console.log({ rect, view })
+    return {
+      x: (rect.right - rect.left) / 2 + view.x,
+      y: (rect.bottom - rect.top) / 2 + view.y,
     }
   }
 
@@ -626,8 +640,13 @@ class TableController {
     public div: HTMLDivElement,
     public data: Table,
   ) {
+    let newTablePosition = diagram.getNewTablePosition()
     this.translateX = new StoredNumber(this.data.name + '-x', 0)
     this.translateY = new StoredNumber(this.data.name + '-y', 0)
+    if (this.translateX.value == 0 && this.translateY.value == 0) {
+      this.translateX.value = newTablePosition.x
+      this.translateY.value = newTablePosition.y
+    }
     this.color = new StoredString(this.data.name + '-color', '')
 
     this.div.addEventListener('mouseenter', () => {
