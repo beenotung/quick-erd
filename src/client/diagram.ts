@@ -119,12 +119,11 @@ export class DiagramController {
   }
 
   getNewTablePosition(): Position {
-    let rect = this.getDiagramRect()
-    let view = {
+    const rect = this.getDiagramRect()
+    const view = {
       x: this.tablesContainer.translateX.value,
       y: this.tablesContainer.translateY.value,
     }
-    console.log({ rect, view })
     return {
       x: (rect.right - rect.left) / 2 + view.x,
       y: (rect.bottom - rect.top) / 2 + view.y,
@@ -640,7 +639,7 @@ class TableController {
     public div: HTMLDivElement,
     public data: Table,
   ) {
-    let newTablePosition = diagram.getNewTablePosition()
+    const newTablePosition = diagram.getNewTablePosition()
     this.translateX = new StoredNumber(this.data.name + '-x', 0)
     this.translateY = new StoredNumber(this.data.name + '-y', 0)
     if (this.translateX.value == 0 && this.translateY.value == 0) {
