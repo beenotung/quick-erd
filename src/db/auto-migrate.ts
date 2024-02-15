@@ -42,9 +42,9 @@ export function setupSqlite(options: { dbFile: string; srcDir: string }) {
   }
   addDependencies('@types/better-sqlite3', '^7.6.9', 'dev')
   addDependencies('@types/integer', '^4.0.1', 'dev')
-  addDependencies('better-sqlite3', '^9.4.0')
+  addDependencies('better-sqlite3', '^9.4.1')
   addDependencies('better-sqlite3-schema', '^3.1.2')
-  addDependencies('better-sqlite3-proxy', '^2.4.1')
+  addDependencies('better-sqlite3-proxy', '^2.6.0')
   const code = `
 import { toSafeMode, newDB, DBInstance } from 'better-sqlite3-schema'
 
@@ -136,7 +136,7 @@ export function setupEnvFile(options: { srcDir: string; db_client: string }) {
   if (existsSync(file)) {
     return
   }
-  addDependencies('dotenv', '^16.0.3')
+  addDependencies('dotenv', '^16.4.4')
   addDependencies('populate-env', '^2.0.0')
   const code = `
 import { config } from 'dotenv'
