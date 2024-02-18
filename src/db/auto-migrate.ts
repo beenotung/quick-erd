@@ -264,18 +264,18 @@ export async function setupKnexMigration(options: {
     log('No migration is needed.')
   } else {
     const code = `
-import { Knex } from "knex";
+import { Knex } from 'knex'
 
-
+// prettier-ignore
 export async function up(knex: Knex): Promise<void> {
 ${up_lines.join('\n')}
 }
 
-
+// prettier-ignore
 export async function down(knex: Knex): Promise<void> {
 ${down_lines.join('\n')}
 }
-`
+`.replaceAll('{\n\n', '{\n')
 
     let file = await knex.migrate.make('auto-migrate', { extension: 'ts' })
     file = file.replace(join(process.cwd(), migrations_dir), migrations_dir)
