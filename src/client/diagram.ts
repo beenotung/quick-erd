@@ -121,9 +121,13 @@ export class DiagramController {
   getNewTablePosition(): Position {
     const rect = this.getDiagramRect()
     const view = {
-      x: this.tablesContainer.translateX.value,
-      y: this.tablesContainer.translateY.value,
+      x: this.tablesContainer.view.x.value,
+      y: this.tablesContainer.view.y.value,
     }
+    console.log('new pos', {
+      rect,
+      view,
+    })
     return {
       x: (rect.right - rect.left) / 2 + view.x,
       y: (rect.bottom - rect.top) / 2 + view.y,
@@ -187,8 +191,8 @@ export class DiagramController {
     }
 
     if (view) {
-      this.tablesContainer.translateX.value = view.x
-      this.tablesContainer.translateY.value = view.y
+      this.tablesContainer.view.x.value = view.x
+      this.tablesContainer.view.y.value = view.y
       this.tablesContainer.renderTransform('skip_storage')
     }
 
@@ -467,8 +471,8 @@ export class DiagramController {
   flushToInputController() {
     this.inputController.setZoom(this.zoom.value)
     this.inputController.setViewPosition({
-      x: this.tablesContainer.translateX.value,
-      y: this.tablesContainer.translateY.value,
+      x: this.tablesContainer.view.x.value,
+      y: this.tablesContainer.view.y.value,
     })
     for (const [name, table] of this.tableMap) {
       this.inputController.setTablePosition(name, {
@@ -500,24 +504,20 @@ export class DiagramController {
 }
 
 export class TablesContainer {
-  translateX: StoredNumber
-  translateY: StoredNumber
   onMouseMove: (ev: { clientX: number; clientY: number }) => void
 
   constructor(
     public diagram: DiagramController,
     public div: HTMLDivElement,
-    view: {
+    public view: {
       x: StoredNumber
       y: StoredNumber
     },
   ) {
-    this.translateX = view.x
-    this.translateY = view.y
-    this.div.style.transform = `translate(${this.translateX}px,${this.translateY}px)`
+    this.div.style.transform = `translate(-${view.x}px,${-view.y}px)`
     this.diagram.inputController.setViewPosition({
-      x: this.translateX.value,
-      y: this.translateY.value,
+      x: view.x.value,
+      y: view.y.value,
     })
 
     let isMouseDown = false
@@ -526,8 +526,8 @@ export class TablesContainer {
     this.onMouseMove = ev => {
       if (!isMouseDown) return
 
-      this.translateX.value += ev.clientX - startX
-      this.translateY.value += ev.clientY - startY
+      view.x.value -= ev.clientX - startX
+      view.y.value -= ev.clientY - startY
 
       startX = ev.clientX
       startY = ev.clientY
@@ -561,15 +561,14 @@ export class TablesContainer {
   }
 
   renderTransform(mode?: 'skip_storage') {
-    const x = this.translateX.toString()
-    const y = this.translateY.toString()
+    const { x, y } = this.view
     if (mode != 'skip_storage') {
       this.diagram.inputController.setViewPosition({
-        x: this.translateX.value,
-        y: this.translateY.value,
+        x: x.value,
+        y: y.value,
       })
     }
-    this.div.style.transform = `translate(${x}px,${y}px)`
+    this.div.style.transform = `translate(-${x}px,-${y}px)`
     const diagramRect = this.diagram.getDiagramRect()
     this.diagram.tableMap.forEach(tableController =>
       tableController.renderLinesTransform(diagramRect),
@@ -577,14 +576,14 @@ export class TablesContainer {
   }
 
   resetView() {
-    this.translateX.value = 0
-    this.translateY.value = 0
+    this.view.x.value = 0
+    this.view.y.value = 0
     this.renderTransform()
   }
 
   exportJSON(json: any) {
-    json['view:x'] = this.translateX
-    json['view:y'] = this.translateY
+    json['view:x'] = this.view.x
+    json['view:y'] = this.view.y
   }
 }
 
