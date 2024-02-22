@@ -124,10 +124,6 @@ export class DiagramController {
       x: this.tablesContainer.view.x.value,
       y: this.tablesContainer.view.y.value,
     }
-    console.log('new pos', {
-      rect,
-      view,
-    })
     return {
       x: (rect.right - rect.left) / 2 + view.x,
       y: (rect.bottom - rect.top) / 2 + view.y,
