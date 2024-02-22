@@ -510,7 +510,7 @@ export class TablesContainer {
       y: StoredNumber
     },
   ) {
-    this.div.style.transform = `translate(-${view.x}px,${-view.y}px)`
+    this.div.style.transform = `translate(${-view.x}px,${-view.y}px)`
     this.diagram.inputController.setViewPosition({
       x: view.x.value,
       y: view.y.value,
@@ -564,7 +564,7 @@ export class TablesContainer {
         y: y.value,
       })
     }
-    this.div.style.transform = `translate(-${x}px,-${y}px)`
+    this.div.style.transform = `translate(${-x}px,${-y}px)`
     const diagramRect = this.diagram.getDiagramRect()
     this.diagram.tableMap.forEach(tableController =>
       tableController.renderLinesTransform(diagramRect),
