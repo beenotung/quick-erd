@@ -239,6 +239,7 @@ export class QueryInputController {
   }
 
   removeAllColumns() {
+    this.columns = []
     this.update([], this.getParts())
   }
 

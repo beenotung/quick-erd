@@ -812,10 +812,21 @@ class TableController {
         )
 
         checkbox.onchange = () => {
-          if (checkbox.checked) {
-            this.diagram.queryController.addColumn(this.data.name, name)
-          } else {
-            this.diagram.queryController.removeColumn(this.data.name, name)
+          try {
+            if (checkbox.checked) {
+              this.diagram.queryController.addColumn(this.data.name, name)
+            } else {
+              this.diagram.queryController.removeColumn(this.data.name, name)
+            }
+          } catch (error) {
+            if (
+              error instanceof Error &&
+              error.message.match(/Table .* not found/)
+            ) {
+              this.diagram.queryController.cleanColumns()
+              return
+            }
+            console.error(error)
           }
         }
 
