@@ -145,6 +145,9 @@ function makeReference(schema: Schema, reference: ast.ForeignKeyReference) {
 }
 
 function makeAsTableAlias(field: Field, table: Table): string | null {
+  if (field.name == 'id') {
+    return null
+  }
   const asTable = field.name.replace(/_id$/, '')
   if (field.reference?.table == field.table.name) {
     return asTable == table.name ? asTable + '2' : asTable
