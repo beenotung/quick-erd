@@ -131,6 +131,9 @@ function makeJoinSelection(schema: Schema, columns: Column[]): Selection {
       })
     }
   }
+  if (selectedTables.size == 1 && joins.length == 0) {
+    removeAllFieldAliases(selectedFields)
+  }
   return {
     joins: removeUnnecessaryJoins(joins, selectedTables),
     selectedTables,
@@ -145,11 +148,20 @@ function makeReference(schema: Schema, reference: ast.ForeignKeyReference) {
 }
 
 function makeAsTableAlias(field: Field, table: Table): string | null {
+  if (field.name == 'id') {
+    return null
+  }
   const asTable = field.name.replace(/_id$/, '')
   if (field.reference?.table == field.table.name) {
     return asTable == table.name ? asTable + '2' : asTable
   }
   return asTable == table.name ? null : asTable
+}
+
+function removeAllFieldAliases(fields: Field[]) {
+  for (const field of fields) {
+    field.alias = null
+  }
 }
 
 function removeUnnecessaryJoins(joins: Join[], selectedTables: Set<Table>) {
