@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "db": "run-s db:update db:plan db:update",
     "db:plan": "auto-migrate db.sqlite3 < sqlite-erd.txt",
     "db:update": "knex migrate:latest && erd-to-proxy < sqlite-erd.txt > proxy.ts",
     "db:dev": "run-s db:update db:plan db:update"
