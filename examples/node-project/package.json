@@ -23,10 +23,10 @@
     "tedious": "^16.7.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.9",
     "@types/integer": "^4.0.3",
     "gen-env": "^1.0.1",
     "npm-run-all": "^4.1.5",
-    "psql-shell": "^1.3.5",
-    "@types/better-sqlite3": "^7.6.9"
+    "psql-shell": "^1.3.5"
   }
 }
