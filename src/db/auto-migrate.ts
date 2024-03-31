@@ -81,21 +81,38 @@ export function setupNpmScripts(options: {
     if (options.srcDir == '.') return filename
     return join(options.srcDir, filename)
   }
+
+  const newScripts: Record<string, string> = {
+    'db:setup': 'npm run db:migrate',
+    'db:dev': 'run-s db:migrate db:plan db:update',
+    'db:migrate': 'knex migrate:latest',
+  }
+
+  let seed = 'db:seed' in scripts ? 'db:seed' : 'seed' in scripts ? 'seed' : ''
+  if (!seed && existsSync('seed.ts')) {
+    seed = 'db:seed'
+    newScripts[seed] = 'ts-node seed.ts'
+  } else if (!seed && existsSync('seed')) {
+    seed = 'db:seed'
+    newScripts[seed] = 'knex seed:run'
+  }
+  if (seed) {
+    newScripts['db:setup'] = 'run-s db:migrate ' + seed
+  }
+
   if (options.db_client.includes('sqlite')) {
     const proxyFile = toFile('proxy.ts')
-    addNpmScripts({
-      'db:dev': 'run-s db:update db:plan db:update',
-      'db:plan': `auto-migrate ${options.dbFile} < erd.txt`,
-      'db:update': `knex migrate:latest && erd-to-proxy < erd.txt > ${proxyFile}`,
-    })
+    newScripts['db:plan'] = `auto-migrate ${options.dbFile} < erd.txt`
+    newScripts['db:update'] = `run-s db:migrate db:gen-proxy`
+    newScripts['db:gen-proxy'] = `erd-to-proxy < erd.txt > ${proxyFile}`
   } else {
     const typesFile = toFile('types.ts')
-    addNpmScripts({
-      'db:dev': 'run-s db:update db:plan db:update',
-      'db:plan': `auto-migrate ${options.db_client} < erd.txt`,
-      'db:update': `knex migrate:latest && erd-to-types < erd.txt > ${typesFile}`,
-    })
+    newScripts['db:plan'] = `auto-migrate ${options.db_client} < erd.txt`
+    newScripts['db:update'] = `run-s db:migrate db:gen-types`
+    newScripts['db:gen-types'] = `erd-to-types < erd.txt > ${typesFile}`
   }
+
+  addNpmScripts(newScripts)
 }
 
 export function setupGitIgnore(options: { dbFile: string | undefined }) {
