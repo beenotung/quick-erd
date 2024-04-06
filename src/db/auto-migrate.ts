@@ -457,8 +457,16 @@ export function generateAutoMigrate(options: {
 
       if (field.is_null !== existing_field.is_null) {
         if (is_sqlite) {
-          raw_up_lines.push(alterSqliteNullable(table, field))
-          raw_down_lines.unshift(alterSqliteNullable(table, existing_field))
+          raw_up_lines.push(
+            alterSqliteNullable(options.parsed_table_list, table.name, field),
+          )
+          raw_down_lines.unshift(
+            alterSqliteNullable(
+              options.existing_table_list,
+              table.name,
+              existing_field,
+            ),
+          )
         } else {
           table_up_lines.push(alterNullable(field))
           table_down_lines.unshift(alterNullable(existing_field))
@@ -693,15 +701,70 @@ function alterSqliteEnum(table: Table, field: Field): string {
   const columnDefinition = `${col} text check (${col} in ${values})`
   return alterSqliteField(table, field, columnDefinition)
 }
-function alterSqliteNullable(table: Table, field: Field): string {
-  if (!field.is_null) {
-    const code = `
-  // FIXME: alter column (${table.name}.${field.name}) to be non-nullable not supported in sqlite
-  // you may set it to be non-nullable with sqlite browser manually
-`
-    return '  ' + code.trim()
+function alterSqliteNullable(
+  allTables: Table[],
+  tableName: string,
+  field: Field,
+): string {
+  const db_client = 'better-sqlite3'
+
+  const table = allTables.find(table => table.name == tableName)
+  if (!table) {
+    throw new Error('table not found, name: ' + tableName)
   }
-  return alterSqliteType(table, field)
+
+  const involvedTables: Table[] = [table]
+
+  function scanDeps(tableName: string) {
+    for (const table of allTables) {
+      if (involvedTables.includes(table)) continue
+      for (const field of table.field_list) {
+        if (field.references?.table == tableName) {
+          involvedTables.push(table)
+          scanDeps(table.name)
+          break
+        }
+      }
+    }
+  }
+  scanDeps(tableName)
+
+  function genCreateTable(table: Table): string {
+    const code = toKnexCreateTableCode(table, db_client)
+    const lines = code.split('\n').slice(1)
+    lines.forEach((line, i) => {
+      if (i == 0) {
+        lines[i] = line.slice(2)
+      } else {
+        lines[i] = '  ' + line
+      }
+    })
+    return lines.join('\n')
+  }
+
+  const code = `
+  {
+    // alter column (${table.name}.${field.name}) to be ${field.is_null ? 'nullable' : 'non-nullable'}
+
+    ${involvedTables.map(table => `let ${table.name}_rows = await knex.select('*').from('${table.name}')`).join('\n    ')}
+
+    ${involvedTables
+      .slice()
+      .reverse()
+      .map(table => `await knex.schema.dropTable('${table.name}')`)
+      .join('\n    ')}
+
+    ${involvedTables.map(genCreateTable).join('\n    ')}
+
+    ${involvedTables
+      .map(
+        table => `for (let row of ${table.name}_rows) {
+      await knex.insert(row).into('${table.name}')
+    }`,
+      )
+      .join('\n    ')}
+  }`
+  return code
 }
 function alterPostgresEnum(table: Table, field: Field): string[] {
   const lines: string[] = []
