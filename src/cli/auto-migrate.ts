@@ -10,6 +10,7 @@ import {
   setupKnexMigration,
   setupSqlite,
   setupGitIgnore,
+  setupTypescript,
 } from '../db/auto-migrate'
 import { loadKnex, loadSqliteKnex } from '../db/knex'
 import { env } from '../db/env'
@@ -56,6 +57,7 @@ async function main() {
     }
   }
   setupNpmScripts({ srcDir, db_client, dbFile })
+  setupTypescript()
   setupGitIgnore({ dbFile })
   setupKnexFile({ srcDir, db_client })
   const knex = dbFile ? loadSqliteKnex(dbFile) : loadKnex(db_client)

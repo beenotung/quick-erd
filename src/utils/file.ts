@@ -1,4 +1,5 @@
-import { readFileSync, writeFileSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync } from 'fs'
+import { extname } from 'path'
 
 export function readErdFromStdin(cb: (text: string) => void) {
   if (process.stdin.isTTY) {
@@ -58,6 +59,31 @@ export function addDependencies(
   )
   const text = JSON.stringify(pkg, null, 2)
   writeSrcFile(file, text)
+}
+
+export function addGitIgnore(file: string, patterns: string[]) {
+  let text = (existsSync(file) && readFileSync(file).toString()) || ''
+  const originalText = text
+  if (text && !text.endsWith('\n')) {
+    text += '\n'
+  }
+  const lines = text.split('\n').map(line => line.trim())
+  for (const pattern of patterns) {
+    const hasPattern = lines.some(
+      line =>
+        line == pattern ||
+        line == pattern + '*' ||
+        line == '*' + pattern + '*' ||
+        line == '*' + extname(pattern) ||
+        line == '*' + extname(pattern) + '*',
+    )
+    if (!hasPattern) {
+      text += pattern + '\n'
+    }
+  }
+  if (text != originalText) {
+    writeSrcFile(file, text)
+  }
 }
 
 export function readNpmScripts(): Record<string, string> {

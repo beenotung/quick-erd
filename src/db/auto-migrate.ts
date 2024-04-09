@@ -1,11 +1,12 @@
 import { closest } from 'fastest-levenshtein'
-import { existsSync, mkdirSync, readFileSync, readdirSync } from 'fs'
+import { existsSync, mkdirSync, readdirSync } from 'fs'
 import { Knex as KnexType } from 'knex'
-import { basename, dirname, extname, join } from 'path'
+import { dirname, join } from 'path'
 import { inspect } from 'util'
 import { Field, ParseResult, Table } from '../core/ast'
 import {
   addDependencies,
+  addGitIgnore,
   addNpmScripts,
   readNpmScripts,
   writeSrcFile,
@@ -59,6 +60,33 @@ toSafeMode(db)
 `
   writeSrcFile(dbTsFile, code)
   return
+}
+
+export function setupTypescript() {
+  addDependencies('typescript', '^5.4.4')
+  addDependencies('ts-node', '^10.9.2')
+  addDependencies('@types/node', '^20.12.6')
+  setupTsConfigFile()
+}
+
+function setupTsConfigFile() {
+  const file = 'tsconfig.json'
+  if (existsSync(file)) return
+  const config = {
+    compilerOptions: {
+      target: 'es2022',
+      module: 'commonjs',
+      esModuleInterop: true,
+      forceConsistentCasingInFileNames: true,
+      strict: true,
+      skipLibCheck: true,
+      incremental: true,
+      outDir: 'dist',
+    },
+    exclude: ['dist'],
+  }
+  const text = JSON.stringify(config, null, 2)
+  writeSrcFile(file, text)
 }
 
 export function setupNpmScripts(options: {
@@ -116,29 +144,24 @@ export function setupNpmScripts(options: {
 }
 
 export function setupGitIgnore(options: { dbFile: string | undefined }) {
-  if (!options.dbFile) return
-  const dir = dirname(options.dbFile)
-  const file = join(dir, '.gitignore')
-  let text = (existsSync(file) && readFileSync(file).toString()) || ''
-  if (options.dbFile.includes('.sqlite3') && text.includes('*.sqlite3*')) return
-  const originalText = text
-  const lines = text
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0)
-  const base = basename(options.dbFile)
-  if (lines.some(line => line == base + '*')) return
-  if (text && !text.endsWith('\n')) {
-    text += '\n'
-  }
-  const files = [base, base + '-shm', base + '-wal']
-  for (const file of files) {
-    if (!lines.includes(file) && !lines.includes('*' + extname(file))) {
-      text += file + '\n'
-    }
-  }
-  if (text != originalText) {
-    writeSrcFile(file, text)
+  addGitIgnore('.gitignore', [
+    'node_modules',
+    '*.tgz',
+    'dist',
+    '.env',
+    '.env.*',
+    '!.env.example',
+  ])
+  if (options.dbFile) {
+    const dir = dirname(options.dbFile)
+    const file = join(dir, '.gitignore')
+    addGitIgnore(file, [
+      '*.sqlite3',
+      '*.sqlite3-shm',
+      '*.sqlite3-wal',
+      'dump.sql',
+      '*.xz',
+    ])
   }
 }
 
