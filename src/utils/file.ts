@@ -21,7 +21,7 @@ const writtenFiles = new Set<string>()
 
 export function writeSrcFile(file: string, code: string) {
   if (!writtenFiles.has(file)) {
-    console.error('saving to', file, '...')
+    console.error('saving to', file)
     writtenFiles.add(file)
   }
   code = code.trim() + '\n'
