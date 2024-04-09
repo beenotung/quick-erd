@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/node": "^20.12.6",
     "better-sqlite3": "^9.4.5",
     "better-sqlite3-proxy": "^2.6.0",
     "better-sqlite3-schema": "^3.1.4",
@@ -20,7 +21,9 @@
     "pg": "^8.11.5",
     "populate-env": "^2.0.0",
     "quick-erd": "link:../..",
-    "tedious": "^16.7.1"
+    "tedious": "^16.7.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.4"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.9",
