@@ -46,11 +46,16 @@ export function addDependencies(
   const pkg: PackageJSON = readPackageJSON(file)
 
   const field = mode === 'dev' ? 'devDependencies' : 'dependencies'
-  const deps = (pkg[field] = pkg[field] || {})
+  const deps = pkg[field] || {}
   if (name in deps) {
     return
   }
   deps[name] = version
+  pkg[field] = Object.fromEntries(
+    Object.keys(deps)
+      .sort()
+      .map(name => [name, deps[name]]),
+  )
   const text = JSON.stringify(pkg, null, 2)
   writeSrcFile(file, text)
 }
