@@ -63,9 +63,9 @@ toSafeMode(db)
 }
 
 export function setupTypescript() {
-  addDependencies('typescript', '^5.4.4')
-  addDependencies('ts-node', '^10.9.2')
-  addDependencies('@types/node', '^20.12.6')
+  addDependencies('typescript', '^5.4.4', 'dev')
+  addDependencies('ts-node', '^10.9.2', 'dev')
+  addDependencies('@types/node', '^20.12.6', 'dev')
   setupTsConfigFile()
 }
 
