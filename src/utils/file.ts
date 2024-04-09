@@ -16,8 +16,13 @@ export function readErdFromStdin(cb: (text: string) => void) {
     })
 }
 
+const writtenFiles = new Set<string>()
+
 export function writeSrcFile(file: string, code: string) {
-  console.error('saving to', file, '...')
+  if (!writtenFiles.has(file)) {
+    console.error('saving to', file, '...')
+    writtenFiles.add(file)
+  }
   code = code.trim() + '\n'
   writeFileSync(file, code)
 }
