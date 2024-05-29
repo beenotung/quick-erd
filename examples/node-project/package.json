@@ -14,7 +14,7 @@
   "dependencies": {
     "@types/node": "^20.12.6",
     "better-sqlite3": "^9.4.5",
-    "better-sqlite3-proxy": "^2.6.0",
+    "better-sqlite3-proxy": "^2.7.0",
     "better-sqlite3-schema": "^3.1.4",
     "knex": "^3.1.0",
     "mysql": "^2.18.1",
