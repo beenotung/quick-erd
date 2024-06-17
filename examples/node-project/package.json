@@ -13,9 +13,9 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^20.14.2",
-    "better-sqlite3": "^10.1.0",
-    "better-sqlite3-proxy": "^2.7.2",
-    "better-sqlite3-schema": "^3.1.6",
+    "better-sqlite3": "^11.0.0",
+    "better-sqlite3-proxy": "^2.7.3",
+    "better-sqlite3-schema": "^3.1.7",
     "knex": "^3.1.0",
     "mysql": "^2.18.1",
     "pg": "^8.12.0",
