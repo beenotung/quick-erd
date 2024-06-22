@@ -125,6 +125,11 @@
       <div id="editor">
         <textarea id="erdInput" placeholder="input table draft here"></textarea>
         <div class="erd-controls">
+          <div class="server-mode">
+            <button class="save-btn" title="save to erd file on disk">
+              Save to Disk
+            </button>
+          </div>
           <button class="copy-btn" title="copy erd text to clipboard">
             Copy
           </button>
@@ -197,6 +202,7 @@
         </div>
       </div>
     </main>
+    <script src="/erd-text.js"></script>
     <script type="module" src="/main.js"></script>
   </body>
 </html>

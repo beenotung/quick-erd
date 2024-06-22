@@ -281,6 +281,14 @@ dialog[open] {
   opacity: 0.5;
 }
 
+.erd-controls {
+  text-align: end;
+}
+.server-mode {
+  margin-bottom: 0.5rem;
+  display: none;
+}
+
 [data-mode="schema"] #queryInput,
 [data-mode="schema"] .output-controls {
   display: none;

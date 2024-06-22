@@ -12,6 +12,7 @@ import {
 } from '../core/meta'
 import { showCopyResult } from './copy'
 import { querySelector } from './dom'
+import { showSaveResult } from './save'
 import { StoredString } from './storage'
 
 export class ErdInputController {
@@ -24,6 +25,24 @@ export class ErdInputController {
 
   private setupCopyListener() {
     const input = this.input
+
+    const saveBtn = querySelector(
+      document.body,
+      '.save-btn',
+    ) as HTMLButtonElement
+    saveBtn.addEventListener('click', () => {
+      showSaveResult(
+        saveBtn,
+        fetch('/erd.txt', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'plain/text',
+          },
+          body: input.value,
+        }).then(res => res.json()),
+      )
+    })
+
     const copyBtn = querySelector(
       document.body,
       '.erd-controls .copy-btn',
