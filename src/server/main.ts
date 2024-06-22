@@ -33,10 +33,17 @@ app.put('/erd.txt', express.text({ type: 'plain/text' }), (req, res) => {
     res.json({ error: 'expect erd text in plain text body' })
     return
   }
-  console.log('updated', erd_file)
+
+  console.log(`[${timestamp()}] updated ${erd_file}`)
   writeFileSync(erd_file, text)
   res.json({ message: 'updated' })
 })
+
+function timestamp() {
+  let date = new Date()
+  let d2 = (x: number) => (x < 10 ? '0' + x : x)
+  return d2(date.getHours()) + ':' + d2(date.getMinutes())
+}
 
 app.use(express.static(public_dir))
 
