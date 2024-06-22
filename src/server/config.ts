@@ -4,7 +4,7 @@ import { join } from 'path'
 export let port = +process.env.PORT! || 8520
 {
   for (let i = 2; i < process.argv.length; i++) {
-    let arg = process.argv[i]
+    const arg = process.argv[i]
     if (arg == '-p' || arg == '--port') {
       port = +process.argv[++i]
       if (!port) {
@@ -15,9 +15,9 @@ export let port = +process.env.PORT! || 8520
   }
 }
 
-export let public_dir = join(__dirname, '..', '..', 'build')
+export const public_dir = join(__dirname, '..', '..', 'build')
 {
-  let file = join(public_dir, 'index.html')
+  const file = join(public_dir, 'index.html')
   if (!existsSync(file)) {
     console.error('Could not locate public directory')
     process.exit(1)
@@ -26,7 +26,7 @@ export let public_dir = join(__dirname, '..', '..', 'build')
 
 export let erd_file = ''
 {
-  let files = [
+  const files = [
     /* in current directory */
     'erd.txt',
     /* in ts-liveview db project */
@@ -35,7 +35,7 @@ export let erd_file = ''
     'docs/erd.txt',
     '../docs/erd.txt',
   ]
-  for (let file of files) {
+  for (const file of files) {
     if (existsSync(file)) {
       erd_file = file
       break
@@ -43,7 +43,7 @@ export let erd_file = ''
   }
 
   for (let i = 2; i < process.argv.length; i++) {
-    let file = process.argv[i]
+    const file = process.argv[i]
     if (file.includes('erd.txt') || existsSync(file)) {
       erd_file = file
       break
