@@ -37,6 +37,7 @@
     "erd-to-spring": "dist/cli/erd-to-spring.js"
   },
   "files": [
+    "build",
     "dist"
   ],
   "scripts": {
@@ -58,7 +59,7 @@
     "format:eslint": "eslint --ext .ts --fix .",
     "format:prettier": "prettier --write .",
     "format:json": "format-json-cli",
-    "build": "run-s type:commonjs clean tsc",
+    "build": "run-s type:commonjs clean tsc build:client",
     "tsc": "tsc -p tsconfig.cjs.json",
     "test": "run-s format tsc mocha",
     "mocha": "ts-mocha \"{src,test}/**/*.spec.ts\"",
