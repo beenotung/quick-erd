@@ -7,10 +7,10 @@ export function showCopyResult(
     .then(done => {
       if (done == 'skip') return
       if (done) {
-        copyBtn.textContent = 'copied'
+        copyBtn.textContent = 'Copied'
         copyBtn.style.color = 'green'
       } else {
-        copyBtn.textContent = 'failed'
+        copyBtn.textContent = 'Failed'
         copyBtn.style.color = 'red'
       }
       setTimeout(() => {
