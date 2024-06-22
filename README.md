@@ -55,6 +55,9 @@ reverse-engineer erd text:
 format erd text:
 `format-erd`
 
+open web ui:
+`erd-ui`
+
 ## Features
 
 - [x] text-based erd editor
@@ -85,6 +88,10 @@ format erd text:
   - [x] copy selected part into clipboard
   - [x] support additional query (where / group-by / order-by / limit, e.t.c.)
   - [x] support sharing diagram embedded in url
+- [x] local web-ui
+  - [x] offline usage
+  - [x] load from disk file
+  - [x] save to disk file
 
 ## Usage
 
@@ -172,6 +179,11 @@ npx format-erd -r erd.txt erd.tmp
 meld erd.txt erd.tmp
 rm erd.tmp
 ```
+
+**To open web ui with disk file access**:
+
+- `npx erd-ui`
+- `npx erd-ui -p 8520 erd.txt`
 
 #### Import from Existing Schema
 
