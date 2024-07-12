@@ -111,6 +111,7 @@ export function setupNpmScripts(options: {
   }
 
   const newScripts: Record<string, string> = {
+    'db:ui': 'erd-ui erd.txt',
     'db:setup': 'npm run db:migrate',
     'db:dev': 'run-s db:migrate db:plan db:update',
     'db:migrate': 'knex migrate:latest',
