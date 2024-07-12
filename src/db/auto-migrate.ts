@@ -45,7 +45,7 @@ export function setupSqlite(options: { dbFile: string; srcDir: string }) {
   addDependencies('@types/integer', '^4.0.1', 'dev')
   addDependencies('better-sqlite3', '^11.0.0')
   addDependencies('better-sqlite3-schema', '^3.1.7')
-  addDependencies('better-sqlite3-proxy', '^2.7.3')
+  addDependencies('better-sqlite3-proxy', '^2.8.0')
   const code = `
 import { toSafeMode, newDB, DBInstance } from 'better-sqlite3-schema'
 
