@@ -217,9 +217,10 @@ export class ErdInputController {
   }
 
   private findTableNameIndex(table: string) {
-    const { input } = this
-
-    const start = input.value.indexOf(table + '\n-')
+    const text = this.input.value
+    const start = text.startsWith(table + '\n-')
+      ? 0
+      : text.indexOf('\n' + table + '\n-')
     if (start === -1) return
 
     const end = start + table.length
