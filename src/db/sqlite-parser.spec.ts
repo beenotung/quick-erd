@@ -371,6 +371,7 @@ create table user (
 CREATE TABLE \`user\` (
   \`id\` integer not null primary key autoincrement
 , \`username\` text not null
+, \`email\` text not null
 )
 `,
       },
@@ -379,6 +380,15 @@ CREATE TABLE \`user\` (
         name: '',
         sql: /* sql */ `
 CREATE UNIQUE INDEX \`user_username_unique\` on \`user\` (\`username\`)
+`,
+      },
+      {
+        type: 'index',
+        name: '',
+        sql: /* sql */ `
+CREATE UNIQUE INDEX "user_email_unique" on "user" (
+  "email"
+)
 `,
       },
     ]
@@ -398,6 +408,16 @@ CREATE UNIQUE INDEX \`user_username_unique\` on \`user\` (\`username\`)
           },
           {
             name: 'username',
+            type: 'text',
+            is_null: false,
+            is_primary_key: false,
+            is_unique: true,
+            is_unsigned: false,
+            default_value: undefined,
+            references: undefined,
+          },
+          {
+            name: 'email',
             type: 'text',
             is_null: false,
             is_primary_key: false,

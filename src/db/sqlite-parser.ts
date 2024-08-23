@@ -200,12 +200,20 @@ type UniqueIndex = {
 }
 function parseCreateIndex(sql: string): UniqueIndex | null {
   // example: CREATE UNIQUE INDEX `user_username_unique` on `user` (`username`)
-  const match = sql.match(
+  let match = sql.match(
     /create unique index .* on \`?(.*?)\`? \(\`?(.*?)\`?\)/i,
   )
+  // example: CREATE UNIQUE INDEX "user_username_unique" on "user" (\n  "username"\n)
+  if (!match)
+    match = sql.match(
+      /create unique index .* on "?(.*?)"? \("?([.|\s|\S]*?)"?\)/i,
+    )
   if (!match) return null
   const table = match[1]
-  const field = match[2]
+  let field = match[2].trim()
+  if (field.startsWith('"') && field.endsWith('"')) {
+    field = field.slice(1, -1)
+  }
   if (field.includes(',')) {
     return null
   }
