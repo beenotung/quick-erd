@@ -43,6 +43,7 @@ DB_PASSWORD=(or DB_PASS or POSTGRES_PASSWORD)
       user,
       password,
       multipleStatements: true,
+      ssl: { rejectUnauthorized: false },
     },
     pool: {
       min: 2,
