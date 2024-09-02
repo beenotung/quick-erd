@@ -81,7 +81,12 @@ export function toKnexCreateColumnTypeCode(
 }
 
 export function toKnexDefaultValueCode(field: Field): string {
-  return field.default_value ? `.defaultTo(${field.default_value})` : ''
+  if (!field.default_value) return ''
+  let value = field.default_value
+  if (value == 'NULL') {
+    value = 'null'
+  }
+  return `.defaultTo(${value})`
 }
 
 export function toKnexNullableCode(field: Field): string {
