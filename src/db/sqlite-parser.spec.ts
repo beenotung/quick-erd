@@ -442,6 +442,7 @@ CREATE TABLE \`thread\` (
   \`id\` integer not null primary key autoincrement
 , \`status\` text check (\`status\` in ('active', 'pending')) not null
 , "visibility" text NOT NULL CHECK ("visibility" IN ('Public', 'Private', 'Unlisted'))
+, \`inclusion_in_main_study\` text null check(\`inclusion_in_main_study\` in ('yes','no'))
 )
 `,
       },
@@ -474,6 +475,16 @@ CREATE TABLE \`thread\` (
             name: 'visibility',
             type: "enum('Public','Private','Unlisted')",
             is_null: false,
+            is_primary_key: false,
+            is_unique: false,
+            is_unsigned: false,
+            default_value: undefined,
+            references: undefined,
+          },
+          {
+            name: 'inclusion_in_main_study',
+            type: "enum('yes','no')",
+            is_null: true,
             is_primary_key: false,
             is_unique: false,
             is_unsigned: false,
