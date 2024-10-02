@@ -304,6 +304,7 @@ function parseAll<T>(fn: () => T): T[] {
 }
 
 export type Table = {
+  is_virtual?: boolean
   name: string
   field_list: Field[]
   position?: { x: number; y: number; color?: string }

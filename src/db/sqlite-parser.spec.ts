@@ -550,4 +550,33 @@ CREATE TABLE \`user\` (
     ]
     expect(parseTableSchema(rows)).to.deep.equals(table_list)
   })
+
+  it('should skip internal tables of fts5 extension', () => {
+    let text = `
+repo_fts,table,"CREATE VIRTUAL TABLE repo_fts using fts5(id,name,desc)"
+repo_fts_data,table,"CREATE TABLE 'repo_fts_data'(id INTEGER PRIMARY KEY, block BLOB)"
+repo_fts_idx,table,"CREATE TABLE 'repo_fts_idx'(segid, term, pgno, PRIMARY KEY(segid, term)) WITHOUT ROWID"
+repo_fts_content,table,"CREATE TABLE 'repo_fts_content'(id INTEGER PRIMARY KEY, c0, c1, c2)"
+repo_fts_docsize,table,"CREATE TABLE 'repo_fts_docsize'(id INTEGER PRIMARY KEY, sz BLOB)"
+repo_fts_config,table,"CREATE TABLE 'repo_fts_config'(k PRIMARY KEY, v) WITHOUT ROWID"
+`
+    let rows = text
+      .trim()
+      .split('\n')
+      .map(line => {
+        let parts = line.split(',')
+        let name = parts[0]
+        let type = parts[1]
+        let sql = JSON.parse(line.slice(name.length + 1 + type.length + 1))
+        return { name, type, sql }
+      })
+    let tables = parseTableSchema(rows)
+    expect(tables).to.have.lengthOf(1)
+    expect(tables[0].name).to.equals('repo_fts')
+    expect(tables[0].is_virtual).to.be.true
+    expect(tables[0].field_list).to.have.lengthOf(3)
+    expect(tables[0].field_list[0].name).to.equals('id')
+    expect(tables[0].field_list[1].name).to.equals('name')
+    expect(tables[0].field_list[2].name).to.equals('desc')
+  })
 })

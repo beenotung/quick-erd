@@ -13,6 +13,29 @@ export function parseTableSchema(rows: SchemaRow[]): Table[] {
   )
   const index_rows: SchemaRow[] = rows.filter(row => row.type === 'index')
 
+  // remove full-text-search extension fts5 internal tables
+  for (let i = 0; i < table_rows.length; i++) {
+    let table = table_rows[i]
+    let sql = table.sql.toLowerCase()
+    if (!(sql.includes('create virtual table') && sql.includes('using fts5'))) {
+      continue
+    }
+    let name = table.name
+    let names = [
+      `${name}_data`,
+      `${name}_idx`,
+      `${name}_content`,
+      `${name}_docsize`,
+      `${name}_config`,
+    ]
+    for (let name of names) {
+      let index = table_rows.findIndex(table => table.name == name)
+      if (index != -1) {
+        table_rows.splice(index, 1)
+      }
+    }
+  }
+
   const table_list: Table[] = []
 
   table_rows.forEach(row => {
@@ -20,7 +43,12 @@ export function parseTableSchema(rows: SchemaRow[]): Table[] {
     if (!field_list) {
       throw new Error('Failed to parse table: ' + row.sql)
     }
-    table_list.push({ name: row.name, field_list: field_list })
+    let is_virtual = row.sql.toLowerCase().includes('create virtual table')
+    let table: Table = { name: row.name, field_list: field_list }
+    if (is_virtual) {
+      table.is_virtual = true
+    }
+    table_list.push(table)
   })
 
   for (const index_row of index_rows) {
