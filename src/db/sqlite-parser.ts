@@ -8,7 +8,9 @@ export type SchemaRow = {
 }
 
 export function parseTableSchema(rows: SchemaRow[]): Table[] {
-  const table_rows: SchemaRow[] = rows.filter(row => row.type === 'table')
+  const table_rows: SchemaRow[] = rows.filter(
+    row => row.type === 'table' && !/^sqlite_stat\d+$/.test(row.name),
+  )
   const index_rows: SchemaRow[] = rows.filter(row => row.type === 'index')
 
   const table_list: Table[] = []
