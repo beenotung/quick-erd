@@ -240,7 +240,7 @@ export function toJavaType(
   const type = field.type
 
   if (
-    type.match(/^varchar/i) ||
+    type.match(/^n?varchar/i) ||
     type.match(/^char/i) ||
     type.match(/^string/i) ||
     type.match(/^text/i)

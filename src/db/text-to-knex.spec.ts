@@ -1,5 +1,9 @@
 import { expect } from 'chai'
-import { textToKnex } from './text-to-knex'
+import { textToKnex as textToKnex_ } from './text-to-knex'
+
+function textToKnex(text: string, db_client = 'mysql') {
+  return textToKnex_(text, db_client)
+}
 
 describe('text-to-knex TestSuit', () => {
   context('varchar', () => {
@@ -28,6 +32,28 @@ user
 username string
 `
       expect(textToKnex(text)).to.contains("table.string('username')")
+    })
+  })
+
+  context('nvarchar', () => {
+    it('should convert nvarchar to string', () => {
+      const text = `
+user
+----
+username nvarchar(32)
+`
+      expect(textToKnex(text)).to.contains("table.string('username', 32)")
+    })
+
+    it('should support string column type as alias to nvarchar when using mssql', () => {
+      const text = `
+user
+----
+username string(32)
+`
+      expect(textToKnex(text, 'mssql')).to.contains(
+        "table.string('username', 32)",
+      )
     })
   })
 

@@ -152,7 +152,9 @@ function toDataType(
   if (type.includes('varchar')) {
     return column.character_maximum_length == -1
       ? 'text'
-      : `varchar(${column.character_maximum_length})`
+      : type.includes('nvarchar')
+        ? `nvarchar(${column.character_maximum_length})`
+        : `varchar(${column.character_maximum_length})`
   }
   if (type.includes('datetime2')) {
     return 'timestamp'

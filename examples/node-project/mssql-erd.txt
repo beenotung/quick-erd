@@ -38,7 +38,7 @@ updated_at datetime
 forum
 -----
 id int PK
-name text
+name nvarchar(64) unique
 created_at datetime
 updated_at datetime
 level int NULL

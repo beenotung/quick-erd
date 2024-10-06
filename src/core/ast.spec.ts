@@ -24,6 +24,20 @@ username varchar(32)
     expect(field_list[1].type).to.equals('varchar(32)')
   })
 
+  it('should parse nvarchar', () => {
+    const text = `
+post
+----
+id pk
+topic nvarchar(50)
+`
+    const table = parseSingleTable(text)
+    const field_list = table.field_list
+    expect(field_list).to.have.lengthOf(2)
+    expect(field_list[1].name).to.equals('topic')
+    expect(field_list[1].type).to.equals('nvarchar(50)')
+  })
+
   it('should parse char', () => {
     const text = `
 user

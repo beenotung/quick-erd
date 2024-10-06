@@ -258,6 +258,7 @@ post
 ----
 id pk
 author_id fk >- user.id
+title nvarchar(50)
 content text
 status enum('active','pending')
 

@@ -1,6 +1,6 @@
 export function toTsType(type: string): string {
   if (
-    type.match(/^varchar/i) ||
+    type.match(/^n?varchar/i) ||
     type.match(/^string/i) ||
     type.match(/^text/i)
   ) {

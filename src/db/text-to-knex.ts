@@ -28,7 +28,7 @@ export function toKnexCreateColumnTypeCode(
     return code
   }
 
-  type = type.replace(/^varchar/i, 'string')
+  type = type.replace(/^n?varchar/i, 'string')
 
   let length = ''
 
