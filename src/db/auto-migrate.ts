@@ -203,6 +203,26 @@ populateEnv(env, { mode: 'halt' })
   writeSrcFile(file, code)
 }
 
+export function setupKnexTsFile(options: { srcDir: string }) {
+  const file = join(options.srcDir, 'knex.ts')
+  if (existsSync(file)) {
+    return
+  }
+  let importDir = options.srcDir
+    .split('/')
+    .map(part => (part == '.' ? part : '..'))
+    .join('/')
+  let code = `
+import Knex from 'knex'
+
+/* eslint-disable @typescript-eslint/no-var-requires */
+let configs = require('${importDir}/knexfile')
+
+export const knex = Knex(configs.development)
+`
+  writeSrcFile(file, code)
+}
+
 export function setupKnexFile(options: { srcDir: string; db_client: string }) {
   const { srcDir, db_client } = options
   const file = 'knexfile.ts'
