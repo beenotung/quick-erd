@@ -48,8 +48,13 @@ export function setupSqlite(options: { dbFile: string; srcDir: string }) {
   addDependencies('better-sqlite3-proxy', '^2.10.0')
   const code = `
 import { toSafeMode, newDB, DBInstance } from 'better-sqlite3-schema'
+import { basename, join } from 'path'
 
-export const dbFile = ${inspect(options.dbFile)}
+function resolveFile(file: string) {
+  return basename(process.cwd()) == 'dist' ? join('..', file) : file
+}
+
+export const dbFile = resolveFile(${inspect(options.dbFile)})
 
 export const db: DBInstance = newDB({
   path: dbFile,
