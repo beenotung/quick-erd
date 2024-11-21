@@ -447,9 +447,13 @@ export function generateAutoMigrate(options: {
 
       // avoid non-effective migration
       // don't distinct int and integer
+      // don't distinct int(10) and integer
       if (
-        (field.type === 'int' && existing_field.type == 'integer') ||
-        (existing_field.type === 'int' && field.type == 'integer')
+        ((field.type === 'int' || field.type.startsWith('int(')) &&
+          existing_field.type == 'integer') ||
+        ((existing_field.type === 'int' ||
+          existing_field.type.startsWith('int(')) &&
+          field.type == 'integer')
       ) {
         field.type = existing_field.type
       }
