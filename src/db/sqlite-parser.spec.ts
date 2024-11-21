@@ -551,6 +551,49 @@ CREATE TABLE \`user\` (
     expect(parseTableSchema(rows)).to.deep.equals(table_list)
   })
 
+  it('should parse enum with "default" in the field name', () => {
+    const rows: SchemaRow[] = [
+      {
+        type: 'table',
+        name: 'setting',
+        sql: /* sql */ `
+CREATE TABLE \`setting\` (
+  \`id\` integer not null primary key autoincrement
+, \`default_status\` text check (\`default_status\` in ('active', 'pending')) not null
+)
+`,
+      },
+    ]
+    const table_list: Table[] = [
+      {
+        name: 'setting',
+        field_list: [
+          {
+            name: 'id',
+            type: 'integer',
+            is_null: false,
+            is_primary_key: true,
+            is_unique: false,
+            is_unsigned: false,
+            default_value: undefined,
+            references: undefined,
+          },
+          {
+            name: 'default_status',
+            type: "enum('active','pending')",
+            is_null: false,
+            is_primary_key: false,
+            is_unique: false,
+            is_unsigned: false,
+            default_value: undefined,
+            references: undefined,
+          },
+        ],
+      },
+    ]
+    expect(parseTableSchema(rows)).to.deep.equals(table_list)
+  })
+
   it('should skip internal tables of fts5 extension', () => {
     let text = `
 repo_fts,table,"CREATE VIRTUAL TABLE repo_fts using fts5(id,name,desc)"

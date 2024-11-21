@@ -158,14 +158,15 @@ export function parseCreateTable(sql: string): Field[] | null {
       lower = rest.toLowerCase()
     }
     let default_value: string | undefined = undefined
-    if (lower.includes('default')) {
-      const start = lower.indexOf('default')
-      const end = start + 'default'.length
+    if (lower.includes('default ')) {
+      const start = lower.indexOf('default ')
+      const end = start + 'default '.length
       const before = rest.substring(0, start)
       const after = rest.substring(end).trim()
       default_value = parseDefaultValue(after)
       if (default_value) {
         rest = before + after.slice(default_value.length)
+        lower = rest.toLowerCase()
       }
     }
     if (lower.match(/check.*in.*/)) {
