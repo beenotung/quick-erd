@@ -191,6 +191,92 @@ describe('auto-migrate TestSuit', () => {
       expect(down_lines).to.contains("integer('score')")
     })
   })
+  context('auto drop table after drop column', () => {
+    let up_lines: string
+    let down_lines: string
+
+    before(() => {
+      const username: Field = {
+        name: 'username',
+        type: 'text',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        default_value: undefined,
+        references: undefined,
+      }
+      const user_id: Field = {
+        name: 'user_id',
+        type: 'integer',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        default_value: undefined,
+        references: { table: 'user', field: 'id', type: '>-' },
+      }
+      const comment: Field = {
+        name: 'comment',
+        type: 'text',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        default_value: undefined,
+        references: undefined,
+      }
+      const existing_table_list: Table[] = [
+        {
+          name: 'user',
+          field_list: [username],
+        },
+        {
+          name: 'content',
+          field_list: [user_id, comment],
+        },
+      ]
+      const parsed_table_list: Table[] = [
+        {
+          name: 'content',
+          field_list: [comment],
+        },
+      ]
+      const result = generateAutoMigrate({
+        existing_table_list,
+        parsed_table_list,
+        detect_rename: false,
+        db_client: 'mock',
+      })
+      up_lines = result.up_lines.join('\n')
+      down_lines = result.down_lines.join('\n')
+    })
+
+    it('should remove extra table in up function', () => {
+      expect(up_lines).to.contains("dropTableIfExists('user')")
+    })
+    it('should restore extra table in down function', () => {
+      expect(down_lines).to.contains("createTable('user',")
+    })
+
+    it('should remove extra column in up function', () => {
+      expect(up_lines).to.contains("dropColumn('user_id')")
+    })
+    it('should restore extra column in down function', () => {
+      expect(down_lines).to.contains("integer('user_id')")
+    })
+
+    it('should remove extra column before drop table in up function', () => {
+      const dropColumnIndex = up_lines.indexOf("dropColumn('user_id')")
+      const dropTableIndex = up_lines.indexOf("dropTableIfExists('user')")
+      expect(dropColumnIndex).to.be.lessThan(dropTableIndex)
+    })
+    it('should restore extra table before add column in down function', () => {
+      const createTableIndex = down_lines.indexOf("createTable('user',")
+      const addColumnIndex = down_lines.indexOf("integer('user_id')")
+      expect(createTableIndex).to.be.lessThan(addColumnIndex)
+    })
+  })
   context('auto rename column', () => {
     let up_lines: string
     let down_lines: string

@@ -363,9 +363,12 @@ export function generateAutoMigrate(options: {
   const up_lines: string[] = []
   const down_lines: string[] = []
 
+  const tailing_up_lines: string[] = []
+  const leading_down_lines: string[] = []
+
   const renamed_tables: string[] = []
 
-  // detect deleted tables
+  // detect renamed / deleted tables
   const [diff_existing_table_names, diff_parsed_table_names] = diffArray(
     options.existing_table_list.map(table => table.name),
     options.parsed_table_list.map(table => table.name),
@@ -410,10 +413,10 @@ export function generateAutoMigrate(options: {
     }
 
     // detected deleted table
-    up_lines.push(
+    tailing_up_lines.push(
       `  await knex.schema.dropTableIfExists('${existing_table_name}')`,
     )
-    down_lines.push(toKnexCreateTableCode(existing_table, db_client))
+    leading_down_lines.unshift(toKnexCreateTableCode(existing_table, db_client))
   }
 
   // detect new / modified tables
@@ -720,6 +723,9 @@ ${mergeLines(table_down_lines)}
     }
     down_lines.unshift(...raw_down_lines)
   })
+
+  up_lines.push(...tailing_up_lines)
+  down_lines.unshift(...leading_down_lines)
 
   return { up_lines, down_lines }
 }
