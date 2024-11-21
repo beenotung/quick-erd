@@ -346,7 +346,7 @@ describe('auto-migrate TestSuit', () => {
 
       expect(down_lines).to.have.lengthOf(1)
       expect(down_lines[0].trim()).to.equals(
-        "await knex.raw('alter table `post` drop column `user_id`')",
+        'await knex.schema.alterTable(`post`, table => table.dropColumn(`user_id`))',
       )
     })
     it('should add unique index with knex', () => {
@@ -379,7 +379,7 @@ describe('auto-migrate TestSuit', () => {
         'await knex.schema.alterTable(`tag`, table => table.dropUnique([`name`]))',
       )
       expect(down_lines[1].trim()).to.equals(
-        "await knex.raw('alter table `tag` drop column `name`')",
+        'await knex.schema.alterTable(`tag`, table => table.dropColumn(`name`))',
       )
     })
     it('should detect table rename', () => {

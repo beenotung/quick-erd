@@ -656,9 +656,7 @@ export function generateAutoMigrate(options: {
           )})`,
         )
         options.raw_drop_lines.unshift(
-          `  await knex.raw(${inspect(
-            `alter table ${table} drop column ${col}`,
-          )})`,
+          `  await knex.schema.alterTable(${table}, table => table.dropColumn(${col}))`,
         )
 
         if (is_unique) {
