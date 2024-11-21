@@ -471,6 +471,22 @@ export function generateAutoMigrate(options: {
         field.is_unsigned = existing_field.is_unsigned
       }
 
+      // avoid non-effective migration
+      // don't distinct varchar and nvarchar in sqlite
+      if (is_sqlite && field.type != existing_field.type) {
+        if (
+          field.type.startsWith('nvarchar') &&
+          existing_field.type.startsWith('varchar')
+        ) {
+          field.type = field.type.slice(1)
+        } else if (
+          field.type.startsWith('varchar') &&
+          existing_field.type.startsWith('nvarchar')
+        ) {
+          existing_field.type = existing_field.type.slice(1)
+        }
+      }
+
       if (
         field.type !== existing_field.type ||
         field.is_unsigned !== existing_field.is_unsigned
