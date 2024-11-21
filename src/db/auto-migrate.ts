@@ -439,8 +439,9 @@ export function generateAutoMigrate(options: {
       // don't distinct datetime and timestamp
       // knex translates 'timestamp' into 'datetime' for sqlite db when running schema query builder
       if (
-        (field.type === 'datetime' && existing_field.type == 'timestamp') ||
-        (existing_field.type === 'datetime' && field.type == 'timestamp')
+        is_sqlite &&
+        ((field.type === 'datetime' && existing_field.type == 'timestamp') ||
+          (existing_field.type === 'datetime' && field.type == 'timestamp'))
       ) {
         field.type = existing_field.type
       }
@@ -449,11 +450,12 @@ export function generateAutoMigrate(options: {
       // don't distinct int and integer
       // don't distinct int(10) and integer
       if (
-        ((field.type === 'int' || field.type.startsWith('int(')) &&
+        is_sqlite &&
+        (((field.type === 'int' || field.type.startsWith('int(')) &&
           existing_field.type == 'integer') ||
-        ((existing_field.type === 'int' ||
-          existing_field.type.startsWith('int(')) &&
-          field.type == 'integer')
+          ((existing_field.type === 'int' ||
+            existing_field.type.startsWith('int(')) &&
+            field.type == 'integer'))
       ) {
         field.type = existing_field.type
       }
@@ -471,7 +473,7 @@ export function generateAutoMigrate(options: {
 
       // avoid non-effective migration
       // don't distinct signed and unsigned in postgres
-      if (is_postgres) {
+      if (is_postgres || is_sqlite) {
         field.is_unsigned = existing_field.is_unsigned
       }
 
