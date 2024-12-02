@@ -255,7 +255,7 @@ create table test (
         is_unique: false,
         is_unsigned: false,
         default_value: undefined,
-        references: { table: 'user', field: 'id', type: '>-' },
+        references: { table: 'user', field: 'id', type: '>0-' },
       },
       {
         name: 'post_id',
@@ -265,7 +265,7 @@ create table test (
         is_unique: false,
         is_unsigned: false,
         default_value: undefined,
-        references: { table: 'post', field: 'id', type: '>-' },
+        references: { table: 'post', field: 'id', type: '>0-' },
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
@@ -285,7 +285,7 @@ create table test (
         is_unique: false,
         is_unsigned: false,
         default_value: undefined,
-        references: { table: 'user', field: 'id', type: '>-' },
+        references: { table: 'user', field: 'id', type: '>0-' },
       },
       {
         name: 'post_id',
@@ -295,7 +295,7 @@ create table test (
         is_unique: false,
         is_unsigned: false,
         default_value: undefined,
-        references: { table: 'post', field: 'id', type: '>-' },
+        references: { table: 'post', field: 'id', type: '>0-' },
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
@@ -317,7 +317,7 @@ CREATE TABLE test(
         is_unique: false,
         is_unsigned: false,
         default_value: undefined,
-        references: { table: 'user', field: 'id', type: '>-' },
+        references: { table: 'user', field: 'id', type: '>0-' },
       },
       {
         name: 'post_id',
@@ -327,7 +327,7 @@ CREATE TABLE test(
         is_unique: false,
         is_unsigned: false,
         default_value: undefined,
-        references: { table: 'post', field: 'id', type: '>-' },
+        references: { table: 'post', field: 'id', type: '>0-' },
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)

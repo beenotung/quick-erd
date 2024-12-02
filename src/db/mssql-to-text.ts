@@ -132,7 +132,7 @@ where con.is_disabled = 0
         is_unique: !pk_row && !!unique_row,
         references: fk_row
           ? {
-              type: '>-',
+              type: '>0-',
               table: fk_row.foreign_table_name,
               field: fk_row.foreign_column_name,
             }

@@ -95,7 +95,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       const [refField] = parseNameInBracket(rest)
       const field = field_dict[fieldName]
       if (!field) return
-      field.references = { table: refTable, field: refField, type: '>-' }
+      field.references = { table: refTable, field: refField, type: '>0-' }
       return
     }
     let is_null = true
@@ -153,7 +153,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       after = rest3.trim()
       const [field, rest4] = parseNameInBracket(after)
       after = rest4.trim()
-      references = { table, field, type: '>-' }
+      references = { table, field, type: '>0-' }
       rest = before + after
       lower = rest.toLowerCase()
     }

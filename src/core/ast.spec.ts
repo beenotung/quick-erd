@@ -162,7 +162,7 @@ domain text
       const text = `
 post
 ----
-user_id fk >- user.id
+user_id fk >0- user.id
 `
       const table = parseSingleTable(text)
       const { field_list } = table
@@ -171,14 +171,14 @@ user_id fk >- user.id
       expect(field_list[0].references).not.undefined
       expect(field_list[0].references!.table).to.equals('user')
       expect(field_list[0].references!.field).to.equals('id')
-      expect(field_list[0].references!.type).to.equals('>-')
+      expect(field_list[0].references!.type).to.equals('>0-')
     })
 
     it('should parse explicit reference without stating primary key', () => {
       const text = `
 post
 ----
-author_id fk >- user
+author_id fk >0- user
 `
       const table = parseSingleTable(text)
       const { field_list } = table
@@ -187,7 +187,7 @@ author_id fk >- user
       expect(field_list[0].references).not.undefined
       expect(field_list[0].references!.table).to.equals('user')
       expect(field_list[0].references!.field).to.equals('id')
-      expect(field_list[0].references!.type).to.equals('>-')
+      expect(field_list[0].references!.type).to.equals('>0-')
     })
 
     it('should parse explicit reference without table name nor field', () => {

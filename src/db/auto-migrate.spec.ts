@@ -214,7 +214,7 @@ describe('auto-migrate TestSuit', () => {
         is_unique: false,
         is_unsigned: false,
         default_value: undefined,
-        references: { table: 'user', field: 'id', type: '>-' },
+        references: { table: 'user', field: 'id', type: '>0-' },
       }
       const comment: Field = {
         name: 'comment',
@@ -353,12 +353,12 @@ describe('auto-migrate TestSuit', () => {
         is_unique: false,
         is_unsigned: false,
         default_value: undefined,
-        references: { table: 'segment', field: 'id', type: '>-' },
+        references: { table: 'segment', field: 'id', type: '>0-' },
       }
       const bus_segment_id: Field = {
         ...segment_id,
         name: 'bus_segment_id',
-        references: { table: 'bus_segment', field: 'id', type: '>-' },
+        references: { table: 'bus_segment', field: 'id', type: '>0-' },
       }
 
       const existing_table_list: Table[] = [
@@ -416,7 +416,7 @@ describe('auto-migrate TestSuit', () => {
         is_unique: false,
         is_unsigned: false,
         default_value: undefined,
-        references: { table: 'user', field: 'id', type: '>-' },
+        references: { table: 'user', field: 'id', type: '>0-' },
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'better-sqlite3',

@@ -1,6 +1,6 @@
 export function normalize(text: string, field: string, table: string): string {
   const textFieldRegex = new RegExp('^' + field + '\\s+text', 'i')
-  const refField = `${table}_id fk >- ${table}.id `
+  const refField = `${table}_id fk >0- ${table}.id `
 
   const lines = text.split('\n')
 

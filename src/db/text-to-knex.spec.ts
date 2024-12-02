@@ -84,7 +84,7 @@ status enum('pending','approved','rejected')
     const text = `
 rating
 ------
-user_id int(10) unsigned FK >- user.id
+user_id int(10) unsigned FK >0- user.id
 level int(11) null
 `
     const code = textToKnex(text)

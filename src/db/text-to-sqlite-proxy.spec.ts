@@ -7,7 +7,7 @@ describe('text-to-sqlite-proxy TestSuit', () => {
 content
 -
 id pk
-user_id fk >- user.id
+user_id fk >0- user.id
 title text
 `
     const code = textToSqliteProxy(text)

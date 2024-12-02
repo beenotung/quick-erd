@@ -144,8 +144,8 @@ knex
 post
 ----
 id
-author_id fk user >- user
-editor_id fk user >- user
+author_id fk user >0- user
+editor_id fk user >0- user
 
 user
 ----

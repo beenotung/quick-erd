@@ -18,7 +18,7 @@ export function parseCreateTable(sql: string): Field[] {
         unique_key_set.add(field.fields)
       } else if (field.is_foreign_key === true) {
         foreign_key_map.set(field.field, {
-          type: '>-',
+          type: '>0-',
           table: field.ref_table,
           field: field.ref_field,
         })
