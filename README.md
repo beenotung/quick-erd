@@ -13,23 +13,11 @@ quick and easy text-based ERD editor with drag and drop visualization + code gen
 
 **Hosted Web UI**: https://quick-erd.surge.sh
 
-**Run locally or self host** (in case the CDN is out of service):
+**Run locally (with access to local erd.txt file):
 
 ```bash
-# step 1: clone the project using git
-git clone https://github.com/beenotung/quick-erd
-## or download and extract the zip file from https://github.com/beenotung/quick-erd/archive/refs/heads/master.zip
-
-# step 2: open a terminal in this project directory
-cd quick-erd
-
-# step 3: install the dependencies
-npm install
-
-# step 4 (MacOS/Linux): build and start the web ui
-npm start
-# step 4 (Windows): build and start the web ui
-node web-ui
+npm i -D quick-erd
+npx erd-ui
 ```
 
 ### npx cli
