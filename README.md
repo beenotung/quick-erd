@@ -13,7 +13,7 @@ quick and easy text-based ERD editor with drag and drop visualization + code gen
 
 **Hosted Web UI**: https://quick-erd.surge.sh
 
-**Run locally** (with access to local erd.txt file):
+**Run locally** (with access to local `erd.txt` file):
 
 ```bash
 npm i -D quick-erd
