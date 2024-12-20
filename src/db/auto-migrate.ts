@@ -137,13 +137,15 @@ export function setupNpmScripts(options: {
   if (options.db_client.includes('sqlite')) {
     const proxyFile = toFile('proxy.ts')
     newScripts['db:plan'] = `auto-migrate ${options.dbFile} < erd.txt`
-    newScripts['db:rename'] = `auto-migrate --rename ${options.dbFile} < erd.txt`
+    newScripts['db:rename'] =
+      `auto-migrate --rename ${options.dbFile} < erd.txt`
     newScripts['db:update'] = `run-s db:migrate db:gen-proxy`
     newScripts['db:gen-proxy'] = `erd-to-proxy < erd.txt > ${proxyFile}`
   } else {
     const typesFile = toFile('types.ts')
     newScripts['db:plan'] = `auto-migrate ${options.db_client} < erd.txt`
-    newScripts['db:rename'] = `auto-migrate --rename ${options.db_client} < erd.txt`
+    newScripts['db:rename'] =
+      `auto-migrate --rename ${options.db_client} < erd.txt`
     newScripts['db:update'] = `run-s db:migrate db:gen-types`
     newScripts['db:gen-types'] = `erd-to-types < erd.txt > ${typesFile}`
   }
