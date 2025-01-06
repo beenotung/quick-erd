@@ -97,10 +97,14 @@ export function toKnexCreateColumnCode(
   field: Field,
   db_client: string,
 ): string {
+  const ref = field.references
   let code = `
       table`
   if (field.is_primary_key) {
     code += `.increments('${field.name}')`
+    if (ref) {
+      code += `.references('${ref.table}.${ref.field}')`
+    }
     return code
   }
 
@@ -112,7 +116,6 @@ export function toKnexCreateColumnCode(
     code += `.unique()`
   }
 
-  const ref = field.references
   if (ref) {
     code += `.references('${ref.table}.${ref.field}')`
   }
