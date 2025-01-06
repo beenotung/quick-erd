@@ -1,6 +1,6 @@
 {
   "name": "quick-erd",
-  "version": "4.26.5",
+  "version": "4.26.6",
   "type": "commonjs",
   "sideEffects": false,
   "description": "quick and easy text-based ERD + code generator for migration, query, typescript types and orm entity",
