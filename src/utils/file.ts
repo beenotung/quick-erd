@@ -72,6 +72,8 @@ export function addGitIgnore(file: string, patterns: string[]) {
     const hasPattern = lines.some(
       line =>
         line == pattern ||
+        line == pattern + '/' ||
+        line + '/' == pattern ||
         line == pattern + '*' ||
         line == '*' + pattern + '*' ||
         line == '*' + extname(pattern) ||
