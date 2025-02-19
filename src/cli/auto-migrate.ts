@@ -12,6 +12,7 @@ import {
   setupGitIgnore,
   setupTypescript,
   setupKnexTsFile,
+  setupPnpm,
 } from '../db/auto-migrate'
 import { loadKnex, loadSqliteKnex } from '../db/knex'
 import { env } from '../db/env'
@@ -59,6 +60,7 @@ async function main() {
   }
   setupNpmScripts({ srcDir, db_client, dbFile })
   setupTypescript()
+  setupPnpm()
   setupGitIgnore({ dbFile })
   setupKnexFile({ srcDir, db_client })
   setupKnexTsFile({ srcDir })

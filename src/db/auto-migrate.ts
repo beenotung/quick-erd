@@ -1,5 +1,5 @@
 import { closest } from 'fastest-levenshtein'
-import { existsSync, mkdirSync, readdirSync } from 'fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs'
 import { Knex as KnexType } from 'knex'
 import { dirname, join } from 'path'
 import { inspect } from 'util'
@@ -8,7 +8,9 @@ import {
   addDependencies,
   addGitIgnore,
   addNpmScripts,
+  PackageJSON,
   readNpmScripts,
+  readPackageJSON,
   writeSrcFile,
 } from '../utils/file'
 import { scanMysqlTableSchema } from './mysql-to-text'
@@ -72,6 +74,26 @@ export function setupTypescript() {
   addDependencies('ts-node', '^10.9.2', 'dev')
   addDependencies('@types/node', '^22.9.1', 'dev')
   setupTsConfigFile()
+}
+
+export function setupPnpm() {
+  let file = 'package.json'
+  let text = readFileSync(file).toString()
+  let pkg: PackageJSON = JSON.parse(text)
+  pkg.pnpm ||= {}
+  pkg.pnpm.onlyBuiltDependencies ||= []
+  let deps = ['better-sqlite3', 'esbuild']
+  let changed = false
+  for (let dep of deps) {
+    if (text.includes(dep) && !pkg.pnpm.onlyBuiltDependencies.includes(dep)) {
+      pkg.pnpm.onlyBuiltDependencies.push(dep)
+      changed = true
+    }
+  }
+  if (changed) {
+    text = JSON.stringify(pkg, null, 2)
+    writeSrcFile(file, text)
+  }
 }
 
 function setupTsConfigFile() {
