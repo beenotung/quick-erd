@@ -304,6 +304,16 @@ Warning: Comments are not preserved in the current version. If you want to resto
 
 ## Todo
 
+- to support named enum
+
+  - currently it only supports inline enum in a table field
+  - but postgres default enum as a global type
+
+- to support prisma schema
+
+  - generate it with relations
+  - read from it
+
 - to support composite primary keys
 - to support composite unique keys
 
