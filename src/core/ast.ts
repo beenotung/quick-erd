@@ -21,6 +21,7 @@ export function parse(input: string): ParseResult {
 
 export type ParseResult = {
   table_list: Table[]
+  enum_list?: Enum[] // TODO
   zoom?: number
   view?: Position
   textBgColor?: string
@@ -301,6 +302,11 @@ function parseAll<T>(fn: () => T): T[] {
       return result_list
     }
   }
+}
+
+export type Enum = {
+  name: string
+  value_list: string[]
 }
 
 export type Table = {
