@@ -73,14 +73,14 @@
     "fastest-levenshtein": "^1.0.16"
   },
   "optionalDependencies": {
-    "@types/better-sqlite3": "^7.6.12",
-    "better-sqlite3": "^11.8.1",
-    "dotenv": "^16.4.7",
+    "@types/better-sqlite3": "^7.6.13",
+    "better-sqlite3": "^11.9.1",
+    "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "knex": "^3.1.0",
     "listening-on": "^2.0.9",
     "mysql": "^2.18.1",
-    "pg": "^8.13.3",
+    "pg": "^8.14.1",
     "tedious": "^18.6.1"
   },
   "peerDependencies": {
@@ -90,14 +90,14 @@
     "listening-on": "^2.0.9"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.9",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/chai": "^4.3.20",
     "@types/express": "^4.17.21",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^22.13.4",
-    "better-sqlite3": "^10.0.0",
+    "@types/node": "^22.14.1",
+    "better-sqlite3": "^11.9.1",
     "chai": "^4.5.0",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.25.2",
     "format-json-cli": "^1.0.2",
     "knex": "^2 || ^3",
     "mocha": "^10.8.2",
@@ -105,15 +105,15 @@
     "nyc": "^17.1.0",
     "oklab.ts": "^2.2.7",
     "open-cli": "^8.0.0",
-    "prettier": "^3.5.1",
+    "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
-    "sass": "^1.85.0",
+    "sass": "^1.86.3",
     "serve-lite": "^1.2.3",
     "surge": "^0.24.6",
-    "ts-mocha": "^10.0.0",
+    "ts-mocha": "^10.1.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

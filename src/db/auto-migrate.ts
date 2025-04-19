@@ -43,9 +43,9 @@ export function setupSqlite(options: { dbFile: string; srcDir: string }) {
   if (existsSync(dbTsFile)) {
     return
   }
-  addDependencies('@types/better-sqlite3', '^7.6.12', 'dev')
+  addDependencies('@types/better-sqlite3', '^7.6.13', 'dev')
   addDependencies('@types/integer', '^4.0.3', 'dev')
-  addDependencies('better-sqlite3', '^11.5.0')
+  addDependencies('better-sqlite3', '^11.9.1')
   addDependencies('better-sqlite3-schema', '^3.1.7')
   addDependencies('better-sqlite3-proxy', '^2.10.1')
   const code = `
@@ -70,9 +70,9 @@ toSafeMode(db)
 }
 
 export function setupTypescript() {
-  addDependencies('typescript', '^5.6.3', 'dev')
+  addDependencies('typescript', '^5.8.3', 'dev')
   addDependencies('ts-node', '^10.9.2', 'dev')
-  addDependencies('@types/node', '^22.9.1', 'dev')
+  addDependencies('@types/node', '^22.14.1', 'dev')
   setupTsConfigFile()
 }
 
@@ -208,7 +208,7 @@ export function setupEnvFile(options: { srcDir: string; db_client: string }) {
   if (existsSync(file)) {
     return
   }
-  addDependencies('dotenv', '^16.4.4')
+  addDependencies('dotenv', '^16.5.0')
   addDependencies('populate-env', '^2.3.1')
   const code = `
 import { config } from 'dotenv'
