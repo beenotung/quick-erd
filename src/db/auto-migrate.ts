@@ -222,6 +222,7 @@ export const env = {
   DB_NAME: '',
   DB_USERNAME: '',
   DB_PASSWORD: '',
+  DB_SSL: 'lax',
 }
 
 populateEnv(env, { mode: 'halt' })
@@ -249,8 +250,12 @@ export const knex = Knex(configs.development)
   writeSrcFile(file, code)
 }
 
-export function setupKnexFile(options: { srcDir: string; db_client: string }) {
-  const { srcDir, db_client } = options
+export function setupKnexFile(options: {
+  srcDir: string
+  db_client: string
+  ssl: 'required' | 'lax' | 'false'
+}) {
+  const { srcDir, db_client, ssl } = options
   const file = 'knexfile.ts'
   if (existsSync(file)) {
     return
@@ -293,6 +298,7 @@ const config: { [key: string]: Knex.Config } = {
       host: env.DB_HOST,
       port: env.DB_PORT,
       multipleStatements: true,
+      ssl: ${ssl == 'required' ? '{ rejectUnauthorized: true }' : ssl == 'lax' ? '{ rejectUnauthorized: false }' : 'false'},
     },
   }
 }

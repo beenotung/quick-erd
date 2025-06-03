@@ -10,6 +10,7 @@ export const env = {
   DB_PASSWORD: '',
   DB_PORT: 5432,
   DB_HOST: 'localhost',
+  DB_SSL: 'lax',
 }
 
 populateEnv(env, { mode: 'halt' })

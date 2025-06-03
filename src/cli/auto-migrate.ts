@@ -14,7 +14,7 @@ import {
   setupKnexTsFile,
   setupPnpm,
 } from '../db/auto-migrate'
-import { loadKnex, loadSqliteKnex } from '../db/knex'
+import { loadKnex, loadSqliteKnex, SSLType } from '../db/knex'
 import { env } from '../db/env'
 
 /* eslint-disable no-console */
@@ -62,7 +62,7 @@ async function main() {
   setupTypescript()
   setupPnpm()
   setupGitIgnore({ dbFile })
-  setupKnexFile({ srcDir, db_client })
+  setupKnexFile({ srcDir, db_client, ssl: (env.DB_SSL || 'lax') as SSLType })
   setupKnexTsFile({ srcDir })
   const knex = dbFile ? loadSqliteKnex(dbFile) : loadKnex(db_client)
   await setupKnexMigration({

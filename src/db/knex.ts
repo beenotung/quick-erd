@@ -12,10 +12,13 @@ export function loadSqliteKnex(dbFile: string) {
   return knex
 }
 
+export type SSLType = 'required' | 'lax' | 'false'
+
 export function loadKnex(client = env.DB_CLIENT || 'pg') {
   const database = env.DB_NAME || env.POSTGRES_DB
   const user = env.DB_USERNAME || env.DB_USER || env.POSTGRES_USER
   const password = env.DB_PASSWORD || env.DB_PASS || env.POSTGRES_PASSWORD
+  const ssl = (env.DB_SSL || 'lax') as SSLType
 
   if (!database && !user) {
     console.error('Missing database credential in env.')
@@ -29,6 +32,7 @@ DB_PORT=(optional)
 DB_NAME=(or POSTGRES_DB)
 DB_USERNAME=(or DB_USER or POSTGRES_USER)
 DB_PASSWORD=(or DB_PASS or POSTGRES_PASSWORD)
+DB_SSL=(optional, 'required' or 'lax' or 'false', default is 'lax')
 `)
     process.exit(1)
   }
@@ -43,7 +47,12 @@ DB_PASSWORD=(or DB_PASS or POSTGRES_PASSWORD)
       user,
       password,
       multipleStatements: true,
-      ssl: { rejectUnauthorized: false },
+      ssl:
+        ssl == 'required'
+          ? { rejectUnauthorized: true }
+          : ssl == 'lax'
+            ? { rejectUnauthorized: false }
+            : false,
     },
     pool: {
       min: 2,
