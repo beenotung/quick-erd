@@ -222,7 +222,7 @@ export const env = {
   DB_NAME: '',
   DB_USERNAME: '',
   DB_PASSWORD: '',
-  DB_SSL: 'lax',
+  DB_SSL: 'lax', // 'required' or 'lax' or 'false'
 }
 
 populateEnv(env, { mode: 'halt' })
