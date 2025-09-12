@@ -1,5 +1,6 @@
 import express from 'express'
-import { erd_file, port, public_dir } from './config'
+import { erd_file, port } from './config'
+import * as config from './config'
 import { print } from 'listening-on'
 import { resolve } from 'path'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
@@ -47,7 +48,7 @@ function timestamp() {
   return d2(date.getHours()) + ':' + d2(date.getMinutes())
 }
 
-app.use(express.static(public_dir))
+app.use(express.static(config.public_dir))
 
 app.listen(port, () => {
   print(port)
