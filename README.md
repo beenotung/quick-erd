@@ -17,8 +17,10 @@ quick and easy text-based ERD editor with drag and drop visualization + code gen
 
 ```bash
 npm i -D quick-erd
-npx erd-ui
+npx erd-ui --open
 ```
+
+The `--open` flag is optional, it will automatically open the web UI in default browser.
 
 ### npx cli
 
@@ -170,8 +172,8 @@ rm erd.tmp
 
 **To open web ui with disk file access**:
 
-- `npx erd-ui`
-- `npx erd-ui -p 8520 erd.txt`
+- `npx erd-ui --open`
+- `npx erd-ui -p 8520 erd.txt --no-open`
 
 #### Import from Existing Schema
 
