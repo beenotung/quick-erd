@@ -1,6 +1,7 @@
 import express from 'express'
 import { erd_file, port } from './config'
 import * as config from './config'
+import open from 'open'
 import { print } from 'listening-on'
 import { resolve } from 'path'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
@@ -52,4 +53,7 @@ app.use(express.static(config.public_dir))
 
 app.listen(port, () => {
   print(port)
+  if (config.open_web_ui) {
+    open(`http://localhost:${port}`)
+  }
 })

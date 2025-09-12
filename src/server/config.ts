@@ -58,3 +58,24 @@ export let erd_file = ''
     process.exit(1)
   }
 }
+
+export let open_web_ui: boolean | null = null
+{
+  for (let i = 2; i < process.argv.length; i++) {
+    const arg = process.argv[i]
+    if (arg === '--open') {
+      open_web_ui = true
+      break
+    }
+    if (arg === '--no-open') {
+      open_web_ui = false
+      break
+    }
+  }
+  if (open_web_ui == null) {
+    console.info(
+      'hint: You can specify --open to open the web ui automatically.',
+    )
+    console.info('hint: You can specify --no-open to turn off this message.')
+  }
+}
