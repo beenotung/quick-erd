@@ -52,7 +52,9 @@ export let erd_file = ''
 
   if (!erd_file) {
     console.error('Missing erd.txt file')
-    console.error('Please specify it in the argument.')
+    console.error(
+      'Specify it in the argument - it will auto-create an empty file.',
+    )
     process.exit(1)
   }
 }
