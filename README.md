@@ -268,7 +268,6 @@ The relation fields are also included based on the foreign key references.
 **Additional arguments**:
 
 - export format:
-
   - `--factory`
   - `--singleton` (default)
 
