@@ -405,4 +405,96 @@ updated_at datetime default now()
     expect(field_list[4].type).to.equals('datetime')
     expect(field_list[4].default_value).to.equals('now()')
   })
+
+  describe('comment parsing', () => {
+    it('should strip # comments', () => {
+      const text = `
+user # table
+----
+id integer PK
+username text
+`
+      const table = parseSingleTable(text)
+      const field_list = table.field_list
+      expect(field_list).to.have.lengthOf(2)
+      expect(field_list[0].name).to.equals('id')
+      expect(field_list[0].is_primary_key).to.be.true
+      expect(field_list[1].name).to.equals('username')
+      expect(field_list[1].type).to.equals('text')
+    })
+
+    it('should strip // comments', () => {
+      const text = `
+user // table
+----
+id integer PK
+username text
+`
+      const table = parseSingleTable(text)
+      const field_list = table.field_list
+      expect(field_list).to.have.lengthOf(2)
+      expect(field_list[0].name).to.equals('id')
+      expect(field_list[0].is_primary_key).to.be.true
+      expect(field_list[1].name).to.equals('username')
+      expect(field_list[1].type).to.equals('text')
+    })
+
+    it('should strip -- comments', () => {
+      const text = `
+user -- table
+-------
+id integer PK
+username text
+`
+      const table = parseSingleTable(text)
+      const field_list = table.field_list
+      expect(field_list).to.have.lengthOf(2)
+      expect(field_list[0].name).to.equals('id')
+      expect(field_list[0].is_primary_key).to.be.true
+      expect(field_list[1].name).to.equals('username')
+      expect(field_list[1].type).to.equals('text')
+    })
+
+    it('should handle lines with only comments', () => {
+      const text = `
+user
+----
+# this is a comment line
+id integer PK
+// another comment line
+-- yet another comment
+username text
+`
+      const table = parseSingleTable(text)
+      const field_list = table.field_list
+      expect(field_list).to.have.lengthOf(2)
+      expect(field_list[0].name).to.equals('id')
+      expect(field_list[0].is_primary_key).to.be.true
+      expect(field_list[1].name).to.equals('username')
+      expect(field_list[1].type).to.equals('text')
+    })
+
+    it('should handle comments with field modifiers', () => {
+      const text = `
+user
+----
+id integer PK
+create_time datetime # timestamp
+update_time datetime // timestamp
+delete_time datetime -- timestamp
+`
+      const table = parseSingleTable(text)
+      const field_list = table.field_list
+      expect(field_list).to.have.lengthOf(4)
+      expect(field_list[0].name).to.equals('id')
+      expect(field_list[0].type).to.equals('integer')
+      expect(field_list[0].is_primary_key).to.be.true
+      expect(field_list[1].name).to.equals('create_time')
+      expect(field_list[1].type).to.equals('datetime')
+      expect(field_list[2].name).to.equals('update_time')
+      expect(field_list[2].type).to.equals('datetime')
+      expect(field_list[3].name).to.equals('delete_time')
+      expect(field_list[3].type).to.equals('datetime')
+    })
+  })
 })
