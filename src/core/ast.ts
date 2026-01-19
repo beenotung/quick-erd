@@ -44,15 +44,7 @@ export class Parser implements ParseResult {
   tableTextColor?: string
   parse(input: string) {
     input.split('\n').forEach(line => {
-      line = line
-        .trim()
-        .replace(/#.*/, '')
-        .replace(/\/\/.*/, '')
-        .trim()
-      // if line is only dashes, keep it as delimiter after table name, otherwise strip it as comment
-      if (!line.match(/^-+$/)) {
-        line = line.replace(/--.*/, '').trim()
-      }
+      line = stripComments(line)
       if (!line) return
       this.line_list.push(line)
     })
@@ -305,6 +297,38 @@ function parseAll<T>(fn: () => T): T[] {
       return result_list
     }
   }
+}
+
+function stripComments(line: string): string {
+  // check for enum with comment symbols
+  let match = line.match(/(enum\(.*?\))/i)
+  if (match) {
+    let parts = line.split(match[0])
+    let before = parts[0]
+    let strippedBefore = stripComments(before)
+    if (strippedBefore !== before.trim()) {
+      return strippedBefore
+    }
+    let enumStr = match[0]
+    let after = parts.slice(1).join(enumStr)
+    return before + enumStr + stripComments(after)
+  }
+
+  line = line
+    .trim()
+    // strip `#` comments
+    .replace(/#.*/, '')
+    // strip `//` comments
+    .replace(/\/\/.*/, '')
+    .trim()
+
+  // if line is only dashes, keep it as delimiter after table name, otherwise strip it as comment
+  if (!line.match(/^-+$/)) {
+    // strip `--` comments
+    line = line.replace(/--.*/, '').trim()
+  }
+
+  return line
 }
 
 export type Table = {

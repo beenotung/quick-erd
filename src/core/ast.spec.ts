@@ -309,6 +309,54 @@ name text
       expect(field_list[2].name).to.equals('name')
       expect(field_list[2].type).to.equals('text')
     })
+
+    it('should preserve special symbols in enum values (hyphens, hash)', () => {
+      const text = `
+status
+------
+id
+state enum('pre-approved','pre--approved','pending#review','#processed') # comment
+# this line should be stripped even it has enum(xxx) inside comments
+name text
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+      expect(field_list).to.have.lengthOf(3)
+
+      expect(field_list[0].name).to.equals('id')
+
+      expect(field_list[1].name).to.equals('state')
+      expect(field_list[1].type).to.equals(
+        "enum('pre-approved','pre--approved','pending#review','#processed')",
+      )
+
+      expect(field_list[2].name).to.equals('name')
+      expect(field_list[2].type).to.equals('text')
+    })
+
+    it('should preserve special symbols in enum values without quotes', () => {
+      const text = `
+status
+------
+id
+state enum(pre-approved,pre--approved,pending#review,#processed) -- comment
+-- this line should be stripped even it has enum(xxx) inside comments
+name text
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+      expect(field_list).to.have.lengthOf(3)
+
+      expect(field_list[0].name).to.equals('id')
+
+      expect(field_list[1].name).to.equals('state')
+      expect(field_list[1].type).to.equals(
+        "enum('pre-approved','pre--approved','pending#review','#processed')",
+      )
+
+      expect(field_list[2].name).to.equals('name')
+      expect(field_list[2].type).to.equals('text')
+    })
   })
 
   describe('parsing position data', () => {
