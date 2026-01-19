@@ -49,6 +49,10 @@ export class Parser implements ParseResult {
         .replace(/#.*/, '')
         .replace(/\/\/.*/, '')
         .trim()
+      // if line is only dashes, keep it as delimiter after table name, otherwise strip it as comment
+      if (!line.match(/^-+$/)) {
+        line = line.replace(/--.*/, '').trim()
+      }
       if (!line) return
       this.line_list.push(line)
     })
