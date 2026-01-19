@@ -270,8 +270,8 @@ id pk
 # "{table}.id" with ">0-" relationship
 post_id fk # e.g. post_id references to post.id
 commenter_id fk >0- user.id # when the column name is not "{table}_id", the referenced table should be specified explicitly
-reply_id null fk # it's fine to include other modifiers in the middle, e.g. null
-content text
+reply_id null fk // it's fine to include other modifiers in the middle, e.g. null
+content text -- all comment styles (#, //, --) are supported
 `.trim()
   parseErdInput()
 }
