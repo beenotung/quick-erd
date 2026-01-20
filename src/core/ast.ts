@@ -256,14 +256,19 @@ export class Parser implements ParseResult {
   }
   parseRelationType(): RelationType {
     let line = this.peekLine()
-    const match = line.match(/.*? /)
-    if (!match) {
+    for (const type of RelationTypes) {
+      if (line.startsWith(type)) {
+        line = line.slice(type.length).trim()
+        this.line_list[0] = line
+        return type
+      }
+    }
+    line = line.trim()
+    let match = line.match(/^\w+/)
+    if (line && !match) {
       throw new ParseRelationTypeError(line)
     }
-    const type = match[0].trim() as RelationType
-    line = line.replace(match[0], '').trim()
-    this.line_list[0] = line
-    return type
+    return defaultRelationType
   }
   parseForeignKeyReference(field: Field): ForeignKeyReference {
     let ref_field_name = field.name
@@ -385,30 +390,38 @@ export type ForeignKeyReference = {
 export type Relation = {
   from: { table: string; field: string }
   to: { table: string; field: string }
-  /*
-  -     - one TO one
-  -<    - one TO many
-  >-    - many TO one
-  >-<   - many TO many
-  -0    - one TO zero or one
-  0-    - zero or one TO one
-  0-0   - zero or one TO zero or one
-  -0<   - one TO zero or many
-  >0-   - zero or many TO one
+  /**
+  | Relation Type | Description |
+  | ---- | ----------- |
+  | -     | one TO one |
+  | -<    | one TO many |
+  | >-    | many TO one |
+  | >-<   | many TO many |
+  | -0    | one TO zero or one |
+  | 0-    | zero or one TO one |
+  | 0-0   | zero or one TO zero or one |
+  | -0<   | one TO zero or many |
+  | >0-   | zero or many TO one |
 */
   type: RelationType
 }
 
-export type RelationType =
-  | '|'
-  | '-<'
-  | '>-'
-  | '>-<'
-  | '-0'
-  | '0-'
-  | '0-0'
-  | '-0<'
-  | '>0-'
+export type RelationType = (typeof RelationTypes)[number]
+
+export const RelationTypes = [
+  // 3 chars tokens first
+  '>0-' as const,
+  '-0<' as const,
+  '>-<' as const,
+  '0-0' as const,
+  // then 2 chars tokens
+  '>-' as const,
+  '-<' as const,
+  '0-' as const,
+  '-0' as const,
+  // finally 1 char tokens
+  '-' as const,
+]
 
 const defaultFieldType = 'integer'
 

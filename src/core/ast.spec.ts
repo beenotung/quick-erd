@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { parse } from './ast'
+import { parse, ParseRelationTypeError } from './ast'
 import { expectObjectKeys } from '../../test/utils'
 
 describe('ast TestSuit', () => {
@@ -158,6 +158,51 @@ domain text
   })
 
   describe('foreign key reference', () => {
+    describe('relation type', () => {
+      function test(type: string, name: string) {
+        it(`should parse '${type}' for ${name} relation`, () => {
+          const text = `
+post
+----
+user_id fk ${type} user.id
+`
+          const table = parseSingleTable(text)
+          const { field_list } = table
+          expect(field_list).to.have.lengthOf(1)
+          expect(field_list[0].name).to.equals('user_id')
+          expect(field_list[0].references).not.undefined
+          expect(field_list[0].references!.type).to.equals(type)
+        })
+      }
+
+      test('-', 'one TO one')
+      test('-<', 'one TO many')
+      test('>-', 'many TO one')
+      test('>-<', 'many TO many')
+      test('-0', 'one TO zero or one')
+      test('0-', 'zero or one TO one')
+      test('0-0', 'zero or one TO zero or one')
+      test('-0<', 'one TO zero or many')
+      test('>0-', 'zero or many TO one')
+
+      function testInvalid(type: string) {
+        it(`should reject invalid relation type '${type}'`, () => {
+          const text = `
+post
+----
+user_id fk ${type} user.id
+`
+          const table = parseSingleTable(text)
+          expect(table.field_list).to.be.empty
+        })
+      }
+
+      testInvalid('>')
+      testInvalid('<')
+      testInvalid('0')
+      testInvalid('|')
+    })
+
     it('should parse explicit reference with table and field', () => {
       const text = `
 post
@@ -166,6 +211,8 @@ user_id fk >0- user.id
 `
       const table = parseSingleTable(text)
       const { field_list } = table
+
+      expect(field_list).to.have.lengthOf(1)
 
       expect(field_list[0].name).to.equals('user_id')
       expect(field_list[0].references).not.undefined
@@ -188,6 +235,24 @@ author_id fk >0- user
       expect(field_list[0].references!.table).to.equals('user')
       expect(field_list[0].references!.field).to.equals('id')
       expect(field_list[0].references!.type).to.equals('>0-')
+    })
+
+    it('should parse explicit reference without relation type', () => {
+      const text = `
+post
+----
+author_id fk user null
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+
+      expect(field_list).to.have.lengthOf(1)
+
+      expect(field_list[0].name).to.equals('author_id')
+      expect(field_list[0].references).not.undefined
+      expect(field_list[0].references!.table).to.equals('user')
+      expect(field_list[0].references!.field).to.equals('id')
+      expect(field_list[0].references!.type).to.equals('>0-') // default relation type
     })
 
     it('should parse explicit reference without table name nor field', () => {
