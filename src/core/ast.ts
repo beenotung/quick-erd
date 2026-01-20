@@ -121,61 +121,77 @@ export class Parser implements ParseResult {
     return { name, field_list }
   }
   parseField(): Field {
-    const field_name = this.parseName()
-    let type = ''
-    let is_null = false
-    let is_unique = false
-    let is_primary_key = false
-    let is_unsigned = false
-    let default_value: string | undefined
-    let references: ForeignKeyReference | undefined
+    const field: Field = {
+      name: this.parseName(),
+      type: '',
+      is_null: false,
+      is_unique: false,
+      is_primary_key: false,
+      is_unsigned: false,
+      default_value: undefined,
+      references: undefined,
+    }
     for (;;) {
-      const name = this.parseType()
-      if (!name) break
-      switch (name.toUpperCase()) {
-        case 'NULL':
-          is_null = true
-          continue
-        case 'UNIQUE':
-          is_unique = true
-          continue
-        case 'UNSIGNED':
-          is_unsigned = true
-          continue
+      this.parseFieldModifiers(field)
+      const token = this.parseType()
+      if (!token) break
+      switch (token.toUpperCase()) {
         case 'DEFAULT':
           // TODO parse default value
-          default_value = this.parseDefaultValue()
-          continue
-        case 'PK':
-          is_primary_key = true
+          field.default_value = this.parseDefaultValue(field)
           continue
         case 'FK':
-          references = this.parseForeignKeyReference(field_name)
+          field.references = this.parseForeignKeyReference(field)
           continue
         default:
-          if (type) {
+          if (field.type) {
             console.debug('unexpected token:', {
-              field_name,
-              type,
-              token: name,
+              field_name: field.name,
+              type: field.type,
+              token: token,
             })
             continue
           }
-          type = name
+          field.type = token
       }
     }
-    type ||= defaultFieldType
+    field.type ||= defaultFieldType
     this.skipLine()
-    return {
-      name: field_name,
-      type,
-      is_null,
-      is_unique,
-      is_primary_key,
-      is_unsigned,
-      default_value,
-      references,
+    return field
+  }
+  parseFieldModifiers(field: Field) {
+    let line = this.peekLine()
+    loop: for (;;) {
+      let match = line.match(/^not null\s*/i)
+      if (match) {
+        field.is_null = false
+        line = line.slice(match[0].length)
+        continue
+      }
+      match = line.match(/^\w+/)
+      if (!match) break
+      const token = match[0]
+      switch (token.toUpperCase()) {
+        case 'NULL':
+          field.is_null = true
+          break
+        case 'UNIQUE':
+          field.is_unique = true
+          break
+        case 'UNSIGNED':
+          field.is_unsigned = true
+          break
+        case 'PK':
+          field.is_primary_key = true
+          break
+        default:
+          // no single token modifier
+          break loop
+      }
+      line = line.replace(token, '').trim()
+      break
     }
+    this.line_list[0] = line
   }
   skipLine(line = '') {
     if (this.line_list[0]?.startsWith(line)) {
@@ -218,7 +234,8 @@ export class Parser implements ParseResult {
     }
     return name
   }
-  parseDefaultValue(): string {
+  parseDefaultValue(field: Field): string {
+    this.parseFieldModifiers(field)
     let line = this.peekLine()
     let end: number
     if (line[0] === '"') {
@@ -239,7 +256,7 @@ export class Parser implements ParseResult {
   }
   parseRelationType(): RelationType {
     let line = this.peekLine()
-    const match = line.match(/.* /)
+    const match = line.match(/.*? /)
     if (!match) {
       throw new ParseRelationTypeError(line)
     }
@@ -248,7 +265,10 @@ export class Parser implements ParseResult {
     this.line_list[0] = line
     return type
   }
-  parseForeignKeyReference(ref_field_name: string): ForeignKeyReference {
+  parseForeignKeyReference(field: Field): ForeignKeyReference {
+    let ref_field_name = field.name
+
+    this.parseFieldModifiers(field)
     if (ref_field_name.endsWith('_id') && this.peekLine() === '') {
       return {
         table: ref_field_name.replace(/_id$/, ''),
@@ -256,19 +276,27 @@ export class Parser implements ParseResult {
         type: defaultRelationType,
       }
     }
+
+    this.parseFieldModifiers(field)
     const type = this.parseRelationType()
+
+    this.parseFieldModifiers(field)
     const table = this.parseName()
+
+    this.parseFieldModifiers(field)
     const line = this.peekLine()
-    let field: string
+
+    let field_name: string
     if (line == '') {
-      field = 'id'
+      field_name = 'id'
     } else if (line.startsWith('.')) {
       this.line_list[0] = line.slice(1)
-      field = this.parseName()
+      field_name = this.parseName()
     } else {
       throw new ParseForeignKeyReferenceError(line)
     }
-    return { type, table, field }
+
+    return { type, table, field: field_name }
   }
 }
 class NonEmptyLineError extends Error {}

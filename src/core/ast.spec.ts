@@ -205,6 +205,82 @@ user_id fk
       expect(field_list[0].references!.field).to.equals('id')
       expect(field_list[0].references!.type).to.equals('>0-')
     })
+
+    it('should parse null modifier before fk keyword', () => {
+      const text = `
+reply
+-----
+id pk
+reply_id null fk
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+
+      expect(field_list[1].name).to.equals('reply_id')
+      expect(field_list[1].is_null).to.be.true
+      expect(field_list[1].references).not.to.be.undefined
+      expect(field_list[1].references!.table).to.equals('reply')
+      expect(field_list[1].references!.field).to.equals('id')
+    })
+
+    it('should parse null modifier after fk keyword', () => {
+      const text = `
+reply
+-----
+id pk
+reply_id fk null
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+
+      expect(field_list).to.have.lengthOf(2)
+      expect(field_list[0].name).to.equals('id')
+      expect(field_list[0].is_primary_key).to.be.true
+
+      expect(field_list[1].name).to.equals('reply_id')
+      expect(field_list[1].is_null).to.be.true
+      expect(field_list[1].references).not.to.be.undefined
+      expect(field_list[1].references!.table).to.equals('reply')
+      expect(field_list[1].references!.field).to.equals('id')
+    })
+
+    it('should parse null modifier with fk and explicit reference', () => {
+      const text = `
+reply
+-----
+id pk
+user_id null fk >0- user.id
+post_id fk null >0- post.id
+reply_id fk >0- reply.id null
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+
+      expect(field_list).to.have.lengthOf(4)
+
+      expect(field_list[0].name).to.equals('id')
+
+      expect(field_list[1].name).to.equals('user_id')
+      expect(field_list[1].is_null).to.be.true
+      expect(field_list[1].references).not.to.be.undefined
+      expect(field_list[1].references!.type).to.equals('>0-')
+      expect(field_list[1].references!.table).to.equals('user')
+      expect(field_list[1].references!.field).to.equals('id')
+
+      expect(field_list[2].name).to.equals('post_id')
+      expect(field_list[2].is_null).to.be.true
+      expect(field_list[2].references).not.to.be.undefined
+      expect(field_list[2].references!.type).to.equals('>0-')
+      expect(field_list[2].references!.table).to.equals('post')
+      expect(field_list[2].references!.field).to.equals('id')
+
+      expect(field_list[3].name).to.equals('reply_id')
+      expect(field_list[3].is_null).to.be.true
+      expect(field_list[3].references).not.to.be.undefined
+      expect(field_list[3].references!.type).to.equals('>0-')
+      expect(field_list[3].references!.table).to.equals('reply')
+      expect(field_list[3].references!.field).to.equals('id')
+    })
   })
 
   describe('enum column type', () => {
