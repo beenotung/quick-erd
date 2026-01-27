@@ -762,13 +762,22 @@ function alterSqliteField(
   columnDefinition: string,
   reason: string,
 ): string {
-  if (!field.is_null) {
-    throw new Error(
-      `alter non-nullable column (${table.name}.${field.name}) is not supported in sqlite`,
-    )
-  }
   const table_name = wrapSqliteName(table.name)
   const field_name = wrapSqliteName(field.name)
+  if (!field.is_null) {
+    const temp_table = wrapSqliteName(table.name + '_temp')
+    const code = `
+  // ${reason} for ${table_name}.${field_name}
+  {
+    await knex.raw(${inspect(`create temp table ${temp_table} as select * from ${table_name}`)})
+    await knex.raw(${inspect(`delete from ${table_name}`)})
+    await knex.raw(${inspect(`alter table ${table_name} drop column ${field_name}`)})
+    await knex.raw(${inspect(`alter table ${table_name} add column ${columnDefinition}`)})
+    await knex.raw(${inspect(`insert into ${table_name} select * from ${temp_table}`)})
+    await knex.raw(${inspect(`drop table ${temp_table}`)})
+  }`
+    return '  ' + code.trim()
+  }
   const fieldExpr = isClearName(field.name)
     ? `{ ${field.name}: row.${field.name} }`
     : `{ ${inspect(field.name)}: row[${inspect(field.name)}] }`
