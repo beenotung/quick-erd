@@ -791,7 +791,9 @@ function alterSqliteType(table: Table, field: Field): string {
 function alterSqliteEnum(table: Table, field: Field): string {
   const col = wrapSqliteName(field.name)
   const values = field.type.replace(/enum/i, '')
-  const columnDefinition = `${col} text check (${col} in ${values})`
+  const columnDefinition = field.is_null
+    ? `${col} text null check (${col} in ${values})`
+    : `${col} text not null check (${col} in ${values})`
   return alterSqliteField(table, field, columnDefinition, 'alter enum')
 }
 function alterSqliteNullable(

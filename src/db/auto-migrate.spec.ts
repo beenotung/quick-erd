@@ -492,4 +492,104 @@ describe('auto-migrate TestSuit', () => {
       )
     })
   })
+  context('alter column for sqlite', () => {
+    it('should alter nullable type', () => {
+      const old_field: Field = {
+        name: 'remark',
+        type: 'integer',
+        is_primary_key: false,
+        is_null: true,
+        is_unique: false,
+        is_unsigned: false,
+        default_value: undefined,
+        references: undefined,
+      }
+      const new_field: Field = {
+        ...old_field,
+        type: 'text',
+      }
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'better-sqlite3',
+        existing_table_list: [{ name: 'user', field_list: [old_field] }],
+        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        detect_rename: false,
+      })
+      expect(up_lines).to.have.lengthOf(1)
+      expect(up_lines[0].trim()).to.equals(
+        `
+  // alter type for \`user\`.\`remark\`
+  {
+    const rows = await knex.select(\`id\`, \`remark\`).from(\`user\`)
+    await knex.raw('alter table \`user\` drop column \`remark\`')
+    await knex.raw('alter table \`user\` add column \`remark\` text null')
+    for (let row of rows) {
+      await knex(\`user\`).update({ remark: row.remark }).where({ id: row.id })
+    }
+  }`.trim(),
+      )
+      expect(down_lines).to.have.lengthOf(1)
+      expect(down_lines[0].trim()).to.equals(
+        `
+  // alter type for \`user\`.\`remark\`
+  {
+    const rows = await knex.select(\`id\`, \`remark\`).from(\`user\`)
+    await knex.raw('alter table \`user\` drop column \`remark\`')
+    await knex.raw('alter table \`user\` add column \`remark\` integer null')
+    for (let row of rows) {
+      await knex(\`user\`).update({ remark: row.remark }).where({ id: row.id })
+    }
+  }`.trim(),
+      )
+    })
+    it('should alter nullable enum values', () => {
+      const old_field: Field = {
+        name: 'role',
+        type: `enum('admin','user')`,
+        is_primary_key: false,
+        is_null: true,
+        is_unique: false,
+        is_unsigned: false,
+        default_value: undefined,
+        references: undefined,
+      }
+      const new_field: Field = {
+        ...old_field,
+        type: `enum('admin','user','guest')`,
+      }
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'better-sqlite3',
+        existing_table_list: [{ name: 'user', field_list: [old_field] }],
+        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        detect_rename: false,
+      })
+      expect(up_lines).to.have.lengthOf(1)
+      expect(up_lines[0].trim()).to.equals(
+        `
+  // alter enum for \`user\`.\`role\`
+  {
+    const rows = await knex.select(\`id\`, \`role\`).from(\`user\`)
+    await knex.raw('alter table \`user\` drop column \`role\`')
+    await knex.raw("alter table \`user\` add column \`role\` text null check (\`role\` in ('admin','user','guest'))")
+    for (let row of rows) {
+      await knex(\`user\`).update({ role: row.role }).where({ id: row.id })
+    }
+  }`.trim(),
+      )
+      expect(down_lines).to.have.lengthOf(1)
+      expect(down_lines[0].trim()).to.equals(
+        `
+  // alter enum for \`user\`.\`role\`
+  {
+    const rows = await knex.select(\`id\`, \`role\`).from(\`user\`)
+    await knex.raw('alter table \`user\` drop column \`role\`')
+    await knex.raw("alter table \`user\` add column \`role\` text null check (\`role\` in ('admin','user'))")
+    for (let row of rows) {
+      await knex(\`user\`).update({ role: row.role }).where({ id: row.id })
+    }
+  }`.trim(),
+      )
+    })
+    it('should alter non-nullable type')
+    it('should alter non-nullable enum values')
+  })
 })
