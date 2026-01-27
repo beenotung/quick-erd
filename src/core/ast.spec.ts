@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { parse, ParseRelationTypeError } from './ast'
+import { parse } from './ast'
 import { expectObjectKeys } from '../../test/utils'
 
 describe('ast TestSuit', () => {
