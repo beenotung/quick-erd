@@ -17,7 +17,7 @@
 
 user
 ----
-id int(10) unsigned PK
+id int(10) unsigned zerofill PK
 username varchar(64) unique
 domain varchar(32)
 created_at datetime

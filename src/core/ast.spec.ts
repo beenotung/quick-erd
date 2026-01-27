@@ -138,6 +138,28 @@ score int(10) unsigned
     expect(field_list[2].is_unsigned).to.be.true
   })
 
+  it('should parse zerofill type', () => {
+    const text = `
+user
+----
+code_1 int(10) zerofill
+code_2 int(10)
+`
+    const result = parse(text)
+    expect(result).not.to.be.undefined
+    expect(result.table_list).to.have.lengthOf(1)
+    const field_list = result.table_list[0].field_list
+    expect(field_list).to.have.lengthOf(2)
+
+    expect(field_list[0].name).to.equals('code_1')
+    expect(field_list[0].type).to.equals('int(10)')
+    expect(field_list[0].is_zerofill).to.be.true
+
+    expect(field_list[1].name).to.equals('code_2')
+    expect(field_list[1].type).to.equals('int(10)')
+    expect(field_list[1].is_zerofill).to.be.false
+  })
+
   describe('auto detect primary key', () => {
     it('should treat id as primary key if no other field is marked as primary key', () => {
       const text = `

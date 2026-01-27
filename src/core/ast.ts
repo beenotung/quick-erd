@@ -128,6 +128,7 @@ export class Parser implements ParseResult {
       is_unique: false,
       is_primary_key: false,
       is_unsigned: false,
+      is_zerofill: false,
       default_value: undefined,
       references: undefined,
     }
@@ -180,6 +181,9 @@ export class Parser implements ParseResult {
           break
         case 'UNSIGNED':
           field.is_unsigned = true
+          break
+        case 'ZEROFILL':
+          field.is_zerofill = true
           break
         case 'PK':
           field.is_primary_key = true
@@ -388,6 +392,7 @@ export type Field = {
   is_unique: boolean
   is_null: boolean
   is_unsigned: boolean
+  is_zerofill: boolean
   references: ForeignKeyReference | undefined
   default_value: string | undefined
 }
