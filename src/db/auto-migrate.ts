@@ -770,27 +770,15 @@ function alterSqliteField(
   }
   const table_name = wrapSqliteName(table.name)
   const field_name = wrapSqliteName(field.name)
-  let drop_lines = ''
-  let add_lines = ''
   const fieldExpr = isClearName(field.name)
     ? `{ ${field.name}: row.${field.name} }`
     : `{ ${inspect(field.name)}: row[${inspect(field.name)}] }`
-  if (field.is_unique) {
-    drop_lines += `
-    await knex.schema.alterTable('${table.name}', table => table.dropUnique(['${field.name}']))`
-    add_lines += `
-    await knex.schema.alterTable('${table.name}', table => table.unique(['${field.name}']))`
-  }
-  if (field.references) {
-    drop_lines += `
-    await knex.schema.alterTable('${table.name}', table => table.dropForeign(['${field.name}']))`
-  }
   const code = `
   // ${reason} for ${table_name}.${field_name}
   {
-    const rows = await knex.select(\`id\`, ${field_name}).from(${table_name})${drop_lines}
+    const rows = await knex.select(\`id\`, ${field_name}).from(${table_name})
     await knex.raw(${inspect(`alter table ${table_name} drop column ${field_name}`)})
-    await knex.raw(${inspect(`alter table ${table_name} add column ${columnDefinition}`)})${add_lines}
+    await knex.raw(${inspect(`alter table ${table_name} add column ${columnDefinition}`)})
     for (let row of rows) {
       await knex(${table_name}).update(${fieldExpr}).where({ id: row.id })
     }
