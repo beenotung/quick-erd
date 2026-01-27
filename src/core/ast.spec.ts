@@ -10,6 +10,50 @@ describe('ast TestSuit', () => {
     return result.table_list[0]
   }
 
+  describe('parse quoted name', () => {
+    function test(name: string, text: string) {
+      it(`should parse ${name}`, () => {
+        const table = parseSingleTable(text)
+        const field_list = table.field_list
+        expect(field_list).to.have.lengthOf(1)
+        expect(field_list[0].name).to.equals('username')
+        expect(field_list[0].type).to.equals('text')
+      })
+    }
+    test(
+      'non quoted name',
+      `
+user
+----
+username text
+`,
+    )
+    test(
+      'double quoted name',
+      `
+"user"
+----
+"username" text
+`,
+    )
+    test(
+      'single quoted name',
+      `
+'user'
+----
+'username' text
+`,
+    )
+    test(
+      'backtick quoted name',
+      `
+\`user\`
+----
+\`username\` text
+`,
+    )
+  })
+
   it('should parse varchar', () => {
     const text = `
 user

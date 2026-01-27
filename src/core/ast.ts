@@ -207,14 +207,14 @@ export class Parser implements ParseResult {
   }
   parseName(): string {
     let line = this.peekLine()
-    const match = line.match(/[a-zA-Z0-9_]+/)
+    const match = line.match(/["'`a-zA-Z0-9_]+/)
     if (!match) {
       throw new ParseNameError(line)
     }
     const name = match[0]
     line = line.replace(name, '').trim()
     this.line_list[0] = line
-    return name
+    return unwrapQuotedName(name)
   }
   parseType(): string | undefined {
     let line = this.peekLine()
@@ -330,6 +330,17 @@ function parseAll<T>(fn: () => T): T[] {
       return result_list
     }
   }
+}
+
+const quotes = ['"', "'", '`']
+function unwrapQuotedName(name: string): string {
+  for (const quote of quotes) {
+    if (name.startsWith(quote) && name.endsWith(quote)) {
+      name = name.slice(1, name.length - 1)
+      break
+    }
+  }
+  return name
 }
 
 function stripComments(line: string): string {
