@@ -5,6 +5,7 @@ import { env } from './env'
 module.exports = {
   sqlite: {
     client: 'better-sqlite3',
+    useNullAsDefault: true,
     connection: {
       filename: './db.sqlite3',
     },
