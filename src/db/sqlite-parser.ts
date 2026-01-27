@@ -187,6 +187,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       is_null,
       is_unique,
       is_unsigned: false,
+      is_zerofill: false,
       default_value,
       references,
     }

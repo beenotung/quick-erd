@@ -182,6 +182,7 @@ WHERE table_name = ?
         is_primary_key: !!pk_row,
         is_null: column_row.is_nullable === 'YES',
         is_unsigned: false,
+        is_zerofill: false,
         is_unique: !!unique_row,
         references: fk_row
           ? {

@@ -28,6 +28,7 @@ export function parseCreateTable(sql: string): Field[] {
           type: field.type,
           is_primary_key: field.is_primary_key,
           is_unsigned: field.unsigned,
+          is_zerofill: false,
           is_null: !field.not_null,
           is_unique: false,
           references: undefined,

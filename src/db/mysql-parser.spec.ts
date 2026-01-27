@@ -28,6 +28,7 @@ CREATE TABLE \`user\` (
       is_null: false,
       is_unique: false,
       is_unsigned: true,
+      is_zerofill: false,
       default_value: undefined,
       references: undefined,
     }
@@ -42,6 +43,7 @@ CREATE TABLE \`user\` (
       is_null: false,
       is_unique: false,
       is_unsigned: false,
+      is_zerofill: false,
       default_value: undefined,
       references: undefined,
     }
@@ -56,6 +58,7 @@ CREATE TABLE \`user\` (
       is_null: false,
       is_unique: true,
       is_unsigned: false,
+      is_zerofill: false,
       default_value: undefined,
       references: undefined,
     }
@@ -70,6 +73,7 @@ CREATE TABLE \`user\` (
       is_null: false,
       is_unique: false,
       is_unsigned: false,
+      is_zerofill: false,
       default_value: 'current_timestamp()',
       references: undefined,
     }
@@ -81,6 +85,7 @@ CREATE TABLE \`user\` (
       is_null: false,
       is_unique: false,
       is_unsigned: false,
+      is_zerofill: false,
       default_value: 'current_timestamp()',
       references: undefined,
     }

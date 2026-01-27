@@ -129,6 +129,7 @@ where con.is_disabled = 0
         is_primary_key: !!pk_row,
         is_null: column.is_nullable == 'YES',
         is_unsigned: false,
+        is_zerofill: false,
         is_unique: !pk_row && !!unique_row,
         references: fk_row
           ? {
