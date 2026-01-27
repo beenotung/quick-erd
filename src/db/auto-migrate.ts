@@ -538,8 +538,7 @@ export function generateAutoMigrate(options: {
         if (is_sqlite && is_both_enum) {
           raw_up_lines.push(alterSqliteEnum(table, field))
           raw_down_lines.unshift(alterSqliteEnum(table, existing_field))
-        }
-        if (is_postgres && is_both_enum) {
+        } else if (is_postgres && is_both_enum) {
           table_up_lines.push(...alterPostgresEnum(table, field))
           table_down_lines.unshift(...alterPostgresEnum(table, existing_field))
         } else if (is_sqlite) {
