@@ -333,7 +333,7 @@ function parseAll<T>(fn: () => T): T[] {
 }
 
 const quotes = ['"', "'", '`']
-function unwrapQuotedName(name: string): string {
+export function unwrapQuotedName(name: string): string {
   for (const quote of quotes) {
     if (name.startsWith(quote) && name.endsWith(quote)) {
       name = name.slice(1, name.length - 1)

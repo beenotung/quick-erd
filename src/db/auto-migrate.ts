@@ -761,6 +761,7 @@ function alterSqliteField(
   table: Table,
   field: Field,
   columnDefinition: string,
+  reason: string,
 ): string {
   if (!field.is_null) {
     throw new Error(
@@ -785,6 +786,7 @@ function alterSqliteField(
     await knex.schema.alterTable('${table.name}', table => table.dropForeign(['${field.name}']))`
   }
   const code = `
+  // ${reason} for ${table_name}.${field_name}
   {
     const rows = await knex.select(\`id\`, ${field_name}).from(${table_name})${drop_lines}
     await knex.raw(${inspect(`alter table ${table_name} drop column ${field_name}`)})
@@ -797,13 +799,13 @@ function alterSqliteField(
 }
 function alterSqliteType(table: Table, field: Field): string {
   const body = toSqliteColumnSql({ ...field, is_unique: false })
-  return alterSqliteField(table, field, body)
+  return alterSqliteField(table, field, body, 'alter type')
 }
 function alterSqliteEnum(table: Table, field: Field): string {
   const col = wrapSqliteName(field.name)
   const values = field.type.replace(/enum/i, '')
   const columnDefinition = `${col} text check (${col} in ${values})`
-  return alterSqliteField(table, field, columnDefinition)
+  return alterSqliteField(table, field, columnDefinition, 'alter enum')
 }
 function alterSqliteNullable(
   allTables: Table[],
