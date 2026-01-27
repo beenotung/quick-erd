@@ -201,6 +201,37 @@ domain text
     expect(field_list[1].is_unique).to.be.false
   })
 
+  describe('null appearing in any order', () => {
+    it('should parse null before unique', () => {
+      const text = `
+user
+----
+username text null unique
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+      expect(field_list).to.have.lengthOf(1)
+      expect(field_list[0].name).to.equals('username')
+      expect(field_list[0].type).to.equals('text')
+      expect(field_list[0].is_null, 'null before unique').to.be.true
+      expect(field_list[0].is_unique, 'unique after null').to.be.true
+    })
+    it('should parse null after unique', () => {
+      const text = `
+user
+----
+username text unique null
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+      expect(field_list).to.have.lengthOf(1)
+      expect(field_list[0].name).to.equals('username')
+      expect(field_list[0].type).to.equals('text')
+      expect(field_list[0].is_unique, 'unique before null').to.be.true
+      expect(field_list[0].is_null, 'null after unique').to.be.true
+    })
+  })
+
   describe('foreign key reference', () => {
     describe('relation type', () => {
       function test(type: string, name: string) {

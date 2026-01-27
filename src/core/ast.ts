@@ -189,7 +189,6 @@ export class Parser implements ParseResult {
           break loop
       }
       line = line.replace(token, '').trim()
-      break
     }
     this.line_list[0] = line
   }
