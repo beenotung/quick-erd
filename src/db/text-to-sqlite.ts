@@ -1,4 +1,4 @@
-import { Field, parse } from '../core/ast'
+import { Field, parse, unwrapQuotedName } from '../core/ast'
 import { sortTables } from './sort-tables'
 
 export function textToSqlite(text: string) {
@@ -72,8 +72,10 @@ drop table if exists ${table.name};
 }
 
 export function toSqliteColumnSql(field: Field): string {
+  const name = wrapSqliteName(field.name)
+
   if (field.is_primary_key) {
-    return `${field.name} integer primary key`
+    return `${name} integer primary key`
   }
   let type = field.type
 
@@ -88,7 +90,7 @@ export function toSqliteColumnSql(field: Field): string {
     type = 'text'
   }
 
-  let sql = `${field.name} ${type}`
+  let sql = `${name} ${type}`
 
   if (field.is_null) {
     sql += ` null`
@@ -105,13 +107,24 @@ export function toSqliteColumnSql(field: Field): string {
   }
 
   if (enums) {
-    sql += ` check(${field.name} in ${enums})`
+    sql += ` check(${name} in ${enums})`
   }
 
   const ref = field.references
   if (ref) {
-    sql += ` references ${ref.table}(${ref.field})`
+    const table = wrapSqliteName(ref.table)
+    const field = wrapSqliteName(ref.field)
+    sql += ` references ${table}(${field})`
   }
 
   return sql
+}
+
+export function wrapSqliteName(name: string): string {
+  // only check in dev mode
+  // if (name.startsWith('`') && name.endsWith('`')) {
+  //   throw new Error(`name is already wrapped: ${name}`)
+  // }
+  name = unwrapQuotedName(name)
+  return '`' + name + '`'
 }

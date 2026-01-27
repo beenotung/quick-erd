@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs'
 import { Knex as KnexType } from 'knex'
 import { dirname, join } from 'path'
 import { inspect } from 'util'
-import { Field, ParseResult, Table } from '../core/ast'
+import { Field, ParseResult, Table, unwrapQuotedName } from '../core/ast'
 import {
   addDependencies,
   addGitIgnore,
@@ -674,17 +674,8 @@ export function generateAutoMigrate(options: {
         const col = wrapSqliteName(field.name)
 
         const { references, is_unique } = field
-        const quoted_field = { ...field, name: col, is_unique: false }
 
-        if (references) {
-          quoted_field.references = {
-            type: references.type,
-            table: wrapSqliteName(references.table),
-            field: wrapSqliteName(references.field),
-          }
-        }
-
-        const body = toSqliteColumnSql(quoted_field)
+        const body = toSqliteColumnSql({ ...field, is_unique: false })
         options.raw_add_lines.push(
           `  await knex.raw(${inspect(
             `alter table ${table} add column ${body}`,
@@ -776,8 +767,13 @@ function alterSqliteField(
       `alter non-nullable column (${table.name}.${field.name}) is not supported in sqlite`,
     )
   }
+  const table_name = wrapSqliteName(table.name)
+  const field_name = wrapSqliteName(field.name)
   let drop_lines = ''
   let add_lines = ''
+  const fieldExpr = isClearName(field.name)
+    ? `{ ${field.name}: row.${field.name} }`
+    : `{ ${inspect(field.name)}: row[${inspect(field.name)}] }`
   if (field.is_unique) {
     drop_lines += `
     await knex.schema.alterTable('${table.name}', table => table.dropUnique(['${field.name}']))`
@@ -790,20 +786,17 @@ function alterSqliteField(
   }
   const code = `
   {
-    const rows = await knex.select('id', '${field.name}').from('${table.name}')${drop_lines}
-    await knex.raw('alter table \`${table.name}\` drop column \`${field.name}\`')
-    await knex.raw("alter table \`${table.name}\` add column ${columnDefinition}")${add_lines}
+    const rows = await knex.select(\`id\`, ${field_name}).from(${table_name})${drop_lines}
+    await knex.raw(${inspect(`alter table ${table_name} drop column ${field_name}`)})
+    await knex.raw(${inspect(`alter table ${table_name} add column ${columnDefinition}`)})${add_lines}
     for (let row of rows) {
-      await knex('${table.name}').update({ ${field.name}: row.${field.name} }).where({ id: row.id })
+      await knex(${table_name}).update(${fieldExpr}).where({ id: row.id })
     }
   }`
   return '  ' + code.trim()
 }
 function alterSqliteType(table: Table, field: Field): string {
-  const col = wrapSqliteName(field.name)
-  const quoted_field = { ...field, name: col }
-  quoted_field.is_unique = false
-  const body = toSqliteColumnSql(quoted_field)
+  const body = toSqliteColumnSql({ ...field, is_unique: false })
   return alterSqliteField(table, field, body)
 }
 function alterSqliteEnum(table: Table, field: Field): string {
@@ -982,5 +975,10 @@ async function checkPendingMigrations(knex: KnexType) {
 const log = console.error.bind(console)
 
 function wrapSqliteName(name: string) {
+  name = unwrapQuotedName(name)
   return '`' + name + '`'
+}
+
+function isClearName(name: string) {
+  return inspect({ [name]: 1 }) == `{ ${name}: 1 }`
 }

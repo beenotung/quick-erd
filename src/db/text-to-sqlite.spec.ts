@@ -8,7 +8,7 @@ user
 ----
 username varchar(32)
 `
-    expect(textToSqlite(text).up).to.contains('username varchar(32) not null')
+    expect(textToSqlite(text).up).to.contains('`username` varchar(32) not null')
   })
 
   it('should support inline enum as column type', () => {
@@ -18,7 +18,7 @@ application
 status enum('pending','approved','rejected')
 `
     expect(textToSqlite(text).up).to.contains(
-      "status text not null check(status in ('pending','approved','rejected'))",
+      "`status` text not null check(`status` in ('pending','approved','rejected'))",
     )
   })
 
@@ -30,10 +30,10 @@ username text unique
 domain text
 `
     const up = textToSqlite(text).up
-    expect(up).to.contains('username text not null')
-    expect(up).to.contains('domain text not null')
-    expect(up).to.contains('username text not null unique')
-    expect(up).not.to.contains('domain text not null unique')
+    expect(up).to.contains('`username` text not null')
+    expect(up).to.contains('`domain` text not null')
+    expect(up).to.contains('`username` text not null unique')
+    expect(up).not.to.contains('`domain` text not null unique')
   })
 
   it('should support blob column', () => {
@@ -43,7 +43,7 @@ content
 payload blob
 `
     const up = textToSqlite(text).up
-    expect(up).to.contains('payload blob not null')
+    expect(up).to.contains('`payload` blob not null')
   })
 
   it('should support default value', () => {
@@ -54,7 +54,7 @@ score default 0
 role text default "guest"
 `
     const up = textToSqlite(text).up
-    expect(up).to.contains('score integer not null default 0')
-    expect(up).to.contains('role text not null default "guest"')
+    expect(up).to.contains('`score` integer not null default 0')
+    expect(up).to.contains('`role` text not null default "guest"')
   })
 })
