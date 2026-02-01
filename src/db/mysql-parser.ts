@@ -87,14 +87,7 @@ function parseDefaultValue(sql: string) {
 
 function nextPart(sql: string) {
   const startIdx = sql.indexOf(' ')
-  const endIdx1 = sql.indexOf(' ', startIdx + 1)
-  const endIdx2 = sql.indexOf(',', startIdx + 1)
-  const endIdx =
-    endIdx1 === -1
-      ? endIdx2
-      : endIdx2 === -1
-        ? endIdx1
-        : Math.min(endIdx1, endIdx2)
+  const endIdx = firstIndexOf(sql, [' ', ','], startIdx + 1)
   sql = sql.slice(endIdx).trim()
   return sql
 }
