@@ -18,6 +18,7 @@ describe('auto-migrate TestSuit', () => {
               is_null: false,
               is_unique: false,
               is_unsigned: true,
+              is_zerofill: false,
               default_value: undefined,
               references: { table: 'author', field: 'id', type: '>0-' },
             },
@@ -35,6 +36,7 @@ describe('auto-migrate TestSuit', () => {
               is_null: false,
               is_unique: false,
               is_unsigned: true,
+              is_zerofill: false,
               default_value: undefined,
               references: { table: 'user', field: 'id', type: '>0-' },
             },
@@ -94,6 +96,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: undefined,
       }
@@ -104,6 +107,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: undefined,
       }
@@ -149,6 +153,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: undefined,
       }
@@ -159,6 +164,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: undefined,
       }
@@ -203,6 +209,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: undefined,
       }
@@ -213,6 +220,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: { table: 'user', field: 'id', type: '>0-' },
       }
@@ -223,6 +231,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: undefined,
       }
@@ -289,6 +298,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: undefined,
       }
@@ -352,6 +362,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: { table: 'segment', field: 'id', type: '>0-' },
       }
@@ -415,6 +426,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: { table: 'user', field: 'id', type: '>0-' },
       }
@@ -443,6 +455,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: true,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: undefined,
       }
@@ -501,6 +514,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: undefined,
       }
@@ -549,6 +563,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: true,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: undefined,
       }
@@ -597,6 +612,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: undefined,
       }
@@ -645,6 +661,7 @@ describe('auto-migrate TestSuit', () => {
         is_null: false,
         is_unique: false,
         is_unsigned: false,
+        is_zerofill: false,
         default_value: undefined,
         references: undefined,
       }
