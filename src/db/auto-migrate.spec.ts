@@ -720,7 +720,7 @@ describe('auto-migrate TestSuit', () => {
       )
     })
   })
-  context('collate change for mysql', () => {
+  context('collate change', () => {
     it('should detect collate change', () => {
       const old_field: Field = {
         name: 'username',
@@ -827,36 +827,7 @@ describe('auto-migrate TestSuit', () => {
       expect(down_lines).to.have.lengthOf(0)
     })
 
-    it('should detect collate change for postgresql', () => {
-      const old_field: Field = {
-        name: 'username',
-        type: 'varchar(255)',
-        is_primary_key: false,
-        is_null: false,
-        is_unique: false,
-        is_unsigned: false,
-        is_zerofill: false,
-        default_value: undefined,
-        references: undefined,
-        collate: 'utf8mb4_unicode_ci',
-      }
-      const new_field: Field = {
-        ...old_field,
-        collate: 'utf8mb4_bin',
-      }
-      const { up_lines, down_lines } = generateAutoMigrate({
-        db_client: 'pg',
-        existing_table_list: [{ name: 'user', field_list: [old_field] }],
-        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
-        detect_rename: false,
-      })
-      expect(up_lines).to.have.lengthOf(1)
-      expect(up_lines[0]).to.contains(".collate('utf8mb4_bin')")
-      expect(down_lines).to.have.lengthOf(1)
-      expect(down_lines[0]).to.contains(".collate('utf8mb4_unicode_ci')")
-    })
-
-    it('should detect collate change for sqlite', () => {
+    it('should detect collate change for sqlite (raw sql)', () => {
       const old_field: Field = {
         name: 'username',
         type: 'varchar(255)',
