@@ -299,6 +299,7 @@ const config: { [key: string]: Knex.Config } = {
       port: env.DB_PORT,
       multipleStatements: true,
       ssl: ${ssl == 'required' ? '{ rejectUnauthorized: true }' : ssl == 'lax' ? '{ rejectUnauthorized: false }' : 'false'},
+      ${db_client == 'mysql' ? `charset: "utf8mb4",` : ''}
     },
   }
 }
