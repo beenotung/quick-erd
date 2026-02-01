@@ -4,6 +4,7 @@ import { Knex as KnexType } from 'knex'
 import { dirname, join } from 'path'
 import { inspect } from 'util'
 import { Field, ParseResult, Table, unwrapQuotedName } from '../core/ast'
+import { isPostgres, isSqlite } from '../utils/db'
 import {
   addDependencies,
   addGitIgnore,
@@ -391,8 +392,8 @@ export function generateAutoMigrate(options: {
   db_client: string
 }) {
   const { db_client } = options
-  const is_sqlite = db_client.includes('sqlite')
-  const is_postgres = db_client.includes('postgres') || db_client == 'pg'
+  const is_sqlite = isSqlite(db_client)
+  const is_postgres = isPostgres(db_client)
   const up_lines: string[] = []
   const down_lines: string[] = []
 
@@ -531,7 +532,8 @@ export function generateAutoMigrate(options: {
 
       if (
         field.type !== existing_field.type ||
-        field.is_unsigned !== existing_field.is_unsigned
+        field.is_unsigned !== existing_field.is_unsigned ||
+        field.collate !== existing_field.collate
       ) {
         const is_both_enum =
           field.type.match(/^enum/i) && existing_field.type.match(/^enum/i)
@@ -886,6 +888,9 @@ function alterType(field: Field, db_client: string): string {
   code += toKnexCreateColumnTypeCode(field, db_client)
   code += toKnexNullableCode(field)
   code += toKnexDefaultValueCode(field)
+  if (field.collate) {
+    code += `.collate('${field.collate}')`
+  }
   code += '.alter()'
   return code
 }

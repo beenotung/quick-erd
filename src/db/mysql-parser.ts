@@ -1,4 +1,5 @@
 import { Field, ForeignKeyReference } from '../core/ast'
+import { firstIndexOf } from '../utils/string'
 
 export function parseCreateTable(sql: string): Field[] {
   const startIdx = sql.indexOf('(')
@@ -33,6 +34,7 @@ export function parseCreateTable(sql: string): Field[] {
           is_unique: false,
           references: undefined,
           default_value: field.default_value,
+          collate: field.collate,
         })
       }
     }
@@ -129,6 +131,7 @@ type Statement =
       auto_inc: boolean
       unsigned: boolean
       default_value: string | undefined
+      collate: string | undefined
       rest: string
     }
   | {
@@ -177,10 +180,11 @@ function parseColumnStatement(sql: string): Statement {
   sql = result.rest
 
   /* parse field type */
-  const endIdx = sql.indexOf(' ')
+  let endIdx = firstIndexOf(sql, [' ', ','])
+  if (endIdx === -1) endIdx = sql.length
   let type = sql.slice(0, endIdx)
   type = toDataType(type)
-  sql = sql.slice(endIdx + 1).trim()
+  sql = sql.slice(endIdx).trim()
 
   /* parse unsigned */
   const unsigned = sql.startsWith('unsigned')
@@ -191,11 +195,17 @@ function parseColumnStatement(sql: string): Statement {
   let not_null = false
   let auto_inc = false
   let default_value = undefined
+  let collate: string | undefined = undefined
 
   for (;;) {
-    /* parse text collection (encoding) */
+    /* parse text collation (encoding) */
     if (sql.startsWith('COLLATE')) {
-      sql = nextPart(sql)
+      sql = sql.slice('COLLATE'.length).trim()
+      const match = sql.match(/^[\w-]+/)
+      if (match) {
+        collate = match[0]
+        sql = sql.slice(collate.length).trim()
+      }
       continue
     }
 
@@ -255,6 +265,7 @@ function parseColumnStatement(sql: string): Statement {
     not_null,
     auto_inc,
     default_value,
+    collate,
     rest: sql,
   }
 }

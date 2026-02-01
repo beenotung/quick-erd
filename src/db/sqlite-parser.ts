@@ -191,6 +191,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       is_zerofill: false,
       default_value,
       references,
+      collate: undefined,
     }
   })
   return Object.values(field_dict)

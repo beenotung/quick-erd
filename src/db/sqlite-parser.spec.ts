@@ -20,6 +20,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
       {
         name: 'content',
@@ -31,6 +32,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
@@ -54,6 +56,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
       {
         name: 'f2',
@@ -65,6 +68,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
       {
         name: 'f3',
@@ -76,6 +80,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
       {
         name: 'f4',
@@ -87,6 +92,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
@@ -110,6 +116,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
       {
         name: 'f2',
@@ -121,6 +128,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
       {
         name: 'f3',
@@ -132,6 +140,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
       {
         name: 'f4',
@@ -143,6 +152,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
@@ -164,6 +174,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
       {
         name: 'content',
@@ -175,6 +186,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
@@ -197,6 +209,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
       {
         name: 'content',
@@ -208,6 +221,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
@@ -230,6 +244,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
       {
         name: 'content',
@@ -241,6 +256,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
@@ -263,6 +279,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
       {
         name: 'user_id',
@@ -274,6 +291,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: { table: 'user', field: 'id', type: '>0-' },
+        collate: undefined,
       },
       {
         name: 'post_id',
@@ -285,6 +303,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: { table: 'post', field: 'id', type: '>0-' },
+        collate: undefined,
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
@@ -306,6 +325,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: { table: 'user', field: 'id', type: '>0-' },
+        collate: undefined,
       },
       {
         name: 'post_id',
@@ -317,6 +337,7 @@ create table test (
         is_zerofill: false,
         default_value: undefined,
         references: { table: 'post', field: 'id', type: '>0-' },
+        collate: undefined,
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
@@ -340,6 +361,7 @@ CREATE TABLE test(
         is_zerofill: false,
         default_value: undefined,
         references: { table: 'user', field: 'id', type: '>0-' },
+        collate: undefined,
       },
       {
         name: 'post_id',
@@ -351,6 +373,7 @@ CREATE TABLE test(
         is_zerofill: false,
         default_value: undefined,
         references: { table: 'post', field: 'id', type: '>0-' },
+        collate: undefined,
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
@@ -372,6 +395,7 @@ create table user (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
       {
         name: 'domain',
@@ -383,6 +407,7 @@ create table user (
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       },
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
@@ -431,6 +456,7 @@ CREATE UNIQUE INDEX "user_email_unique" on "user" (
             is_zerofill: false,
             default_value: undefined,
             references: undefined,
+            collate: undefined,
           },
           {
             name: 'username',
@@ -442,6 +468,7 @@ CREATE UNIQUE INDEX "user_email_unique" on "user" (
             is_zerofill: false,
             default_value: undefined,
             references: undefined,
+            collate: undefined,
           },
           {
             name: 'email',
@@ -453,6 +480,7 @@ CREATE UNIQUE INDEX "user_email_unique" on "user" (
             is_zerofill: false,
             default_value: undefined,
             references: undefined,
+            collate: undefined,
           },
         ],
       },
@@ -489,6 +517,7 @@ CREATE TABLE \`thread\` (
             is_zerofill: false,
             default_value: undefined,
             references: undefined,
+            collate: undefined,
           },
           {
             name: 'status',
@@ -500,6 +529,7 @@ CREATE TABLE \`thread\` (
             is_zerofill: false,
             default_value: undefined,
             references: undefined,
+            collate: undefined,
           },
           {
             name: 'visibility',
@@ -511,6 +541,7 @@ CREATE TABLE \`thread\` (
             is_zerofill: false,
             default_value: undefined,
             references: undefined,
+            collate: undefined,
           },
           {
             name: 'inclusion_in_main_study',
@@ -522,6 +553,7 @@ CREATE TABLE \`thread\` (
             is_zerofill: false,
             default_value: undefined,
             references: undefined,
+            collate: undefined,
           },
         ],
       },
@@ -557,6 +589,7 @@ CREATE TABLE \`user\` (
             is_zerofill: false,
             default_value: `'guest'`,
             references: undefined,
+            collate: undefined,
           },
           {
             name: 'created_at',
@@ -568,6 +601,7 @@ CREATE TABLE \`user\` (
             is_zerofill: false,
             default_value: `CURRENT_TIMESTAMP`,
             references: undefined,
+            collate: undefined,
           },
           {
             name: 'updated_at',
@@ -579,6 +613,7 @@ CREATE TABLE \`user\` (
             is_zerofill: false,
             default_value: `now()`,
             references: undefined,
+            collate: undefined,
           },
         ],
       },
@@ -613,6 +648,7 @@ CREATE TABLE \`setting\` (
             is_zerofill: false,
             default_value: undefined,
             references: undefined,
+            collate: undefined,
           },
           {
             name: 'default_status',
@@ -624,6 +660,7 @@ CREATE TABLE \`setting\` (
             is_zerofill: false,
             default_value: undefined,
             references: undefined,
+            collate: undefined,
           },
         ],
       },

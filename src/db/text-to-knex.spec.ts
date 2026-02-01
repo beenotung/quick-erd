@@ -186,4 +186,77 @@ role text default 'guest'
       "table.text('role').notNullable().defaultTo('guest')",
     )
   })
+
+  describe('collate support', () => {
+    it('should generate collate for mysql when specified', () => {
+      const text = `
+user
+----
+username varchar(255) collate utf8mb4_unicode_ci
+`
+      const code = textToKnex(text, 'mysql')
+      expect(code).to.contains(
+        "table.string('username', 255).notNullable().collate('utf8mb4_unicode_ci')",
+      )
+    })
+
+    it('should not generate collate for mysql when not specified', () => {
+      const text = `
+user
+----
+username varchar(255)
+`
+      const code = textToKnex(text, 'mysql')
+      expect(code).to.contains("table.string('username', 255).notNullable()")
+      expect(code).not.to.contains('.collate(')
+    })
+
+    it('should generate collate for postgresql', () => {
+      const text = `
+user
+----
+username varchar(255) collate utf8mb4_unicode_ci
+`
+      const pgCode = textToKnex(text, 'pg')
+      expect(pgCode).to.contains(".collate('utf8mb4_unicode_ci')")
+    })
+
+    it('should generate collate for sqlite', () => {
+      const text = `
+user
+----
+username varchar(255) collate NOCASE
+`
+      const sqliteCode = textToKnex(text, 'better-sqlite3')
+      expect(sqliteCode).to.contains(".collate('NOCASE')")
+    })
+
+    it('should generate different collations for different columns', () => {
+      const text = `
+product
+-------
+name varchar(255) collate utf8mb4_unicode_ci
+sku varchar(64) collate utf8mb4_bin
+`
+      const code = textToKnex(text, 'mysql')
+      expect(code).to.contains(
+        "table.string('name', 255).notNullable().collate('utf8mb4_unicode_ci')",
+      )
+      expect(code).to.contains(
+        "table.string('sku', 64).notNullable().collate('utf8mb4_bin')",
+      )
+    })
+
+    it('should place collate after other modifiers', () => {
+      const text = `
+user
+----
+email varchar(255) not null unique collate utf8mb4_bin
+`
+      const code = textToKnex(text, 'mysql')
+      expect(code).to.contains(
+        "table.string('email', 255).notNullable().unique().collate('utf8mb4_bin')",
+      )
+    })
+  })
 })

@@ -692,6 +692,97 @@ updated_at datetime default now()
     expect(field_list[4].default_value).to.equals('now()')
   })
 
+  describe('collate parsing', () => {
+    it('should parse collate for varchar column', () => {
+      const text = `
+user
+----
+id
+username varchar(255) collate utf8mb4_unicode_ci
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+      expect(field_list).to.have.lengthOf(2)
+
+      expect(field_list[1].name).to.equals('username')
+      expect(field_list[1].type).to.equals('varchar(255)')
+      expect(field_list[1].collate).to.equals('utf8mb4_unicode_ci')
+    })
+
+    it('should parse collate with case insensitive keyword', () => {
+      const text = `
+user
+----
+id
+username varchar(255) COLLATE utf8mb4_bin
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+
+      expect(field_list[1].name).to.equals('username')
+      expect(field_list[1].collate).to.equals('utf8mb4_bin')
+    })
+
+    it('should parse collate with other modifiers', () => {
+      const text = `
+user
+----
+id
+username varchar(255) collate utf8mb4_unicode_ci not null unique
+email varchar(255) not null collate utf8mb4_bin
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+      expect(field_list).to.have.lengthOf(3)
+
+      expect(field_list[1].name).to.equals('username')
+      expect(field_list[1].collate).to.equals('utf8mb4_unicode_ci')
+      expect(field_list[1].is_null).to.be.false
+      expect(field_list[1].is_unique).to.be.true
+
+      expect(field_list[2].name).to.equals('email')
+      expect(field_list[2].collate).to.equals('utf8mb4_bin')
+      expect(field_list[2].is_null).to.be.false
+    })
+
+    it('should not have collate when not specified', () => {
+      const text = `
+user
+----
+id
+username varchar(255)
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+
+      expect(field_list[1].name).to.equals('username')
+      expect(field_list[1].collate).to.be.undefined
+    })
+
+    it('should parse different collations for different columns', () => {
+      const text = `
+product
+-------
+id
+name varchar(255) collate utf8mb4_unicode_ci
+sku varchar(64) collate utf8mb4_bin
+description text
+`
+      const table = parseSingleTable(text)
+      const { field_list } = table
+      expect(field_list).to.have.lengthOf(4)
+
+      expect(field_list[1].name).to.equals('name')
+      expect(field_list[1].collate).to.equals('utf8mb4_unicode_ci')
+
+      expect(field_list[2].name).to.equals('sku')
+      expect(field_list[2].collate).to.equals('utf8mb4_bin')
+
+      expect(field_list[3].name).to.equals('description')
+      expect(field_list[3].collate).to.be.undefined
+    })
+  })
+
   describe('comment parsing', () => {
     it('should strip # comments', () => {
       const text = `

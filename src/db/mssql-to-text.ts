@@ -139,6 +139,7 @@ where con.is_disabled = 0
             }
           : undefined,
         default_value: column.column_default || undefined,
+        collate: undefined,
       })
     }
   }

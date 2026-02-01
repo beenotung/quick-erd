@@ -2,7 +2,7 @@
 
 import { env } from '../db/env'
 import { textToSpring } from '../db/text-to-spring'
-import { detectDBClient } from '../utils/cli'
+import { detectDBClient } from '../utils/db'
 
 /* eslint-disable no-console */
 

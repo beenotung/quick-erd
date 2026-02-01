@@ -23,6 +23,7 @@ export function textToSqlite(text: string) {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       })
     }
 
@@ -92,6 +93,10 @@ export function toSqliteColumnSql(field: Field): string {
   }
 
   let sql = `${name} ${type}`
+
+  if (field.collate) {
+    sql += ` collate ${field.collate}`
+  }
 
   if (field.is_null) {
     sql += ` null`

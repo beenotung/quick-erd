@@ -131,6 +131,7 @@ export class Parser implements ParseResult {
       is_zerofill: false,
       default_value: undefined,
       references: undefined,
+      collate: undefined,
     }
     for (;;) {
       this.parseFieldModifiers(field)
@@ -143,6 +144,9 @@ export class Parser implements ParseResult {
           continue
         case 'FK':
           field.references = this.parseForeignKeyReference(field)
+          continue
+        case 'COLLATE':
+          field.collate = this.parseCollateValue()
           continue
         default:
           if (field.type) {
@@ -159,6 +163,17 @@ export class Parser implements ParseResult {
     field.type ||= defaultFieldType
     this.skipLine()
     return field
+  }
+  parseCollateValue(): string {
+    let line = this.peekLine()
+    const match = line.match(/^[\w-]+/)
+    if (!match) {
+      throw new Error('missing collate value')
+    }
+    const value = match[0]
+    line = line.slice(value.length).trim()
+    this.line_list[0] = line
+    return value
   }
   parseFieldModifiers(field: Field) {
     let line = this.peekLine()
@@ -395,6 +410,7 @@ export type Field = {
   is_zerofill: boolean
   references: ForeignKeyReference | undefined
   default_value: string | undefined
+  collate: string | undefined
 }
 export type ForeignKeyReference = {
   type: RelationType

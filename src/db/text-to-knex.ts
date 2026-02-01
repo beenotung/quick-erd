@@ -116,6 +116,10 @@ export function toKnexCreateColumnCode(
     code += `.unique()`
   }
 
+  if (field.collate) {
+    code += `.collate('${field.collate}')`
+  }
+
   if (ref) {
     code += `.references('${ref.table}.${ref.field}')`
   }

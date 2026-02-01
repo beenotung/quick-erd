@@ -21,6 +21,7 @@ describe('auto-migrate TestSuit', () => {
               is_zerofill: false,
               default_value: undefined,
               references: { table: 'author', field: 'id', type: '>0-' },
+              collate: undefined,
             },
           ],
         },
@@ -39,6 +40,7 @@ describe('auto-migrate TestSuit', () => {
               is_zerofill: false,
               default_value: undefined,
               references: { table: 'user', field: 'id', type: '>0-' },
+              collate: undefined,
             },
           ],
         },
@@ -99,6 +101,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       }
       const score: Field = {
         name: 'score',
@@ -110,6 +113,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       }
       const existing_table_list: Table[] = [
         {
@@ -156,6 +160,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       }
       const score: Field = {
         name: 'score',
@@ -167,6 +172,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       }
       const existing_table_list: Table[] = [
         {
@@ -212,6 +218,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       }
       const user_id: Field = {
         name: 'user_id',
@@ -223,6 +230,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: { table: 'user', field: 'id', type: '>0-' },
+        collate: undefined,
       }
       const comment: Field = {
         name: 'comment',
@@ -234,6 +242,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       }
       const existing_table_list: Table[] = [
         {
@@ -301,6 +310,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       }
       const bus_segment_id: Field = {
         ...segment_id,
@@ -365,6 +375,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: { table: 'segment', field: 'id', type: '>0-' },
+        collate: undefined,
       }
       const bus_segment_id: Field = {
         ...segment_id,
@@ -429,6 +440,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: { table: 'user', field: 'id', type: '>0-' },
+        collate: undefined,
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'better-sqlite3',
@@ -458,6 +470,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'better-sqlite3',
@@ -517,6 +530,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       }
       const new_field: Field = {
         ...old_field,
@@ -566,6 +580,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       }
       const new_field: Field = {
         ...old_field,
@@ -615,6 +630,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       }
       const new_field: Field = {
         ...old_field,
@@ -664,6 +680,7 @@ describe('auto-migrate TestSuit', () => {
         is_zerofill: false,
         default_value: undefined,
         references: undefined,
+        collate: undefined,
       }
       const new_field: Field = {
         ...old_field,
@@ -701,6 +718,171 @@ describe('auto-migrate TestSuit', () => {
     await knex.raw('drop table \`user_temp\`')
   }`.trim(),
       )
+    })
+  })
+  context('collate change for mysql', () => {
+    it('should detect collate change', () => {
+      const old_field: Field = {
+        name: 'username',
+        type: 'varchar(255)',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        is_zerofill: false,
+        default_value: undefined,
+        references: undefined,
+        collate: 'utf8mb4_unicode_ci',
+      }
+      const new_field: Field = {
+        ...old_field,
+        collate: 'utf8mb4_bin',
+      }
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'mysql',
+        existing_table_list: [{ name: 'user', field_list: [old_field] }],
+        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        detect_rename: false,
+      })
+      expect(up_lines.join('\n')).to.contains(".collate('utf8mb4_bin')")
+      expect(down_lines.join('\n')).to.contains(
+        ".collate('utf8mb4_unicode_ci')",
+      )
+    })
+
+    it('should detect adding collate', () => {
+      const old_field: Field = {
+        name: 'username',
+        type: 'varchar(255)',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        is_zerofill: false,
+        default_value: undefined,
+        references: undefined,
+        collate: undefined,
+      }
+      const new_field: Field = {
+        ...old_field,
+        collate: 'utf8mb4_bin',
+      }
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'mysql',
+        existing_table_list: [{ name: 'user', field_list: [old_field] }],
+        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        detect_rename: false,
+      })
+      expect(up_lines.join('\n')).to.contains(".collate('utf8mb4_bin')")
+      expect(down_lines.join('\n')).not.to.contains('.collate(')
+    })
+
+    it('should detect removing collate', () => {
+      const old_field: Field = {
+        name: 'username',
+        type: 'varchar(255)',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        is_zerofill: false,
+        default_value: undefined,
+        references: undefined,
+        collate: 'utf8mb4_bin',
+      }
+      const new_field: Field = {
+        ...old_field,
+        collate: undefined,
+      }
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'mysql',
+        existing_table_list: [{ name: 'user', field_list: [old_field] }],
+        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        detect_rename: false,
+      })
+      expect(up_lines.join('\n')).not.to.contains('.collate(')
+      expect(down_lines.join('\n')).to.contains(".collate('utf8mb4_bin')")
+    })
+
+    it('should not generate migration when collate is same', () => {
+      const field: Field = {
+        name: 'username',
+        type: 'varchar(255)',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        is_zerofill: false,
+        default_value: undefined,
+        references: undefined,
+        collate: 'utf8mb4_unicode_ci',
+      }
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'mysql',
+        existing_table_list: [{ name: 'user', field_list: [field] }],
+        parsed_table_list: [{ name: 'user', field_list: [field] }],
+        detect_rename: false,
+      })
+      expect(up_lines).to.have.lengthOf(0)
+      expect(down_lines).to.have.lengthOf(0)
+    })
+
+    it('should detect collate change for postgresql', () => {
+      const old_field: Field = {
+        name: 'username',
+        type: 'varchar(255)',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        is_zerofill: false,
+        default_value: undefined,
+        references: undefined,
+        collate: 'utf8mb4_unicode_ci',
+      }
+      const new_field: Field = {
+        ...old_field,
+        collate: 'utf8mb4_bin',
+      }
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'pg',
+        existing_table_list: [{ name: 'user', field_list: [old_field] }],
+        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        detect_rename: false,
+      })
+      expect(up_lines).to.have.lengthOf(1)
+      expect(up_lines[0]).to.contains(".collate('utf8mb4_bin')")
+      expect(down_lines).to.have.lengthOf(1)
+      expect(down_lines[0]).to.contains(".collate('utf8mb4_unicode_ci')")
+    })
+
+    it('should detect collate change for sqlite', () => {
+      const old_field: Field = {
+        name: 'username',
+        type: 'varchar(255)',
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        is_zerofill: false,
+        default_value: undefined,
+        references: undefined,
+        collate: 'BINARY',
+      }
+      const new_field: Field = {
+        ...old_field,
+        collate: 'NOCASE',
+      }
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'better-sqlite3',
+        existing_table_list: [{ name: 'user', field_list: [old_field] }],
+        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        detect_rename: false,
+      })
+      expect(up_lines).to.have.lengthOf(1)
+      expect(up_lines[0]).to.contains('collate NOCASE')
+      expect(down_lines).to.have.lengthOf(1)
+      expect(down_lines[0]).to.contains('collate BINARY')
     })
   })
 })

@@ -31,6 +31,7 @@ CREATE TABLE \`user\` (
       is_zerofill: false,
       default_value: undefined,
       references: undefined,
+      collate: undefined,
     }
     expect(fields).deep.contains(field)
   })
@@ -46,6 +47,7 @@ CREATE TABLE \`user\` (
       is_zerofill: false,
       default_value: undefined,
       references: undefined,
+      collate: 'utf8mb4_unicode_ci',
     }
     expect(fields).deep.contains(field)
   })
@@ -61,6 +63,7 @@ CREATE TABLE \`user\` (
       is_zerofill: false,
       default_value: undefined,
       references: undefined,
+      collate: 'utf8mb4_unicode_ci',
     }
     expect(fields).deep.contains(field)
   })
@@ -76,6 +79,7 @@ CREATE TABLE \`user\` (
       is_zerofill: false,
       default_value: 'current_timestamp()',
       references: undefined,
+      collate: undefined,
     }
     expect(fields).deep.contains(field)
     field = {
@@ -88,7 +92,60 @@ CREATE TABLE \`user\` (
       is_zerofill: false,
       default_value: 'current_timestamp()',
       references: undefined,
+      collate: undefined,
     }
     expect(fields).deep.contains(field)
+  })
+})
+
+describe('mysql-parser collate TestSuit', () => {
+  it('should parse collate from varchar column', () => {
+    const sql = `
+CREATE TABLE \`product\` (
+  \`id\` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  \`name\` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  \`sku\` varchar(64) COLLATE utf8mb4_bin NOT NULL,
+  \`slug\` varchar(255) NOT NULL,
+  PRIMARY KEY (\`id\`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`
+    const fields = parseCreateTable(sql)
+
+    // varchar WITH collate
+    const nameField = fields.find(f => f.name === 'name')
+    expect(nameField).not.to.be.undefined
+    expect(nameField!.collate).to.equals('utf8mb4_unicode_ci')
+
+    // varchar WITH different collate
+    const skuField = fields.find(f => f.name === 'sku')
+    expect(skuField).not.to.be.undefined
+    expect(skuField!.collate).to.equals('utf8mb4_bin')
+
+    // varchar WITHOUT collate
+    const slugField = fields.find(f => f.name === 'slug')
+    expect(slugField).not.to.be.undefined
+    expect(slugField!.collate).to.be.undefined
+  })
+
+  it('should parse collate from text column', () => {
+    const sql = `
+CREATE TABLE \`post\` (
+  \`id\` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  \`title\` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  \`content\` text,
+  PRIMARY KEY (\`id\`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`
+    const fields = parseCreateTable(sql)
+
+    // text WITH collate
+    const titleField = fields.find(f => f.name === 'title')
+    expect(titleField).not.to.be.undefined
+    expect(titleField!.collate).to.equals('utf8mb4_unicode_ci')
+
+    // text WITHOUT collate
+    const contentField = fields.find(f => f.name === 'content')
+    expect(contentField).not.to.be.undefined
+    expect(contentField!.collate).to.be.undefined
   })
 })

@@ -192,6 +192,7 @@ WHERE table_name = ?
             }
           : undefined,
         default_value,
+        collate: undefined,
       })
     }
   }

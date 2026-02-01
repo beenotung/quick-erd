@@ -5,7 +5,7 @@ import { Field, parse } from '../core/ast'
 import { sortTables } from './sort-tables'
 import { snake_to_camel, snake_to_Pascal } from '../utils/case'
 import { writeSrcFile, writeSrcFileIfNeeded } from '../utils/file'
-import { DBClient } from '../utils/cli'
+import { DBClient } from '../utils/db'
 import { parseEnumValues } from '../core/enum'
 
 export function textToSpring(dbClient: DBClient, text: string) {
