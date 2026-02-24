@@ -1,7 +1,7 @@
 import { closest } from 'fastest-levenshtein'
 import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs'
 import { Knex as KnexType } from 'knex'
-import { dirname, join } from 'path'
+import { dirname, join, relative, resolve } from 'path'
 import { inspect } from 'util'
 import { Field, ParseResult, Table, unwrapQuotedName } from '../core/ast'
 import { isPostgres, isSqlite } from '../utils/db'
@@ -29,6 +29,7 @@ import { toSqliteColumnSql } from './text-to-sqlite'
 import { scanMssqlTableSchema } from './mssql-to-text'
 import { parseEnumValues } from '../core/enum'
 import { isInternalTable } from '../core/table'
+import { isRootDir } from '../utils/fs'
 
 export function detectSrcDir() {
   for (const dir of ['src', 'server']) {
@@ -196,6 +197,41 @@ export function setupGitIgnore(options: { dbFile: string | undefined }) {
       'dump.sql',
       '*.xz',
     ])
+  }
+}
+
+export function setupPrettierIgnore(options: {
+  srcDir: string
+  db_client: string
+}) {
+  const patterns: string[] = [
+    toSrcFile(
+      options,
+      options.db_client.includes('sqlite') ? 'proxy.ts' : 'types.ts',
+    ),
+    // e.g. 20260214230550_auto-migrate.ts
+    'migrations/*_auto-migrate.ts',
+  ]
+  addIgnore('.prettierignore', patterns)
+
+  // check if this project is not the root of workspace
+  let rootDir = findRootDir()
+  if (rootDir) {
+    const dir = relative(rootDir, process.cwd()).replaceAll('\\', '/')
+    addIgnore(
+      join(rootDir, '.prettierignore'),
+      patterns.map(pattern => dir + '/' + pattern),
+    )
+  }
+}
+
+function findRootDir(): string | null {
+  let dir = '..'
+  for (;;) {
+    if (isRootDir(resolve(dir))) return null
+    let file = join(dir, 'package.json')
+    if (existsSync(file)) return dir
+    dir = join('..', dir)
   }
 }
 

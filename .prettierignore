@@ -6,6 +6,8 @@ src/components.d.ts
 src/polyfill-array.ts
 coverage/
 .nyc_output/
-examples/node-project/migrations/*.ts
+examples/node-project/migrations/*_init.ts
+examples/node-project/migrations/*_auto-migrate.ts
+examples/node-project/proxy.ts
 .trunk
 tsconfig.json
