@@ -4,15 +4,23 @@ export function textToSqliteProxy(
   text: string,
   options?: {
     mode?: 'factory' | 'singleton' // default as singleton
-    type?: 'commonjs' | 'module'
+    type?: 'commonjs' | 'module' // default as commonjs
+    command?: string // default as "npx erd-to-proxy < erd.txt > proxy.ts"
   },
 ): string {
   const mode = options?.mode || 'singleton'
   const type = options?.type || 'commonjs'
+  const command = options?.command || 'npx erd-to-proxy < erd.txt > proxy.ts'
 
   const { tableTypes, proxyFields, schemaFields } = textToTypes(text)
 
-  let code = ''
+  let code = `
+/**
+ * This file is auto generated, do not edit it manually.
+ *
+ * update command: ${command}
+ */
+`.trimStart()
 
   if (mode === 'singleton') {
     const importPath = type === 'commonjs' ? './db' : './db.js'
