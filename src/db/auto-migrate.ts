@@ -117,6 +117,11 @@ function setupTsConfigFile() {
   writeSrcFile(file, text)
 }
 
+function toSrcFile(options: { srcDir: string }, filename: string): string {
+  if (options.srcDir == '.') return filename
+  return join(options.srcDir, filename)
+}
+
 export function setupNpmScripts(options: {
   srcDir: string
   db_client: string
@@ -133,10 +138,6 @@ export function setupNpmScripts(options: {
     return
   }
   addDependencies('npm-run-all', '^4.1.5', 'dev')
-  const toFile = (filename: string): string => {
-    if (options.srcDir == '.') return filename
-    return join(options.srcDir, filename)
-  }
 
   const newScripts: Record<string, string> = {
     'db:ui': 'erd-ui erd.txt',
@@ -158,14 +159,14 @@ export function setupNpmScripts(options: {
   }
 
   if (options.db_client.includes('sqlite')) {
-    const proxyFile = toFile('proxy.ts')
+    const proxyFile = toSrcFile(options, 'proxy.ts')
     newScripts['db:plan'] = `auto-migrate ${options.dbFile} < erd.txt`
     newScripts['db:rename'] =
       `auto-migrate --rename ${options.dbFile} < erd.txt`
     newScripts['db:update'] = `run-s db:migrate db:gen-proxy`
     newScripts['db:gen-proxy'] = `erd-to-proxy < erd.txt > ${proxyFile}`
   } else {
-    const typesFile = toFile('types.ts')
+    const typesFile = toSrcFile(options, 'types.ts')
     newScripts['db:plan'] = `auto-migrate ${options.db_client} < erd.txt`
     newScripts['db:rename'] =
       `auto-migrate --rename ${options.db_client} < erd.txt`
