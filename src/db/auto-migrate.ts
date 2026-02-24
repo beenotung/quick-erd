@@ -7,7 +7,7 @@ import { Field, ParseResult, Table, unwrapQuotedName } from '../core/ast'
 import { isPostgres, isSqlite } from '../utils/db'
 import {
   addDependencies,
-  addGitIgnore,
+  addIgnore,
   addNpmScripts,
   PackageJSON,
   readNpmScripts,
@@ -178,7 +178,7 @@ export function setupNpmScripts(options: {
 }
 
 export function setupGitIgnore(options: { dbFile: string | undefined }) {
-  addGitIgnore('.gitignore', [
+  addIgnore('.gitignore', [
     'node_modules',
     '*.tgz',
     'dist',
@@ -189,7 +189,7 @@ export function setupGitIgnore(options: { dbFile: string | undefined }) {
   if (options.dbFile) {
     const dir = dirname(options.dbFile)
     const file = join(dir, '.gitignore')
-    addGitIgnore(file, [
+    addIgnore(file, [
       '*.sqlite3',
       '*.sqlite3-shm',
       '*.sqlite3-wal',

@@ -61,7 +61,7 @@ export function addDependencies(
   writeSrcFile(file, text)
 }
 
-export function addGitIgnore(file: string, patterns: string[]) {
+export function addIgnore(file: string, patterns: string[]) {
   let text = (existsSync(file) && readFileSync(file).toString()) || ''
   const originalText = text
   if (text && !text.endsWith('\n')) {
