@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import { textToSqliteProxy } from '../db/text-to-sqlite-proxy'
 import { readErdFromStdin, readPackageJSON } from '../utils/file'
 
@@ -47,6 +47,10 @@ function main() {
 }
 
 function getCommand() {
+  let script = getNpmScript()
+  if (script) {
+    return `npm run ${script}`
+  }
   const args = process.argv.slice(2).join(' ')
   let command = `npx erd-to-proxy`
   if (args) {
@@ -56,6 +60,26 @@ function getCommand() {
   const proxy_file = existsSync('src') ? 'src/proxy.ts' : 'proxy.ts'
   command += ` < ${erd_file} > ${proxy_file}`
   return command
+}
+
+function getNpmScript(): string | null {
+  let file = 'package.json'
+  if (!existsSync(file)) {
+    return null
+  }
+  let text = readFileSync(file).toString()
+  let pkg = JSON.parse(text)
+  let scripts: Record<string, string> = pkg.scripts || {}
+  let proxyKey = Object.entries(scripts).find(([key, value]) => {
+    return value.includes('erd-to-proxy')
+  })?.[0]
+  if (!proxyKey) {
+    return null
+  }
+  let updateKey = Object.entries(scripts).find(([key, value]) => {
+    return value.includes(proxyKey)
+  })?.[0]
+  return updateKey || proxyKey
 }
 
 main()

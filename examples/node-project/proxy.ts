@@ -1,7 +1,7 @@
 /**
  * This file is auto generated, do not edit it manually.
  *
- * update command: npx erd-to-proxy < erd.txt > proxy.ts
+ * update command: npm run db:dev
  */
 
 import { proxySchema } from 'better-sqlite3-proxy'
