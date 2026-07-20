@@ -13,15 +13,9 @@ export default {
     /* ... */
     '@snowpack/plugin-sass',
   ],
-  packageOptions: {
-    /* ... */
-  },
-  devOptions: {
-    /* ... */
-  },
-  buildOptions: {
-    /* ... */
-  },
+  packageOptions: {/* ... */},
+  devOptions: {/* ... */},
+  buildOptions: {/* ... */},
   optimize: {
     bundle: true,
     minify: true,

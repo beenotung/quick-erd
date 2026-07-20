@@ -354,7 +354,7 @@ function parseComment(sql: string) {
     throw new Error(`missing starting "'" for comment`)
   }
   sql = sql.slice(1)
-  for (; sql.length > 0; ) {
+  for (; sql.length > 0;) {
     if (sql.startsWith("''")) {
       sql = sql.slice(2)
       continue
