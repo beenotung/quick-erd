@@ -7,6 +7,7 @@
     "strict": true,
     "skipLibCheck": true,
     "incremental": true,
+    "rootDir": ".",
     "outDir": "dist"
   },
   "exclude": [

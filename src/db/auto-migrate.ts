@@ -47,9 +47,9 @@ export function setupSqlite(options: { dbFile: string; srcDir: string }) {
   }
   addDependencies('@types/better-sqlite3', '^7.6.13', 'dev')
   addDependencies('@types/integer', '^4.0.3', 'dev')
-  addDependencies('better-sqlite3', '^12.6.2')
-  addDependencies('better-sqlite3-schema', '^3.1.7')
-  addDependencies('better-sqlite3-proxy', '^2.10.1')
+  addDependencies('better-sqlite3', '^12.11.1')
+  addDependencies('better-sqlite3-schema', '^3.1.10')
+  addDependencies('better-sqlite3-proxy', '^2.11.4')
   const code = `
 import { toSafeMode, newDB, DBInstance } from 'better-sqlite3-schema'
 import { basename, join } from 'path'
@@ -72,9 +72,9 @@ toSafeMode(db)
 }
 
 export function setupTypescript() {
-  addDependencies('typescript', '^5.9.3', 'dev')
+  addDependencies('typescript', '^6.0.3', 'dev')
   addDependencies('ts-node', '^10.9.2', 'dev')
-  addDependencies('@types/node', '^22.19.7', 'dev')
+  addDependencies('@types/node', '^24.13.3', 'dev')
   setupTsConfigFile()
 }
 
@@ -110,6 +110,7 @@ function setupTsConfigFile() {
       strict: true,
       skipLibCheck: true,
       incremental: true,
+      rootDir: '.',
       outDir: 'dist',
     },
     exclude: ['dist'],
@@ -247,7 +248,7 @@ export function setupEnvFile(options: { srcDir: string; db_client: string }) {
     return
   }
   addDependencies('dotenv', '^17.2.3')
-  addDependencies('populate-env', '^2.3.1')
+  addDependencies('populate-env', '^2.6.1')
   const code = `
 import { config } from 'dotenv'
 import populateEnv from 'populate-env'
@@ -298,7 +299,7 @@ export function setupKnexFile(options: {
   if (existsSync(file)) {
     return
   }
-  addDependencies('knex', '^3.1.0')
+  addDependencies('knex', '^3.3.0')
   let importDir = srcDir
   if (!importDir.startsWith('.')) {
     importDir = './' + srcDir
