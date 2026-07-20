@@ -1,11 +1,10 @@
 import { inspect } from 'util'
 import { parse } from '../core/ast'
 import { toTsType } from '../core/ts-type'
-import { sortTables } from './sort-tables'
 
 export function textToTypes(text: string) {
   const result = parse(text)
-  const table_list = sortTables(result.table_list)
+  const table_list = result.table_list
 
   let tableTypes = ''
   let proxyFields = ''
