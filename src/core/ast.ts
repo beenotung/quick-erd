@@ -101,6 +101,7 @@ export class Parser implements ParseResult {
     return this.line_list[0] && this.line_list[1]?.startsWith('-')
   }
   parseTable(): Table {
+    const index = this.table_list.length
     const name = this.parseName()
     this.parseEmptyLine()
     this.skipLine('-')
@@ -118,7 +119,7 @@ export class Parser implements ParseResult {
         field.is_primary_key = true
       }
     }
-    return { name, field_list }
+    return { name, field_list, index }
   }
   parseField(): Field {
     const field: Field = {
@@ -398,6 +399,7 @@ export type Table = {
   name: string
   field_list: Field[]
   position?: { x: number; y: number; color?: string }
+  index?: number
 }
 
 export type Field = {
