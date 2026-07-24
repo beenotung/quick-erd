@@ -120,17 +120,26 @@ export class Parser implements ParseResult {
       }
     }
     const unique_field_lists: string[][] = []
+    const index_field_lists: string[][] = []
     for (let i = 0; i < field_list.length; i++) {
       let field = field_list[i]
-      if (field.name !== 'unique') {
-        continue
+      let list
+      switch (field.name) {
+        case 'unique':
+          list = unique_field_lists
+          break
+        case 'index':
+          list = index_field_lists
+          break
+        default:
+          continue
       }
       let fields = parseEnumValues(formatEnum(field.type))
-      unique_field_lists.push(fields)
+      list.push(fields)
       field_list.splice(i, 1)
       i--
     }
-    return { name, field_list, index, unique_field_lists }
+    return { name, field_list, index, unique_field_lists, index_field_lists }
   }
   parseField(): Field {
     const field: Field = {
@@ -416,6 +425,7 @@ export type Table = {
   position?: { x: number; y: number; color?: string }
   index?: number
   unique_field_lists: string[][]
+  index_field_lists: string[][]
 }
 
 export type Field = {

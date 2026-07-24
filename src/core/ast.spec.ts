@@ -274,6 +274,37 @@ unique(post_id,keyword_id)
     expect(unique_field_lists[0]).to.deep.equal(['post_id', 'keyword_id'])
   })
 
+  it('should parse combined index field', () => {
+    let text = `
+post_keyword
+------------
+id pk
+post_id fk
+keyword_id fk
+index(post_id,keyword_id)
+`
+    let [table] = parse(text).table_list
+
+    let { name, field_list, index_field_lists } = table
+
+    expect(name).to.equals('post_keyword')
+
+    console.log(field_list)
+    expect(field_list).to.have.lengthOf(3)
+
+    expect(field_list[0].name).to.equals('id')
+    expect(field_list[0].type).to.equals('integer')
+
+    expect(field_list[1].name).to.equals('post_id')
+    expect(field_list[1].type).to.equals('integer')
+
+    expect(field_list[2].name).to.equals('keyword_id')
+    expect(field_list[2].type).to.equals('integer')
+
+    expect(index_field_lists).to.have.lengthOf(1)
+    expect(index_field_lists[0]).to.deep.equal(['post_id', 'keyword_id'])
+  })
+
   describe('null appearing in any order', () => {
     it('should parse null before unique', () => {
       const text = `
