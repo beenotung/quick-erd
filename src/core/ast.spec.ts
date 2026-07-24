@@ -289,7 +289,6 @@ index(post_id,keyword_id)
 
     expect(name).to.equals('post_keyword')
 
-    console.log(field_list)
     expect(field_list).to.have.lengthOf(3)
 
     expect(field_list[0].name).to.equals('id')
