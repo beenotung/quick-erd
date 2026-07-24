@@ -203,7 +203,7 @@ username text
     })
   })
 
-  it('should parse unique field', () => {
+  it('should parse inline unique field', () => {
     const text = `
 user
 ----
@@ -221,6 +221,37 @@ domain text
     expect(field_list[1].name).to.equals('domain')
     expect(field_list[1].type).to.equals('text')
     expect(field_list[1].is_unique).to.be.false
+  })
+
+  it('should parse combined unique field', () => {
+    let text = `
+post_keyword
+------------
+id pk
+post_id fk
+keyword_id fk
+unique(post_id,keyword_id)
+`
+    let [table] = parse(text).table_list
+
+    let { name, field_list, unique_field_lists } = table
+
+    expect(name).to.equals('post_keyword')
+
+    console.log(field_list)
+    expect(field_list).to.have.lengthOf(3)
+
+    expect(field_list[0].name).to.equals('id')
+    expect(field_list[0].type).to.equals('integer')
+
+    expect(field_list[1].name).to.equals('post_id')
+    expect(field_list[1].type).to.equals('integer')
+
+    expect(field_list[2].name).to.equals('keyword_id')
+    expect(field_list[2].type).to.equals('integer')
+
+    expect(unique_field_lists).to.have.lengthOf(1)
+    expect(unique_field_lists[0]).to.deep.equal(['post_id', 'keyword_id'])
   })
 
   describe('null appearing in any order', () => {

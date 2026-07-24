@@ -1,4 +1,4 @@
-import { formatEnum } from './enum'
+import { formatEnum, parseEnumValues } from './enum'
 import {
   Position,
   textBgColorRegex,
@@ -119,7 +119,18 @@ export class Parser implements ParseResult {
         field.is_primary_key = true
       }
     }
-    return { name, field_list, index }
+    const unique_field_lists: string[][] = []
+    for (let i = 0; i < field_list.length; i++) {
+      let field = field_list[i]
+      if (field.name !== 'unique') {
+        continue
+      }
+      let fields = parseEnumValues(formatEnum(field.type))
+      unique_field_lists.push(fields)
+      field_list.splice(i, 1)
+      i--
+    }
+    return { name, field_list, index, unique_field_lists }
   }
   parseField(): Field {
     const field: Field = {
@@ -400,6 +411,7 @@ export type Table = {
   field_list: Field[]
   position?: { x: number; y: number; color?: string }
   index?: number
+  unique_field_lists: string[][]
 }
 
 export type Field = {
