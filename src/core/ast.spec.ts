@@ -223,6 +223,26 @@ domain text
     expect(field_list[1].is_unique).to.be.false
   })
 
+  it('should parse inline index field', () => {
+    const text = `
+user
+----
+username text index
+domain text
+`
+    const table = parseSingleTable(text)
+    const { field_list } = table
+    expect(field_list).to.have.lengthOf(2)
+
+    expect(field_list[0].name).to.equals('username')
+    expect(field_list[0].type).to.equals('text')
+    expect(field_list[0].is_index).to.be.true
+
+    expect(field_list[1].name).to.equals('domain')
+    expect(field_list[1].type).to.equals('text')
+    expect(field_list[1].is_index).to.be.false
+  })
+
   it('should parse combined unique field', () => {
     let text = `
 post_keyword

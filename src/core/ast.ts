@@ -138,6 +138,7 @@ export class Parser implements ParseResult {
       type: '',
       is_null: false,
       is_unique: false,
+      is_index: false,
       is_primary_key: false,
       is_unsigned: false,
       is_zerofill: false,
@@ -205,6 +206,9 @@ export class Parser implements ParseResult {
           break
         case 'UNIQUE':
           field.is_unique = true
+          break
+        case 'INDEX':
+          field.is_index = true
           break
         case 'UNSIGNED':
           field.is_unsigned = true
@@ -419,6 +423,7 @@ export type Field = {
   type: string
   is_primary_key: boolean
   is_unique: boolean
+  is_index: boolean
   is_null: boolean
   is_unsigned: boolean
   is_zerofill: boolean
