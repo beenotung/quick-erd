@@ -18,8 +18,8 @@
 user
 ----
 id int PK
-username varchar(64) unique
-domain varchar(32)
+username nvarchar(64) unique
+domain nvarchar(32)
 created_at datetime
 updated_at datetime
 

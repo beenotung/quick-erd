@@ -4,7 +4,7 @@ import { Knex as KnexType } from 'knex'
 import { dirname, join, relative, resolve } from 'path'
 import { inspect } from 'util'
 import { Field, ParseResult, Table, unwrapQuotedName } from '../core/ast'
-import { isPostgres, isSqlite } from '../utils/db'
+import { isMssql, isPostgres, isSqlite } from '../utils/db'
 import {
   addDependencies,
   addIgnore,
@@ -432,6 +432,7 @@ export function generateAutoMigrate(options: {
   const { db_client } = options
   const is_sqlite = isSqlite(db_client)
   const is_postgres = isPostgres(db_client)
+  const is_mssql = isMssql(db_client)
   const up_lines: string[] = []
   const down_lines: string[] = []
 
@@ -513,8 +514,9 @@ export function generateAutoMigrate(options: {
       // avoid non-effective migration
       // don't distinct datetime and timestamp
       // knex translates 'timestamp' into 'datetime' for sqlite db when running schema query builder
+      // mssql knex timestamps() creates datetime2, which is scanned as 'timestamp'
       if (
-        is_sqlite &&
+        (is_sqlite || is_mssql) &&
         ((field.type === 'datetime' && existing_field.type == 'timestamp') ||
           (existing_field.type === 'datetime' && field.type == 'timestamp'))
       ) {
@@ -553,8 +555,9 @@ export function generateAutoMigrate(options: {
       }
 
       // avoid non-effective migration
-      // don't distinct varchar and nvarchar in sqlite
-      if (is_sqlite && field.type != existing_field.type) {
+      // don't distinct varchar and nvarchar in sqlite/mssql
+      // mssql knex string() creates nvarchar
+      if ((is_sqlite || is_mssql) && field.type != existing_field.type) {
         if (
           field.type.startsWith('nvarchar') &&
           existing_field.type.startsWith('varchar')

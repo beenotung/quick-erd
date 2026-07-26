@@ -20,3 +20,7 @@ export function isPostgres(db_client: string): boolean {
 export function isSqlite(db_client: string): boolean {
   return db_client.includes('sqlite')
 }
+
+export function isMssql(db_client: string): boolean {
+  return db_client.includes('mssql')
+}

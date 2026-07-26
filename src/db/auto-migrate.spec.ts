@@ -856,4 +856,64 @@ describe('auto-migrate TestSuit', () => {
       expect(down_lines[0]).to.contains('collate BINARY')
     })
   })
+
+  context('mssql type aliases', () => {
+    function field(
+      partial: Partial<Field> & Pick<Field, 'name' | 'type'>,
+    ): Field {
+      return {
+        is_primary_key: false,
+        is_null: false,
+        is_unique: false,
+        is_unsigned: false,
+        is_zerofill: false,
+        default_value: undefined,
+        references: undefined,
+        collate: undefined,
+        ...partial,
+      }
+    }
+
+    it('should not distinct datetime and timestamp', () => {
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'mssql',
+        existing_table_list: [
+          {
+            name: 'user',
+            field_list: [field({ name: 'created_at', type: 'timestamp' })],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'user',
+            field_list: [field({ name: 'created_at', type: 'datetime' })],
+          },
+        ],
+        detect_rename: false,
+      })
+      expect(up_lines).to.have.lengthOf(0)
+      expect(down_lines).to.have.lengthOf(0)
+    })
+
+    it('should not distinct varchar and nvarchar', () => {
+      const { up_lines, down_lines } = generateAutoMigrate({
+        db_client: 'mssql',
+        existing_table_list: [
+          {
+            name: 'user',
+            field_list: [field({ name: 'username', type: 'nvarchar(64)' })],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'user',
+            field_list: [field({ name: 'username', type: 'varchar(64)' })],
+          },
+        ],
+        detect_rename: false,
+      })
+      expect(up_lines).to.have.lengthOf(0)
+      expect(down_lines).to.have.lengthOf(0)
+    })
+  })
 })
