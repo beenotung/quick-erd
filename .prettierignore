@@ -11,3 +11,4 @@ examples/node-project/migrations/*_auto-migrate.ts
 examples/node-project/proxy.ts
 .trunk
 tsconfig.json
+examples/node-project/types.ts
