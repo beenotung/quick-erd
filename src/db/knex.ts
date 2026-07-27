@@ -26,7 +26,7 @@ export function loadKnex(client = env.DB_CLIENT || 'pg') {
     console.log(`
 Template for .env file:
 
-DB_CLIENT=better-sqlite3|pg|mysql
+DB_CLIENT=better-sqlite3|pg|mysql|mysql2
 DB_HOST=(optional)
 DB_PORT=(optional)
 DB_NAME=(or POSTGRES_DB)

@@ -4,7 +4,7 @@ import { Knex as KnexType } from 'knex'
 import { dirname, join, relative, resolve } from 'path'
 import { inspect } from 'util'
 import { Field, ParseResult, Table, unwrapQuotedName } from '../core/ast'
-import { isMssql, isPostgres, isSqlite } from '../utils/db'
+import { isMssql, isMysql, isPostgres, isSqlite } from '../utils/db'
 import {
   addDependencies,
   addIgnore,
@@ -338,7 +338,7 @@ const config: { [key: string]: Knex.Config } = {
       port: env.DB_PORT,
       multipleStatements: true,
       ssl: ${ssl == 'required' ? '{ rejectUnauthorized: true }' : ssl == 'lax' ? '{ rejectUnauthorized: false }' : 'false'},
-      ${db_client == 'mysql' ? `charset: "utf8mb4",` : ''}
+      ${isMysql(db_client) ? `charset: "utf8mb4",` : ''}
     },
   }
 }

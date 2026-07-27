@@ -3,6 +3,7 @@ export type DBClient = ReturnType<typeof detectDBClient>
 export function detectDBClient(dbFile_or_client: string) {
   switch (dbFile_or_client) {
     case 'mysql':
+    case 'mysql2':
       return 'mysql' as const
     case 'pg':
     case 'postgresql':
@@ -19,6 +20,10 @@ export function isPostgres(db_client: string): boolean {
 
 export function isSqlite(db_client: string): boolean {
   return db_client.includes('sqlite')
+}
+
+export function isMysql(db_client: string): boolean {
+  return db_client.includes('mysql')
 }
 
 export function isMssql(db_client: string): boolean {
