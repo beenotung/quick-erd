@@ -12,7 +12,12 @@ export async function scanMysqlTableSchema(knex: Knex): Promise<Table[]> {
     const result = await knex.raw(`show create table \`${table}\``)
     const sql: string = result[0][0]['Create Table']
     const field_list = parseCreateTable(sql)
-    table_list.push({ name: table, field_list })
+    table_list.push({
+      name: table,
+      field_list,
+      unique_field_lists: [],
+      index_field_lists: [],
+    })
   }
 
   return table_list

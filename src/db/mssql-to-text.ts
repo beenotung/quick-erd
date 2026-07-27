@@ -11,6 +11,8 @@ export async function scanMssqlTableSchema(knex: Knex): Promise<Table[]> {
     const table: Table = {
       name: table_row.table_name,
       field_list: [],
+      unique_field_lists: [],
+      index_field_lists: [],
     }
     table_list.push(table)
 
@@ -131,6 +133,7 @@ where con.is_disabled = 0
         is_unsigned: false,
         is_zerofill: false,
         is_unique: !pk_row && !!unique_row,
+        is_index: false,
         references: fk_row
           ? {
               type: '>0-',

@@ -32,6 +32,7 @@ export function parseCreateTable(sql: string): Field[] {
           is_zerofill: false,
           is_null: !field.not_null,
           is_unique: false,
+          is_index: false,
           references: undefined,
           default_value: field.default_value,
           collate: field.collate,

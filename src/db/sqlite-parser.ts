@@ -45,7 +45,12 @@ export function parseTableSchema(rows: SchemaRow[]): Table[] {
       throw new Error('Failed to parse table: ' + row.sql)
     }
     let is_virtual = row.sql.toLowerCase().includes('create virtual table')
-    let table: Table = { name: row.name, field_list: field_list }
+    let table: Table = {
+      name: row.name,
+      field_list: field_list,
+      unique_field_lists: [],
+      index_field_lists: [],
+    }
     if (is_virtual) {
       table.is_virtual = true
     }
@@ -187,6 +192,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       is_primary_key,
       is_null,
       is_unique,
+      is_index: false,
       is_unsigned: false,
       is_zerofill: false,
       default_value,

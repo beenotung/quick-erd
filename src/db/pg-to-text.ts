@@ -58,6 +58,8 @@ export async function scanPGTableSchema(knex: Knex): Promise<Table[]> {
     const table: Table = {
       name: table_row.tablename,
       field_list: [],
+      unique_field_lists: [],
+      index_field_lists: [],
     }
     table_list.push(table)
     const result = await knex.raw(
@@ -184,6 +186,7 @@ WHERE table_name = ?
         is_unsigned: false,
         is_zerofill: false,
         is_unique: !!unique_row,
+        is_index: false,
         references: fk_row
           ? {
               type: '>0-',
