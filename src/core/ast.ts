@@ -265,7 +265,13 @@ export class Parser implements ParseResult {
     if (match) {
       line = line.slice(match[0].length)
     }
-    match = line.match(/^\w+\(.*?\)/) || line.match(/^[a-zA-Z0-9_(),"']+/)
+    match =
+      // named type with args, e.g. enum('a', 'b') | varchar(32)
+      line.match(/^\w+\(.*?\)/) ||
+      // bare field list for composite unique/index, e.g. (user_id, status)
+      line.match(/^\([^)]*\)/) ||
+      // plain type token, e.g. integer | text
+      line.match(/^[a-zA-Z0-9_(),"']+/)
     if (!match) {
       return
     }

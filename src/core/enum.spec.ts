@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { formatEnum } from './enum'
+import { formatEnum, parseEnumValues } from './enum'
 
 describe('enum parser', () => {
   it('should parse values without quotes', () => {
@@ -20,5 +20,15 @@ describe('enum parser', () => {
   it('should parse enum in upper case', () => {
     expect(formatEnum('ENUM(T,F)')).to.equal("ENUM('T','F')")
     expect(formatEnum('ENUM(t,f)')).to.equal("ENUM('t','f')")
+  })
+  it('should trim spaces when parsing enum values', () => {
+    expect(parseEnumValues("enum('active', 'recall')")).to.deep.equal([
+      'active',
+      'recall',
+    ])
+    expect(parseEnumValues("enum('active','recall')")).to.deep.equal([
+      'active',
+      'recall',
+    ])
   })
 })

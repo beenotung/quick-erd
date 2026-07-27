@@ -304,6 +304,46 @@ index(post_id,keyword_id)
     expect(index_field_lists[0]).to.deep.equal(['post_id', 'keyword_id'])
   })
 
+  it('should parse combined unique field with spaces', () => {
+    let text = `
+like
+----
+id pk
+user_id fk
+post_id fk
+unique(user_id, post_id)
+`
+    let [table] = parse(text).table_list
+
+    expect(table.unique_field_lists).to.have.lengthOf(1)
+    expect(table.unique_field_lists[0]).to.deep.equal(['user_id', 'post_id'])
+    expect(table.field_list.map(field => field.name)).to.deep.equal([
+      'id',
+      'user_id',
+      'post_id',
+    ])
+  })
+
+  it('should parse combined index field with spaces', () => {
+    let text = `
+post
+----
+id pk
+user_id fk
+status text
+index(user_id, status)
+`
+    let [table] = parse(text).table_list
+
+    expect(table.index_field_lists).to.have.lengthOf(1)
+    expect(table.index_field_lists[0]).to.deep.equal(['user_id', 'status'])
+    expect(table.field_list.map(field => field.name)).to.deep.equal([
+      'id',
+      'user_id',
+      'status',
+    ])
+  })
+
   describe('null appearing in any order', () => {
     it('should parse null before unique', () => {
       const text = `
