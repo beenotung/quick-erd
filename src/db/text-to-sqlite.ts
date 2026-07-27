@@ -19,6 +19,7 @@ export function textToSqlite(text: string) {
         is_primary_key: true,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,

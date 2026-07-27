@@ -108,6 +108,47 @@ domain text
     expect(code).not.to.contains(`table.text('domain').notNullable().unique()`)
   })
 
+  it('should support composite unique fields', () => {
+    const text = `
+like
+----
+user_id integer
+post_id integer
+unique(user_id,post_id)
+`
+    const code = textToKnex(text)
+    expect(code).to.contains(`table.unique(['user_id', 'post_id'])`)
+  })
+
+  it('should support index column', () => {
+    const text = `
+user
+----
+username text index
+domain text
+`
+    const code = textToKnex(text)
+    expect(code).to.contains(`table.text('username').notNullable()`)
+    expect(code).to.contains(`table.text('domain').notNullable()`)
+    expect(code).to.contains(`table.text('username').notNullable().index()`)
+    expect(code).not.to.contains(`table.text('domain').notNullable().index()`)
+  })
+
+  it('should support composite index fields', () => {
+    const text = `
+post
+----
+reply_id integer
+user_id integer
+thread_id integer
+index(reply_id,user_id,thread_id)
+`
+    const code = textToKnex(text)
+    expect(code).to.contains(
+      `table.index(['reply_id', 'user_id', 'thread_id'])`,
+    )
+  })
+
   it("should translate 'blob' sqlite field to knex 'binary' column", () => {
     const text = `
 content

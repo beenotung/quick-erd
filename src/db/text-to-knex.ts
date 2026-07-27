@@ -1,4 +1,5 @@
 import { parse, Field, Table } from '../core/ast'
+import { formatEnum, parseEnumValues } from '../core/enum'
 import { sortTables } from './sort-tables'
 
 const type_alias: Record<string, string> = {
@@ -15,16 +16,13 @@ export function toKnexCreateColumnTypeCode(
   let type = field.type
 
   if (type.match(/^enum/i)) {
-    const values = type
-      .replace(/^enum/i, '')
-      .replace(/^\(/, '[')
-      .replace(/\)$/, ']')
-      .replace(/','/g, "', '")
+    let values = parseEnumValues(formatEnum(type))
+    let values_code = `[${values.map(value => `'${value}'`).join(', ')}]`
 
     code +=
       db_client == 'mssql'
-        ? `.string('${field.name}').checkIn(${values})`
-        : `.enum('${field.name}', ${values})`
+        ? `.string('${field.name}').checkIn(${values_code})`
+        : `.enum('${field.name}', ${values_code})`
     return code
   }
 
@@ -116,6 +114,10 @@ export function toKnexCreateColumnCode(
     code += `.unique()`
   }
 
+  if (field.is_index) {
+    code += `.index()`
+  }
+
   if (field.collate) {
     code += `.collate('${field.collate}')`
   }
@@ -143,6 +145,14 @@ export function toKnexCreateTableCode(table: Table, db_client: string): string {
   if (!fields.created_at && !fields.updated_at && !fields.timestamp) {
     code += `
       table.timestamps(false, true)`
+  }
+  for (let fields of table.unique_field_lists || []) {
+    code += `
+      table.unique([${fields.map(field => `'${field}'`).join(', ')}])`
+  }
+  for (let fields of table.index_field_lists || []) {
+    code += `
+      table.index([${fields.map(field => `'${field}'`).join(', ')}])`
   }
   code += `
     })
