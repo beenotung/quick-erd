@@ -31,11 +31,14 @@ localStorage.erd = ${JSON.stringify(text)};
 })
 
 app.put('/erd.txt', express.text({ type: 'plain/text' }), (req, res) => {
-  const text = req.body
+  let text = req.body
   if (typeof text !== 'string') {
     res.status(400)
     res.json({ error: 'expect erd text in plain text body' })
     return
+  }
+  if (!text.endsWith('\n')) {
+    text += '\n'
   }
 
   console.log(`[${timestamp()}] updated ${erd_file}`)
