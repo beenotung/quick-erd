@@ -12,11 +12,13 @@ module.exports = {
   },
 
   mysql: {
-    client: 'mysql',
+    client: 'mysql2',
     connection: {
       database: env.DB_NAME,
       user: env.DB_USERNAME,
       password: env.DB_PASSWORD,
+      host: env.DB_HOST,
+      port: env.DB_PORT,
     },
     pool: {
       min: 2,
@@ -42,7 +44,6 @@ module.exports = {
     migrations: {
       tableName: 'knex_migrations',
     },
-    debug: true,
   },
 
   pg: {
@@ -53,6 +54,12 @@ module.exports = {
       password: env.DB_PASSWORD,
       host: env.DB_HOST,
       port: env.DB_PORT,
+      ssl:
+        env.DB_SSL == 'required'
+          ? { rejectUnauthorized: true }
+          : env.DB_SSL == 'lax'
+            ? { rejectUnauthorized: false }
+            : false,
     },
     pool: {
       min: 2,
@@ -69,6 +76,7 @@ switch (env.DB_CLIENT) {
     module.exports.development = module.exports.sqlite
     break
   case 'mysql':
+  case 'mysql2':
     module.exports.development = module.exports.mysql
     break
   case 'mssql':
