@@ -121,6 +121,12 @@ export function parseCreateTable(sql: string): Field[] | null {
       const [before, after] = split(rest, lower, ' unique ')
       rest = before + ' ' + after
     }
+    let is_index = false
+    if (lower.includes(' index ')) {
+      is_index = true
+      const [before, after] = split(rest, lower, ' index ')
+      rest = before + ' ' + after
+    }
     rest = rest.trim()
     const [name, rest1] = parseName(rest)
     rest = rest1.trim()
@@ -192,7 +198,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       is_primary_key,
       is_null,
       is_unique,
-      is_index: false,
+      is_index,
       is_unsigned: false,
       is_zerofill: false,
       default_value,

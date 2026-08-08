@@ -437,6 +437,42 @@ create table user (
     ]
     expect(parseCreateTable(sql)).to.deep.equals(ast)
   })
+  it('should parse index column', () => {
+    const sql = /* sql */ `
+create table post (
+  status text index
+, title text
+)`
+    const ast: Field[] = [
+      {
+        name: 'status',
+        type: 'text',
+        is_primary_key: false,
+        is_null: true,
+        is_unique: false,
+        is_index: true,
+        is_unsigned: false,
+        is_zerofill: false,
+        default_value: undefined,
+        references: undefined,
+        collate: undefined,
+      },
+      {
+        name: 'title',
+        type: 'text',
+        is_primary_key: false,
+        is_null: true,
+        is_unique: false,
+        is_index: false,
+        is_unsigned: false,
+        is_zerofill: false,
+        default_value: undefined,
+        references: undefined,
+        collate: undefined,
+      },
+    ]
+    expect(parseCreateTable(sql)).to.deep.equals(ast)
+  })
   it('should parse unique index', () => {
     const rows: SchemaRow[] = [
       {
