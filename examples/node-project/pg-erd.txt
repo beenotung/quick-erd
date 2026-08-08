@@ -1,12 +1,21 @@
 user
 -
 id pk
-username text unique null
-password_hash varchar(60)
-email varchar(255) null
+username varchar(64) unique null
+password_hash char(97)
+email varchar(255) null unique
 
 post
 -
 id pk
 user_id FK >- user.id
-status enum('active','recall')
+status enum('active', 'recall') index
+title text
+index(user_id, status)
+
+like
+-
+id pk
+user_id fk
+post_id fk
+unique(user_id,post_id)

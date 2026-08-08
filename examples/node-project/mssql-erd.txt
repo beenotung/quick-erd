@@ -29,7 +29,7 @@ thread
 id int PK
 user_id int FK >- user.id
 topic text
-status enum('active','pending')
+status enum('active','pending') index
 forum_id int FK >- forum.id
 created_at datetime
 updated_at datetime
@@ -53,6 +53,7 @@ thread_id int FK >- thread.id
 content text
 created_at datetime
 updated_at datetime
+index(reply_id,user_id,thread_id)
 
 
 like
@@ -61,3 +62,4 @@ user_id int FK >- user.id
 post_id int FK >- post.id
 created_at datetime
 updated_at datetime
+unique(user_id,post_id)
