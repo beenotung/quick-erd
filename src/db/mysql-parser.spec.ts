@@ -103,6 +103,26 @@ CREATE TABLE \`user\` (
   })
 })
 
+describe('mysql-parser index TestSuit', () => {
+  it('should parse INDEX key', () => {
+    let sql = `
+CREATE TABLE \`post\` (
+  \`id\` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  \`user_id\` int(10) unsigned NOT NULL,
+  \`status\` varchar(32) NOT NULL,
+  PRIMARY KEY (\`id\`),
+  INDEX \`post_user_id\` (\`user_id\`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`
+    let fields = parseCreateTable(sql)
+    let user_id = fields.find(field => field.name === 'user_id')
+    expect(user_id).not.to.be.undefined
+    expect(user_id!.is_index).to.be.true
+    let status = fields.find(field => field.name === 'status')
+    expect(status!.is_index).to.be.false
+  })
+})
+
 describe('mysql-parser collate TestSuit', () => {
   it('should parse collate from varchar column', () => {
     const sql = `

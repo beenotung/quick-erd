@@ -8,6 +8,7 @@ export function parseCreateTable(sql: string): Field[] {
   const field_list: Field[] = []
   const primary_key_set = new Set<string>()
   const unique_key_set = new Set<string[]>()
+  const index_key_set = new Set<string[]>()
   const foreign_key_map = new Map<string, ForeignKeyReference>()
   for (;;) {
     const field = parseStatement(sql)
@@ -15,8 +16,10 @@ export function parseCreateTable(sql: string): Field[] {
     if (field.is_skip === false) {
       if (field.is_primary_key === true) {
         primary_key_set.add(field.name)
-      } else if (field.is_unique_key) {
+      } else if (field.is_unique_key === true) {
         unique_key_set.add(field.fields)
+      } else if (field.is_index_key === true) {
+        index_key_set.add(field.fields)
       } else if (field.is_foreign_key === true) {
         foreign_key_map.set(field.field, {
           type: '>0-',
@@ -58,6 +61,13 @@ export function parseCreateTable(sql: string): Field[] {
     for (const field of field_list) {
       if (unique_fields.includes(field.name)) {
         field.is_unique = true
+      }
+    }
+  }
+  for (const index_fields of index_key_set) {
+    for (const field of field_list) {
+      if (index_fields.includes(field.name)) {
+        field.is_index = true
       }
     }
   }
@@ -118,6 +128,7 @@ type Statement =
       is_skip: false
       is_primary_key: false
       is_unique_key: true
+      is_index_key: false
       fields: string[]
       rest: string
     }
@@ -125,6 +136,15 @@ type Statement =
       is_skip: false
       is_primary_key: false
       is_unique_key: false
+      is_index_key: true
+      fields: string[]
+      rest: string
+    }
+  | {
+      is_skip: false
+      is_primary_key: false
+      is_unique_key: false
+      is_index_key: false
       is_foreign_key: false
       name: string
       type: string
@@ -139,6 +159,7 @@ type Statement =
       is_skip: false
       is_primary_key: false
       is_unique_key: false
+      is_index_key: false
       is_foreign_key: true
       field: string
       ref_table: string
@@ -164,6 +185,12 @@ function parseStatement(sql: string): Statement {
   const is_unique_key = sql.startsWith('UNIQUE KEY')
   if (is_unique_key) {
     return parseUniqueKeyStatement(sql)
+  }
+
+  /* parse index */
+  const is_index = sql.startsWith('INDEX')
+  if (is_index) {
+    return parseIndexStatement(sql)
   }
 
   /* parse foreign key constraint */
@@ -259,6 +286,7 @@ function parseColumnStatement(sql: string): Statement {
     is_skip: false,
     is_primary_key: false,
     is_unique_key: false,
+    is_index_key: false,
     is_foreign_key: false,
     name,
     type,
@@ -298,6 +326,31 @@ function parseUniqueKeyStatement(sql: string): Statement {
     is_skip: false,
     is_primary_key: false,
     is_unique_key: true,
+    is_index_key: false,
+    fields,
+    rest: sql,
+  }
+}
+function parseIndexStatement(sql: string): Statement {
+  sql = sql.slice('INDEX'.length).trim()
+
+  /* parse index key name */
+  let result = parseName(sql)
+  sql = result.rest.trim()
+
+  /* parse column names */
+  // TODO parse multiple columns
+  result = parseNameInBracket(sql, 'INDEX')
+  sql = result.rest.replace(/using hash/i, '').trim()
+  if (sql && !sql.startsWith(',')) {
+    throw new Error(`unknown tokens after INDEX: ${JSON.stringify(sql)}`)
+  }
+  const fields: string[] = [result.name]
+  return {
+    is_skip: false,
+    is_primary_key: false,
+    is_unique_key: false,
+    is_index_key: true,
     fields,
     rest: sql,
   }
@@ -342,6 +395,7 @@ function parseConstraintStatement(sql: string): Statement {
     is_skip: false,
     is_primary_key: false,
     is_unique_key: false,
+    is_index_key: false,
     is_foreign_key: true,
     field,
     ref_table,
