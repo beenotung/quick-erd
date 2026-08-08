@@ -2,6 +2,7 @@ import { closest } from 'fastest-levenshtein'
 import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs'
 import { Knex as KnexType } from 'knex'
 import { dirname, join, relative, resolve } from 'path'
+import { posix } from 'path'
 import { inspect } from 'util'
 import { Field, ParseResult, Table, unwrapQuotedName } from '../core/ast'
 import { isMssql, isMysql, isPostgres, isSqlite } from '../utils/db'
@@ -190,7 +191,7 @@ export function setupGitIgnore(options: { dbFile: string | undefined }) {
   ])
   if (options.dbFile) {
     const dir = dirname(options.dbFile)
-    const file = join(dir, '.gitignore')
+    const file = posix.join(dir, '.gitignore')
     addIgnore(file, [
       '*.sqlite3',
       '*.sqlite3-shm',
@@ -221,7 +222,7 @@ export function setupPrettierIgnore(options: {
     const dir = relative(rootDir, process.cwd()).replaceAll('\\', '/')
     addIgnore(
       join(rootDir, '.prettierignore'),
-      patterns.map(pattern => dir + '/' + pattern),
+      patterns.map(pattern => posix.join(dir, pattern)),
     )
   }
 }
@@ -232,7 +233,7 @@ function findRootDir(): string | null {
     if (isRootDir(resolve(dir))) return null
     let file = join(dir, 'package.json')
     if (existsSync(file)) return dir
-    dir = join('..', dir)
+    dir = posix.join('..', dir)
   }
 }
 
