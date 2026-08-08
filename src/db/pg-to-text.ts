@@ -31,14 +31,18 @@ function toDataType(column_row: ColumnRow): string {
   return column_row.data_type
 }
 
-function parseEnum(
+export function parseEnum(
   column_name: string,
-  // e.g. ((status = ANY (ARRAY['active'::text, 'recall'::text])))
+  // knex/pg versions may wrap with one or two parentheses, e.g.
+  // (status = ANY (ARRAY['active'::text, 'recall'::text]))
+  // ((status = ANY (ARRAY['active'::text, 'recall'::text])))
   check_clause: string,
 ): string | null {
-  const matches = check_clause
-    ?.replace(column_name, 'column_name')
-    .match(/\(\(column_name = ANY \(ARRAY\[(.*)\]\)\)\)/)
+  const normalized = check_clause?.replace(column_name, 'column_name')
+  // handle both single-bracket and double-bracket wrappers
+  const matches =
+    normalized?.match(/\(column_name = ANY \(ARRAY\[(.*)\]\)\)/) ||
+    normalized?.match(/\(\(column_name = ANY \(ARRAY\[(.*)\]\)\)\)/)
   if (!matches) return null
   const values: string[] = matches[1].split(',').map(value => {
     value = value.trim()
