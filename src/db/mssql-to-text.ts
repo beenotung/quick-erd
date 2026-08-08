@@ -97,6 +97,35 @@ order by i.[name]
       )
       const unique_row = result[0]
 
+      /* check index */
+      result = await knex.raw(
+        /* sql */ `
+select
+  i.name as index_name
+from sys.objects t
+inner join sys.indexes i on t.object_id = i.object_id
+cross apply (
+  select col.[name] + ', '
+  from sys.index_columns ic
+  inner join sys.columns col
+     on ic.object_id = col.object_id
+    and ic.column_id = col.column_id
+  where ic.object_id = t.object_id
+    and ic.index_id = i.index_id
+  order by key_ordinal
+  for xml path ('')
+) D (column_name_)
+where t.is_ms_shipped <> 1
+  and t.type = 'U' -- U for table, V for view
+  and i.is_unique = 0
+  and t.name = ?
+  and substring(column_name_, 1, len(column_name_)-1) = ?
+order by i.[name]
+`,
+        [table.name, column.column_name],
+      )
+      const index_row = result[0]
+
       // TODO
       /* check enum */
       result = await knex.raw(
@@ -133,7 +162,7 @@ where con.is_disabled = 0
         is_unsigned: false,
         is_zerofill: false,
         is_unique: !pk_row && !!unique_row,
-        is_index: false,
+        is_index: !pk_row && !unique_row && !!index_row,
         references: fk_row
           ? {
               type: '>0-',
