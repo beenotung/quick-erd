@@ -128,7 +128,7 @@ WHERE tc.constraint_type = 'PRIMARY KEY'
       )
       const pk_row = result.rows[0]
 
-      /* check unique */
+      /* check unique (single-column only; multi-column goes to unique_field_lists) */
       result = await knex.raw(
         /* sql */ `
 SELECT
@@ -144,11 +144,40 @@ FROM
 WHERE tc.constraint_type = 'UNIQUE'
   AND tc.table_name = ?
   AND kcu.column_name = ?
+  AND (
+    SELECT count(*)
+    FROM information_schema.key_column_usage AS kcu2
+    WHERE kcu2.constraint_name = tc.constraint_name
+      AND kcu2.table_schema = tc.table_schema
+      AND kcu2.table_name = tc.table_name
+  ) = 1
 ;
 `,
         [table.name, column_row.column_name],
       )
       const unique_row = result.rows[0]
+
+      /* check index */
+      result = await knex.raw(
+        /* sql */ `
+SELECT
+    ccu.column_name AS index_column_name
+FROM
+    information_schema.table_constraints AS tc
+    JOIN information_schema.key_column_usage AS kcu
+      ON tc.constraint_name = kcu.constraint_name
+      AND tc.table_schema = kcu.table_schema
+    JOIN information_schema.constraint_column_usage AS ccu
+      ON ccu.constraint_name = tc.constraint_name
+      AND ccu.table_schema = tc.table_schema
+WHERE tc.constraint_type = 'INDEX'
+  AND tc.table_name = ?
+  AND kcu.column_name = ?
+;
+`,
+        [table.name, column_row.column_name],
+      )
+      const index_row = result.rows[0]
 
       let type = toDataType(column_row)
 
@@ -190,7 +219,7 @@ WHERE table_name = ?
         is_unsigned: false,
         is_zerofill: false,
         is_unique: !!unique_row,
-        is_index: false,
+        is_index: !!index_row,
         references: fk_row
           ? {
               type: '>0-',
