@@ -41,6 +41,35 @@ export class DiagramController {
     return (this.maxZIndex + 1) * 100
   }
 
+  bringTableToFront(tableDiv: HTMLDivElement) {
+    this.maxZIndex++
+    tableDiv.style.zIndex = this.maxZIndex.toString()
+  }
+
+  /** Larger tables sit lower so smaller overlapping tables stay reachable. */
+  restackTablesByArea() {
+    let tables = Array.from(this.tableMap.values())
+    if (tables.length === 0) return
+
+    let withArea = tables.map(table => ({
+      table,
+      area: table.div.offsetWidth * table.div.offsetHeight,
+    }))
+    withArea.sort((rowA, rowB) => {
+      if (rowA.area !== rowB.area) {
+        return rowB.area - rowA.area
+      }
+      return rowA.table.data.name.localeCompare(rowB.table.data.name)
+    })
+
+    let z = 1
+    for (let { table } of withArea) {
+      table.div.style.zIndex = String(z)
+      z++
+    }
+    this.maxZIndex = z - 1
+  }
+
   onMouseMove?: (ev: { clientX: number; clientY: number }) => void
 
   constructor(
@@ -81,10 +110,18 @@ export class DiagramController {
       }
     })
     this.div.addEventListener('mouseup', () => {
+      let wasTableDrag = !!this.onMouseMove
       delete this.onMouseMove
+      if (wasTableDrag) {
+        this.restackTablesByArea()
+      }
     })
     this.div.addEventListener('touchend', () => {
+      let wasTableDrag = !!this.onMouseMove
       delete this.onMouseMove
+      if (wasTableDrag) {
+        this.restackTablesByArea()
+      }
     })
 
     this.controls
@@ -141,8 +178,7 @@ export class DiagramController {
     let startX = 0
     let startY = 0
     const onMouseDown = (ev: { clientX: number; clientY: number }) => {
-      this.maxZIndex++
-      tableDiv.style.zIndex = this.maxZIndex.toString()
+      this.bringTableToFront(tableDiv)
       isMouseDown = true
       startX = ev.clientX
       startY = ev.clientY
@@ -163,12 +199,12 @@ export class DiagramController {
       if (!e) return
       onMouseDown(e)
     })
-    tableDiv.addEventListener('mouseup', () => {
+    const onPointerUp = () => {
       isMouseDown = false
-    })
-    tableDiv.addEventListener('touchend', () => {
-      isMouseDown = false
-    })
+      this.restackTablesByArea()
+    }
+    tableDiv.addEventListener('mouseup', onPointerUp)
+    tableDiv.addEventListener('touchend', onPointerUp)
     this.tablesContainer.appendChild(tableDiv)
 
     const controller = new TableController(this, tableDiv, table)
@@ -241,6 +277,11 @@ export class DiagramController {
     })
 
     this.controls.style.zIndex = this.getSafeZIndex().toString()
+
+    requestAnimationFrame(() => {
+      this.restackTablesByArea()
+      this.controls.style.zIndex = this.getSafeZIndex().toString()
+    })
   }
 
   renameTable(
@@ -395,6 +436,7 @@ export class DiagramController {
       if (!isMoved) {
         this.isAutoMoving = false
         tables.forEach(({ table }) => table.saveTransform())
+        this.restackTablesByArea()
         return
       }
 
@@ -410,6 +452,7 @@ export class DiagramController {
       table.rerenderColumns()
       table.renderLine(diagramRect)
     })
+    requestAnimationFrame(() => this.restackTablesByArea())
   }
 
   applyFontSize(mode?: 'skip_storage') {
