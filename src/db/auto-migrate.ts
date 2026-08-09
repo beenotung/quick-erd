@@ -248,13 +248,9 @@ export function setupEnvFile(options: { srcDir: string; db_client: string }) {
   if (existsSync(file)) {
     return
   }
-  addDependencies('dotenv', '^17.2.3')
   addDependencies('populate-env', '^2.6.1')
   const code = `
-import { config } from 'dotenv'
 import populateEnv from 'populate-env'
-
-config({ quiet: true })
 
 export const env = {
   DB_HOST: 'localhost',
@@ -265,7 +261,7 @@ export const env = {
   DB_SSL: 'lax', // 'required' or 'lax' or 'false'
 }
 
-populateEnv(env, { mode: 'halt' })
+populateEnv(env, { mode: 'halt', auto_load: true })
 `
   writeSrcFile(file, code)
 }

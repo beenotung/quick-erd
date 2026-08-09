@@ -1,7 +1,4 @@
-import { config } from 'dotenv'
 import populateEnv from 'populate-env'
-
-config({ quiet: true })
 
 export const env = {
   DB_CLIENT: 'better-sqlite3',
@@ -13,4 +10,4 @@ export const env = {
   DB_SSL: 'lax',
 }
 
-populateEnv(env, { mode: 'halt' })
+populateEnv(env, { mode: 'halt', auto_load: true })
