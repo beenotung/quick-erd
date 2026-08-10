@@ -233,6 +233,104 @@ WHERE table_name = ?
         collate: undefined,
       })
     }
+
+    /* check multi-column unique constraints */
+    const uniqueResult = await knex.raw(
+      /* sql */ `
+SELECT
+    tc.constraint_name,
+    array_agg(kcu.column_name ORDER BY kcu.ordinal_position) AS column_names
+FROM
+    information_schema.table_constraints AS tc
+    JOIN information_schema.key_column_usage AS kcu
+      ON tc.constraint_name = kcu.constraint_name
+      AND tc.table_schema = kcu.table_schema
+      AND tc.table_name = kcu.table_name
+WHERE tc.constraint_type = 'UNIQUE'
+  AND tc.table_name = ?
+GROUP BY tc.constraint_name
+HAVING count(*) > 1
+;
+`,
+      [table.name],
+    )
+    for (const row of uniqueResult.rows) {
+      table.unique_field_lists.push(toColumnList(row.column_names))
+    }
+
+    /* check multi-column unique indexes (CREATE UNIQUE INDEX, not a table constraint) */
+    const uniqueIndexResult = await knex.raw(
+      /* sql */ `
+SELECT
+    ic.relname AS index_name,
+    array_agg(a.attname ORDER BY k.ordinality) AS column_names
+FROM pg_index i
+JOIN pg_class t ON t.oid = i.indrelid
+JOIN pg_namespace n ON n.oid = t.relnamespace
+JOIN pg_class ic ON ic.oid = i.indexrelid
+JOIN LATERAL unnest(i.indkey::smallint[]) WITH ORDINALITY AS k(attnum, ordinality) ON true
+JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = k.attnum
+WHERE n.nspname = 'public'
+  AND t.relname = ?
+  AND i.indisunique
+  AND NOT i.indisprimary
+  AND i.indnkeyatts > 1
+  AND k.ordinality <= i.indnkeyatts
+GROUP BY ic.relname
+;
+`,
+      [table.name],
+    )
+    for (const row of uniqueIndexResult.rows) {
+      table.unique_field_lists.push(toColumnList(row.column_names))
+    }
+    table.unique_field_lists = dedupeLists(table.unique_field_lists)
+
+    /* check multi-column indexes */
+    const indexResult = await knex.raw(
+      /* sql */ `
+SELECT
+    ic.relname AS index_name,
+    array_agg(a.attname ORDER BY k.ordinality) AS column_names
+FROM pg_index i
+JOIN pg_class t ON t.oid = i.indrelid
+JOIN pg_namespace n ON n.oid = t.relnamespace
+JOIN pg_class ic ON ic.oid = i.indexrelid
+JOIN LATERAL unnest(i.indkey::smallint[]) WITH ORDINALITY AS k(attnum, ordinality) ON true
+JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = k.attnum
+WHERE n.nspname = 'public'
+  AND t.relname = ?
+  AND NOT i.indisprimary
+  AND NOT i.indisunique
+  AND i.indnkeyatts > 1
+  AND k.ordinality <= i.indnkeyatts
+GROUP BY ic.relname
+;
+`,
+      [table.name],
+    )
+    for (const row of indexResult.rows) {
+      table.index_field_lists.push(toColumnList(row.column_names))
+    }
   }
   return table_list
+}
+
+function toColumnList(columnNames: string[] | string): string[] {
+  if (Array.isArray(columnNames)) return columnNames
+  const inner = columnNames.slice(1, -1)
+  if (!inner) return []
+  return inner.split(',').map(name => name.trim())
+}
+
+function dedupeLists(lists: string[][]): string[][] {
+  const seen = new Set<string>()
+  const result: string[][] = []
+  for (const list of lists) {
+    const key = list.join('\u0000')
+    if (seen.has(key)) continue
+    seen.add(key)
+    result.push(list)
+  }
+  return result
 }
