@@ -334,13 +334,19 @@ function parseUniqueKeyStatement(sql: string): Statement {
 function parseIndexStatement(sql: string): Statement {
   sql = sql.replace(/^(INDEX|KEY)/, '').trim()
 
-  /* parse index key name */
-  let result = parseName(sql)
-  sql = result.rest.trim()
+  /* parse index key name (optional, e.g. `KEY (a)` has no name) */
+  if (!sql.startsWith('(')) {
+    const nameResult = parseName(sql)
+    sql = nameResult.rest.trim()
+  }
+
+  /* strip index type placed before the column list, e.g. KEY `idx` USING BTREE (`a`) */
+  sql = sql.replace(/^using (btree|hash)/i, '').trim()
 
   /* parse column names */
   let namesResult = parseNamesInBracket(sql, 'INDEX')
-  sql = namesResult.rest.replace(/using hash/i, '').trim()
+  /* strip index type placed after the column list, e.g. KEY `idx` (`a`) USING BTREE */
+  sql = namesResult.rest.replace(/using (btree|hash)/i, '').trim()
   if (sql && !sql.startsWith(',')) {
     throw new Error(`unknown tokens after INDEX: ${JSON.stringify(sql)}`)
   }
@@ -461,6 +467,14 @@ function parseNamesInBracket(sql: string, context: string): { names: string[]; r
     const result = parseName(sql)
     names.push(result.name)
     sql = result.rest.trim()
+    // skip prefix-length suffix, e.g. `name`(10)
+    if (sql.startsWith('(')) {
+      const close = sql.indexOf(')')
+      if (close === -1) {
+        throw new Error(`missing ')' for ${context} prefix length`)
+      }
+      sql = sql.slice(close + 1).trim()
+    }
     if (sql.startsWith(',')) {
       sql = sql.slice(1).trim()
     }
