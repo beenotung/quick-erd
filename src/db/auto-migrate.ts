@@ -765,6 +765,22 @@ export function generateAutoMigrate(options: {
       })
     })
 
+    // diff composite unique / index keys
+    diffCompositeKeys({
+      keyType: 'unique',
+      existingLists: existing_table.unique_field_lists,
+      parsedLists: table.unique_field_lists,
+      upLines: table_up_lines,
+      downLines: table_down_lines,
+    })
+    diffCompositeKeys({
+      keyType: 'index',
+      existingLists: existing_table.index_field_lists,
+      parsedLists: table.index_field_lists,
+      upLines: table_up_lines,
+      downLines: table_down_lines,
+    })
+
     function mergeLines(lines: string[]): string {
       return lines
         .map(line => '    ' + line.trim())
@@ -945,6 +961,66 @@ function alterUnique(field: Field): string {
   } else {
     return `table.dropUnique([${inspect(field.name)}])`
   }
+}
+function diffCompositeKeys({
+  keyType,
+  existingLists,
+  parsedLists,
+  upLines,
+  downLines,
+}: {
+  keyType: 'unique' | 'index'
+  existingLists: string[][]
+  parsedLists: string[][]
+  upLines: string[]
+  downLines: string[]
+}) {
+  const [removed, added] = diffArrayOfArrays({
+    existingLists,
+    parsedLists,
+  })
+  const add = (fields: string[]) =>
+    `table.${keyType}([${fields.map(field => inspect(field)).join(', ')}])`
+  const drop = (fields: string[]) =>
+    `table.drop${keyType === 'unique' ? 'Unique' : 'Index'}([${fields
+      .map(field => inspect(field))
+      .join(', ')}])`
+  for (const fields of added) {
+    upLines.push(add(fields))
+    downLines.unshift(drop(fields))
+  }
+  for (const fields of removed) {
+    upLines.push(drop(fields))
+    downLines.unshift(add(fields))
+  }
+}
+function diffArrayOfArrays({
+  existingLists,
+  parsedLists,
+}: {
+  existingLists: string[][]
+  parsedLists: string[][]
+}): [string[][], string[][]] {
+  const existingSet = new Set(existingLists.map(toKey))
+  const parsedSet = new Set(parsedLists.map(toKey))
+
+  const removed: string[][] = []
+  const added: string[][] = []
+
+  for (const fields of existingLists) {
+    if (parsedSet.has(toKey(fields))) continue
+    removed.push(fields)
+  }
+
+  for (const fields of parsedLists) {
+    if (existingSet.has(toKey(fields))) continue
+    added.push(fields)
+  }
+
+  return [removed, added]
+}
+function toKey(fields: string[]) {
+  return JSON.stringify(fields)
 }
 function alterNullable(field: Field): string {
   if (field.is_null) {

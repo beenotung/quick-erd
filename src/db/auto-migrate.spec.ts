@@ -1147,4 +1147,68 @@ describe('auto-migrate TestSuit', () => {
       expect(down_lines).to.have.lengthOf(0)
     })
   })
+
+  context('composite unique/index keys', () => {
+    it('should drop removed composite unique in up and restore in down', () => {
+      const existing_table_list: Table[] = [
+        {
+          name: 'like',
+          field_list: [],
+          unique_field_lists: [['user_id', 'post_id']],
+          index_field_lists: [],
+        },
+      ]
+      const parsed_table_list: Table[] = [
+        {
+          name: 'like',
+          field_list: [],
+          unique_field_lists: [],
+          index_field_lists: [],
+        },
+      ]
+      const { up_lines, down_lines } = generateAutoMigrate({
+        existing_table_list,
+        parsed_table_list,
+        detect_rename: false,
+        db_client: 'better-sqlite3',
+      })
+      expect(up_lines.join('\n')).to.contain(
+        "table.dropUnique(['user_id', 'post_id'])",
+      )
+      expect(down_lines.join('\n')).to.contain(
+        "table.unique(['user_id', 'post_id'])",
+      )
+    })
+
+    it('should add new composite index in up and drop in down', () => {
+      const existing_table_list: Table[] = [
+        {
+          name: 'like',
+          field_list: [],
+          unique_field_lists: [],
+          index_field_lists: [],
+        },
+      ]
+      const parsed_table_list: Table[] = [
+        {
+          name: 'like',
+          field_list: [],
+          unique_field_lists: [],
+          index_field_lists: [['user_id', 'post_id']],
+        },
+      ]
+      const { up_lines, down_lines } = generateAutoMigrate({
+        existing_table_list,
+        parsed_table_list,
+        detect_rename: false,
+        db_client: 'better-sqlite3',
+      })
+      expect(up_lines.join('\n')).to.contain(
+        "table.index(['user_id', 'post_id'])",
+      )
+      expect(down_lines.join('\n')).to.contain(
+        "table.dropIndex(['user_id', 'post_id'])",
+      )
+    })
+  })
 })
