@@ -161,18 +161,20 @@ WHERE tc.constraint_type = 'UNIQUE'
       result = await knex.raw(
         /* sql */ `
 SELECT
-    ccu.column_name AS index_column_name
-FROM
-    information_schema.table_constraints AS tc
-    JOIN information_schema.key_column_usage AS kcu
-      ON tc.constraint_name = kcu.constraint_name
-      AND tc.table_schema = kcu.table_schema
-    JOIN information_schema.constraint_column_usage AS ccu
-      ON ccu.constraint_name = tc.constraint_name
-      AND ccu.table_schema = tc.table_schema
-WHERE tc.constraint_type = 'INDEX'
-  AND tc.table_name = ?
-  AND kcu.column_name = ?
+    ic.relname AS index_name
+FROM pg_index i
+JOIN pg_class t ON t.oid = i.indrelid
+JOIN pg_namespace n ON n.oid = t.relnamespace
+JOIN pg_class ic ON ic.oid = i.indexrelid
+JOIN pg_attribute a
+  ON a.attrelid = i.indrelid
+ AND a.attnum = ANY (i.indkey)
+WHERE n.nspname = 'public'
+  AND t.relname = ?
+  AND a.attname = ?
+  AND NOT i.indisprimary
+  AND NOT i.indisunique
+LIMIT 1
 ;
 `,
         [table.name, column_row.column_name],
