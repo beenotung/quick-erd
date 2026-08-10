@@ -291,6 +291,38 @@ CREATE TABLE \`post\` (
     const title = field_list.find(field => field.name === 'title')
     expect(title!.is_index).to.be.true
   })
+
+  it('should parse FULLTEXT INDEX', () => {
+    const sql = `
+CREATE TABLE \`post\` (
+  \`id\` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  \`title\` text NOT NULL,
+  PRIMARY KEY (\`id\`),
+  FULLTEXT INDEX \`post_title\` (\`title\`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`
+    const field_list = parseCreateTable(sql).field_list
+    const title = field_list.find(field => field.name === 'title')
+    expect(title!.is_index).to.be.true
+  })
+
+  it('should parse foreign key with ON DELETE clause', () => {
+    const sql = `
+CREATE TABLE \`comment\` (
+  \`id\` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  \`post_id\` int(10) unsigned NOT NULL,
+  PRIMARY KEY (\`id\`),
+  CONSTRAINT \`comment_post_id_foreign\` FOREIGN KEY (\`post_id\`) REFERENCES \`post\` (\`id\`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`
+    const field_list = parseCreateTable(sql).field_list
+    const post_id = field_list.find(field => field.name === 'post_id')
+    expect(post_id!.references).to.deep.equal({
+      type: '>0-',
+      table: 'post',
+      field: 'id',
+    })
+  })
 })
 
 describe('mysql-parser collate TestSuit', () => {

@@ -184,12 +184,14 @@ function parseStatement(sql: string): Statement {
     return parseUniqueKeyStatement(sql)
   }
 
-  /* parse index (incl. FULLTEXT KEY / SPATIAL KEY / KEY) */
+  /* parse index (incl. FULLTEXT KEY/INDEX, SPATIAL KEY/INDEX, KEY) */
   const is_index =
     sql.startsWith('INDEX') ||
     sql.startsWith('KEY ') ||
     sql.startsWith('FULLTEXT KEY') ||
-    sql.startsWith('SPATIAL KEY')
+    sql.startsWith('FULLTEXT INDEX') ||
+    sql.startsWith('SPATIAL KEY') ||
+    sql.startsWith('SPATIAL INDEX')
   if (is_index) {
     return parseIndexStatement(sql)
   }
@@ -342,7 +344,9 @@ function parseUniqueKeyStatement(sql: string): Statement {
   }
 }
 function parseIndexStatement(sql: string): Statement {
-  sql = sql.replace(/^(FULLTEXT KEY|SPATIAL KEY|INDEX|KEY)/, '').trim()
+  sql = sql
+    .replace(/^(FULLTEXT INDEX|SPATIAL INDEX|FULLTEXT KEY|SPATIAL KEY|INDEX|KEY)/, '')
+    .trim()
 
   /* parse index key name (optional, e.g. `KEY (a)` has no name) */
   if (!sql.startsWith('(')) {
@@ -404,6 +408,9 @@ function parseConstraintStatement(sql: string): Statement {
   result = parseNameInBracket(sql, 'FOREIGN KEY reference field name')
   const ref_field = result.name
   sql = result.rest.trim()
+
+  /* strip trailing ON DELETE / ON UPDATE clauses */
+  sql = sql.replace(/^on (delete|update) [\w\s]+/i, '').trim()
 
   return {
     is_skip: false,
