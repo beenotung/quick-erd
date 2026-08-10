@@ -14,10 +14,17 @@ import {
 } from './meta'
 
 export function tableToString(table: Table): string {
+  const fields = table.field_list.map(fieldToString)
+  for (const list of table.unique_field_lists || []) {
+    fields.push(`unique(${list.join(',')})`)
+  }
+  for (const list of table.index_field_lists || []) {
+    fields.push(`index(${list.join(',')})`)
+  }
   return `
 ${table.name}
 ${'-'.repeat(table.name.length)}
-${table.field_list.map(fieldToString).join('\n')}
+${fields.join('\n')}
 `
 }
 

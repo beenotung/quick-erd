@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { parse } from './ast'
-import { astToText } from './table'
+import { astToText, tableToString } from './table'
 
 let formattedText: string
 
@@ -49,4 +49,19 @@ it('should preserve view position line', () => {
 
 it('should preserve table position line', () => {
   expect(formattedText).contain('# post (56, 78)')
+})
+
+it('should render composite unique and index keys', () => {
+  const ast = parse(`
+like
+-
+id
+user_id
+post_id
+unique(user_id,post_id)
+index(user_id,post_id)
+`)
+  const text = tableToString(ast.table_list[0])
+  expect(text).contain('unique(user_id,post_id)')
+  expect(text).contain('index(user_id,post_id)')
 })
