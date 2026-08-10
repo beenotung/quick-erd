@@ -169,7 +169,7 @@ JOIN pg_namespace n ON n.oid = t.relnamespace
 JOIN pg_class ic ON ic.oid = i.indexrelid
 JOIN pg_attribute a
   ON a.attrelid = i.indrelid
- AND a.attnum = ANY (i.indkey)
+ AND a.attnum = i.indkey[0]
 WHERE n.nspname = 'public'
   AND t.relname = ?
   AND a.attname = ?
