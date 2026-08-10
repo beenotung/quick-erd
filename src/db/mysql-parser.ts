@@ -29,11 +29,13 @@ export function parseCreateTable(sql: string): ParseCreateTableResult {
       } else if (field.is_index_key === true) {
         index_key_set.add(field.fields)
       } else if (field.is_foreign_key === true) {
-        foreign_key_map.set(field.field, {
-          type: '>0-',
-          table: field.ref_table,
-          field: field.ref_field,
-        })
+        for (let i = 0; i < field.fields.length; i++) {
+          foreign_key_map.set(field.fields[i], {
+            type: '>0-',
+            table: field.ref_table,
+            field: field.ref_fields[i] ?? field.fields[i],
+          })
+        }
       } else {
         field_list.push({
           name: field.name,
@@ -165,9 +167,9 @@ type Statement =
       is_unique_key: false
       is_index_key: false
       is_foreign_key: true
-      field: string
+      fields: string[]
+      ref_fields: string[]
       ref_table: string
-      ref_field: string
       rest: string
     }
 
@@ -387,10 +389,9 @@ function parseConstraintStatement(sql: string): Statement {
   }
   sql = sql.slice('FOREIGN KEY'.length).trim()
 
-  /* parse own field name */
-  result = parseNameInBracket(sql, 'FOREIGN KEY own field')
-  const field = result.name
-  sql = result.rest.trim()
+  /* parse own field name(s) */
+  const ownFieldsResult = parseNamesInBracket(sql, 'FOREIGN KEY own field')
+  sql = ownFieldsResult.rest.trim()
 
   /* parse 'REFERENCES' keyword */
   const is_references = sql.startsWith('REFERENCES')
@@ -404,10 +405,9 @@ function parseConstraintStatement(sql: string): Statement {
   const ref_table = result.name
   sql = result.rest.trim()
 
-  /* parse reference field name */
-  result = parseNameInBracket(sql, 'FOREIGN KEY reference field name')
-  const ref_field = result.name
-  sql = result.rest.trim()
+  /* parse reference field name(s) */
+  const refFieldsResult = parseNamesInBracket(sql, 'FOREIGN KEY reference field name')
+  sql = refFieldsResult.rest.trim()
 
   /* strip trailing ON DELETE / ON UPDATE clauses */
   sql = sql.replace(/^on (delete|update) [\w\s]+/i, '').trim()
@@ -418,9 +418,9 @@ function parseConstraintStatement(sql: string): Statement {
     is_unique_key: false,
     is_index_key: false,
     is_foreign_key: true,
-    field,
+    fields: ownFieldsResult.names,
+    ref_fields: refFieldsResult.names,
     ref_table,
-    ref_field,
     rest: sql,
   }
 }

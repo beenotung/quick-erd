@@ -323,6 +323,29 @@ CREATE TABLE \`comment\` (
       field: 'id',
     })
   })
+
+  it('should parse composite foreign key', () => {
+    const sql = `
+CREATE TABLE \`like\` (
+  \`user_id\` int(10) unsigned NOT NULL,
+  \`post_id\` int(10) unsigned NOT NULL,
+  CONSTRAINT \`like_user_post_foreign\` FOREIGN KEY (\`user_id\`, \`post_id\`) REFERENCES \`post\` (\`author_id\`, \`id\`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`
+    const field_list = parseCreateTable(sql).field_list
+    const user_id = field_list.find(field => field.name === 'user_id')
+    const post_id = field_list.find(field => field.name === 'post_id')
+    expect(user_id!.references).to.deep.equal({
+      type: '>0-',
+      table: 'post',
+      field: 'author_id',
+    })
+    expect(post_id!.references).to.deep.equal({
+      type: '>0-',
+      table: 'post',
+      field: 'id',
+    })
+  })
 })
 
 describe('mysql-parser collate TestSuit', () => {
