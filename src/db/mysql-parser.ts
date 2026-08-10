@@ -1,7 +1,13 @@
 import { Field, ForeignKeyReference } from '../core/ast'
 import { firstIndexOf } from '../utils/string'
 
-export function parseCreateTable(sql: string): Field[] {
+export type ParseCreateTableResult = {
+  field_list: Field[]
+  unique_field_lists: string[][]
+  index_field_lists: string[][]
+}
+
+export function parseCreateTable(sql: string): ParseCreateTableResult {
   const startIdx = sql.indexOf('(')
   const endIdx = sql.lastIndexOf(') ENGINE=')
   sql = sql.slice(startIdx + 1, endIdx).trim()
@@ -15,7 +21,9 @@ export function parseCreateTable(sql: string): Field[] {
     sql = field.rest
     if (field.is_skip === false) {
       if (field.is_primary_key === true) {
-        primary_key_set.add(field.name)
+        for (const name of field.fields) {
+          primary_key_set.add(name)
+        }
       } else if (field.is_unique_key === true) {
         unique_key_set.add(field.fields)
       } else if (field.is_index_key === true) {
@@ -58,17 +66,17 @@ export function parseCreateTable(sql: string): Field[] {
     }
   }
   for (const unique_fields of unique_key_set) {
-    for (const field of field_list) {
-      if (unique_fields.includes(field.name)) {
-        field.is_unique = true
-      }
+    if (unique_fields.length > 1) continue
+    const field = field_list.find(field => field.name === unique_fields[0])
+    if (field) {
+      field.is_unique = true
     }
   }
   for (const index_fields of index_key_set) {
-    for (const field of field_list) {
-      if (index_fields.includes(field.name)) {
-        field.is_index = true
-      }
+    if (index_fields.length > 1) continue
+    const field = field_list.find(field => field.name === index_fields[0])
+    if (field) {
+      field.is_index = true
     }
   }
   for (const [name, ref] of foreign_key_map.entries()) {
@@ -77,7 +85,11 @@ export function parseCreateTable(sql: string): Field[] {
       field.references = ref
     }
   }
-  return field_list
+  return {
+    field_list,
+    unique_field_lists: Array.from(unique_key_set).filter(fields => fields.length > 1),
+    index_field_lists: Array.from(index_key_set).filter(fields => fields.length > 1),
+  }
 }
 
 function parseDefaultValue(sql: string) {
@@ -105,14 +117,6 @@ function nextPart(sql: string) {
   return sql
 }
 
-function nextStatement(sql: string) {
-  const idx = sql.indexOf(',')
-  if (idx === -1) {
-    return ''
-  }
-  return sql.slice(idx).trim()
-}
-
 type Statement =
   | {
       is_skip: true
@@ -121,7 +125,7 @@ type Statement =
   | {
       is_skip: false
       is_primary_key: true
-      name: string
+      fields: string[]
       rest: string
     }
   | {
@@ -168,13 +172,6 @@ type Statement =
     }
 
 function parseStatement(sql: string): Statement {
-  /* check named key */
-  const is_skip = sql.startsWith('KEY ')
-  if (is_skip) {
-    sql = nextStatement(sql)
-    return { is_skip, rest: sql }
-  }
-
   /* parse primary key */
   const is_primary_key = sql.startsWith('PRIMARY KEY')
   if (is_primary_key) {
@@ -188,7 +185,7 @@ function parseStatement(sql: string): Statement {
   }
 
   /* parse index */
-  const is_index = sql.startsWith('INDEX')
+  const is_index = sql.startsWith('INDEX') || sql.startsWith('KEY ')
   if (is_index) {
     return parseIndexStatement(sql)
   }
@@ -300,12 +297,17 @@ function parseColumnStatement(sql: string): Statement {
 }
 function parsePrimaryKeyStatement(sql: string): Statement {
   sql = sql.slice('PRIMARY KEY'.length).trim()
-  const { name, rest } = parseNameInBracket(sql, 'PRIMARY KEY')
-  sql = rest
+  const namesResult = parseNamesInBracket(sql, 'PRIMARY KEY')
+  sql = namesResult.rest
   if (sql && !sql.startsWith(',')) {
     throw new Error(`unknown tokens after PRIMARY KEY: ${JSON.stringify(sql)}`)
   }
-  return { is_skip: false, is_primary_key: true, name, rest: sql }
+  return {
+    is_skip: false,
+    is_primary_key: true,
+    fields: namesResult.names,
+    rest: sql,
+  }
 }
 function parseUniqueKeyStatement(sql: string): Statement {
   sql = sql.slice('UNIQUE KEY'.length).trim()
@@ -315,43 +317,39 @@ function parseUniqueKeyStatement(sql: string): Statement {
   sql = result.rest.trim()
 
   /* parse column names */
-  // TODO parse multiple columns
-  result = parseNameInBracket(sql, 'UNIQUE KEY')
-  sql = result.rest.replace(/using hash/i, '').trim()
+  let namesResult = parseNamesInBracket(sql, 'UNIQUE KEY')
+  sql = namesResult.rest.replace(/using hash/i, '').trim()
   if (sql && !sql.startsWith(',')) {
     throw new Error(`unknown tokens after UNIQUE KEY: ${JSON.stringify(sql)}`)
   }
-  const fields: string[] = [result.name]
   return {
     is_skip: false,
     is_primary_key: false,
     is_unique_key: true,
     is_index_key: false,
-    fields,
+    fields: namesResult.names,
     rest: sql,
   }
 }
 function parseIndexStatement(sql: string): Statement {
-  sql = sql.slice('INDEX'.length).trim()
+  sql = sql.replace(/^(INDEX|KEY)/, '').trim()
 
   /* parse index key name */
   let result = parseName(sql)
   sql = result.rest.trim()
 
   /* parse column names */
-  // TODO parse multiple columns
-  result = parseNameInBracket(sql, 'INDEX')
-  sql = result.rest.replace(/using hash/i, '').trim()
+  let namesResult = parseNamesInBracket(sql, 'INDEX')
+  sql = namesResult.rest.replace(/using hash/i, '').trim()
   if (sql && !sql.startsWith(',')) {
     throw new Error(`unknown tokens after INDEX: ${JSON.stringify(sql)}`)
   }
-  const fields: string[] = [result.name]
   return {
     is_skip: false,
     is_primary_key: false,
     is_unique_key: false,
     is_index_key: true,
-    fields,
+    fields: namesResult.names,
     rest: sql,
   }
 }
@@ -451,6 +449,24 @@ function parseNameInBracket(sql: string, context: string) {
   }
   sql = sql.slice(1)
   return { name: result.name, rest: sql }
+}
+
+function parseNamesInBracket(sql: string, context: string): { names: string[]; rest: string } {
+  if (!sql.startsWith('(')) {
+    throw new Error(`missing '(' for ${context}`)
+  }
+  sql = sql.slice(1)
+  const names: string[] = []
+  while (!sql.startsWith(')')) {
+    const result = parseName(sql)
+    names.push(result.name)
+    sql = result.rest.trim()
+    if (sql.startsWith(',')) {
+      sql = sql.slice(1).trim()
+    }
+  }
+  sql = sql.slice(1)
+  return { names, rest: sql }
 }
 
 function toDataType(type: string): string {
