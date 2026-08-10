@@ -17,6 +17,7 @@ describe('auto-migrate TestSuit', () => {
               is_primary_key: false,
               is_null: false,
               is_unique: false,
+              is_index: false,
               is_unsigned: true,
               is_zerofill: false,
               default_value: undefined,
@@ -24,6 +25,8 @@ describe('auto-migrate TestSuit', () => {
               collate: undefined,
             },
           ],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
       ]
       const parsed_table_list: Table[] = [
@@ -36,6 +39,7 @@ describe('auto-migrate TestSuit', () => {
               is_primary_key: false,
               is_null: false,
               is_unique: false,
+              is_index: false,
               is_unsigned: true,
               is_zerofill: false,
               default_value: undefined,
@@ -43,6 +47,8 @@ describe('auto-migrate TestSuit', () => {
               collate: undefined,
             },
           ],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
       ]
       const result = generateAutoMigrate({
@@ -97,6 +103,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -109,6 +116,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -119,12 +127,16 @@ describe('auto-migrate TestSuit', () => {
         {
           name: 'content',
           field_list: [username],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
       ]
       const parsed_table_list: Table[] = [
         {
           name: 'content',
           field_list: [username, score],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
       ]
       const result = generateAutoMigrate({
@@ -156,6 +168,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -168,6 +181,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -178,12 +192,16 @@ describe('auto-migrate TestSuit', () => {
         {
           name: 'content',
           field_list: [username, score],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
       ]
       const parsed_table_list: Table[] = [
         {
           name: 'content',
           field_list: [username],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
       ]
       const result = generateAutoMigrate({
@@ -214,6 +232,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -226,6 +245,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -238,6 +258,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -248,16 +269,22 @@ describe('auto-migrate TestSuit', () => {
         {
           name: 'user',
           field_list: [username],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
         {
           name: 'content',
           field_list: [user_id, comment],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
       ]
       const parsed_table_list: Table[] = [
         {
           name: 'content',
           field_list: [comment],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
       ]
       const result = generateAutoMigrate({
@@ -306,6 +333,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -329,12 +357,16 @@ describe('auto-migrate TestSuit', () => {
         {
           name: 'busline',
           field_list: [segment_id, user_id],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
       ]
       const parsed_table_list: Table[] = [
         {
           name: 'busline',
           field_list: [bus_segment_id, author_id],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
       ]
       const result = generateAutoMigrate({
@@ -371,6 +403,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -387,12 +420,16 @@ describe('auto-migrate TestSuit', () => {
         {
           name: 'busline',
           field_list: [segment_id],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
       ]
       const parsed_table_list: Table[] = [
         {
           name: 'busline',
           field_list: [bus_segment_id],
+          unique_field_lists: [],
+          index_field_lists: [],
         },
       ]
       const result = generateAutoMigrate({
@@ -436,6 +473,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: true,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -444,8 +482,22 @@ describe('auto-migrate TestSuit', () => {
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'better-sqlite3',
-        existing_table_list: [{ name: 'post', field_list: [] }],
-        parsed_table_list: [{ name: 'post', field_list: [field] }],
+        existing_table_list: [
+          {
+            name: 'post',
+            field_list: [],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'post',
+            field_list: [field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
         detect_rename: false,
       })
 
@@ -466,6 +518,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: true,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -474,8 +527,22 @@ describe('auto-migrate TestSuit', () => {
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'better-sqlite3',
-        existing_table_list: [{ name: 'tag', field_list: [] }],
-        parsed_table_list: [{ name: 'tag', field_list: [field] }],
+        existing_table_list: [
+          {
+            name: 'tag',
+            field_list: [],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'tag',
+            field_list: [field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
         detect_rename: false,
       })
       expect(up_lines).to.have.lengthOf(2)
@@ -498,12 +565,32 @@ describe('auto-migrate TestSuit', () => {
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'better-sqlite3',
         existing_table_list: [
-          { name: 'user', field_list: [] },
-          { name: 'post', field_list: [] },
+          {
+            name: 'user',
+            field_list: [],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+          {
+            name: 'post',
+            field_list: [],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
         ],
         parsed_table_list: [
-          { name: 'user', field_list: [] },
-          { name: 'article', field_list: [] },
+          {
+            name: 'user',
+            field_list: [],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+          {
+            name: 'article',
+            field_list: [],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
         ],
         detect_rename: true,
       })
@@ -526,6 +613,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: true,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -538,8 +626,22 @@ describe('auto-migrate TestSuit', () => {
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'better-sqlite3',
-        existing_table_list: [{ name: 'user', field_list: [old_field] }],
-        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        existing_table_list: [
+          {
+            name: 'user',
+            field_list: [old_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'user',
+            field_list: [new_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
         detect_rename: false,
       })
       expect(up_lines).to.have.lengthOf(1)
@@ -576,6 +678,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: true,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -588,8 +691,22 @@ describe('auto-migrate TestSuit', () => {
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'better-sqlite3',
-        existing_table_list: [{ name: 'user', field_list: [old_field] }],
-        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        existing_table_list: [
+          {
+            name: 'user',
+            field_list: [old_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'user',
+            field_list: [new_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
         detect_rename: false,
       })
       expect(up_lines).to.have.lengthOf(1)
@@ -626,6 +743,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -638,8 +756,22 @@ describe('auto-migrate TestSuit', () => {
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'better-sqlite3',
-        existing_table_list: [{ name: 'user', field_list: [old_field] }],
-        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        existing_table_list: [
+          {
+            name: 'user',
+            field_list: [old_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'user',
+            field_list: [new_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
         detect_rename: false,
       })
       expect(up_lines).to.have.lengthOf(1)
@@ -676,6 +808,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -688,8 +821,22 @@ describe('auto-migrate TestSuit', () => {
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'better-sqlite3',
-        existing_table_list: [{ name: 'user', field_list: [old_field] }],
-        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        existing_table_list: [
+          {
+            name: 'user',
+            field_list: [old_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'user',
+            field_list: [new_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
         detect_rename: false,
       })
       expect(up_lines).to.have.lengthOf(1)
@@ -728,6 +875,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -740,8 +888,22 @@ describe('auto-migrate TestSuit', () => {
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'mysql',
-        existing_table_list: [{ name: 'user', field_list: [old_field] }],
-        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        existing_table_list: [
+          {
+            name: 'user',
+            field_list: [old_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'user',
+            field_list: [new_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
         detect_rename: false,
       })
       expect(up_lines.join('\n')).to.contains(".collate('utf8mb4_bin')")
@@ -757,6 +919,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -769,8 +932,22 @@ describe('auto-migrate TestSuit', () => {
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'mysql',
-        existing_table_list: [{ name: 'user', field_list: [old_field] }],
-        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        existing_table_list: [
+          {
+            name: 'user',
+            field_list: [old_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'user',
+            field_list: [new_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
         detect_rename: false,
       })
       expect(up_lines.join('\n')).to.contains(".collate('utf8mb4_bin')")
@@ -784,6 +961,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -796,8 +974,22 @@ describe('auto-migrate TestSuit', () => {
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'mysql',
-        existing_table_list: [{ name: 'user', field_list: [old_field] }],
-        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        existing_table_list: [
+          {
+            name: 'user',
+            field_list: [old_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'user',
+            field_list: [new_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
         detect_rename: false,
       })
       expect(up_lines.join('\n')).not.to.contains('.collate(')
@@ -811,6 +1003,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -819,8 +1012,22 @@ describe('auto-migrate TestSuit', () => {
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'mysql',
-        existing_table_list: [{ name: 'user', field_list: [field] }],
-        parsed_table_list: [{ name: 'user', field_list: [field] }],
+        existing_table_list: [
+          {
+            name: 'user',
+            field_list: [field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'user',
+            field_list: [field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
         detect_rename: false,
       })
       expect(up_lines).to.have.lengthOf(0)
@@ -834,6 +1041,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -846,8 +1054,22 @@ describe('auto-migrate TestSuit', () => {
       }
       const { up_lines, down_lines } = generateAutoMigrate({
         db_client: 'better-sqlite3',
-        existing_table_list: [{ name: 'user', field_list: [old_field] }],
-        parsed_table_list: [{ name: 'user', field_list: [new_field] }],
+        existing_table_list: [
+          {
+            name: 'user',
+            field_list: [old_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
+        parsed_table_list: [
+          {
+            name: 'user',
+            field_list: [new_field],
+            unique_field_lists: [],
+            index_field_lists: [],
+          },
+        ],
         detect_rename: false,
       })
       expect(up_lines).to.have.lengthOf(1)
@@ -865,6 +1087,7 @@ describe('auto-migrate TestSuit', () => {
         is_primary_key: false,
         is_null: false,
         is_unique: false,
+        is_index: false,
         is_unsigned: false,
         is_zerofill: false,
         default_value: undefined,
@@ -881,12 +1104,16 @@ describe('auto-migrate TestSuit', () => {
           {
             name: 'user',
             field_list: [field({ name: 'created_at', type: 'timestamp' })],
+            unique_field_lists: [],
+            index_field_lists: [],
           },
         ],
         parsed_table_list: [
           {
             name: 'user',
             field_list: [field({ name: 'created_at', type: 'datetime' })],
+            unique_field_lists: [],
+            index_field_lists: [],
           },
         ],
         detect_rename: false,
@@ -902,12 +1129,16 @@ describe('auto-migrate TestSuit', () => {
           {
             name: 'user',
             field_list: [field({ name: 'username', type: 'nvarchar(64)' })],
+            unique_field_lists: [],
+            index_field_lists: [],
           },
         ],
         parsed_table_list: [
           {
             name: 'user',
             field_list: [field({ name: 'username', type: 'varchar(64)' })],
+            unique_field_lists: [],
+            index_field_lists: [],
           },
         ],
         detect_rename: false,
