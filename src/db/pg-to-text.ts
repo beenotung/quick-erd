@@ -155,7 +155,34 @@ WHERE tc.constraint_type = 'UNIQUE'
 `,
         [table.name, column_row.column_name],
       )
-      const unique_row = result.rows[0]
+      let unique_row = result.rows[0]
+
+      /* check single-column unique index (CREATE UNIQUE INDEX, not a table constraint) */
+      if (!unique_row) {
+        result = await knex.raw(
+          /* sql */ `
+SELECT
+    ic.relname AS index_name
+FROM pg_index i
+JOIN pg_class t ON t.oid = i.indrelid
+JOIN pg_namespace n ON n.oid = t.relnamespace
+JOIN pg_class ic ON ic.oid = i.indexrelid
+JOIN pg_attribute a
+  ON a.attrelid = i.indrelid
+ AND a.attnum = ANY (i.indkey)
+WHERE n.nspname = 'public'
+  AND t.relname = ?
+  AND a.attname = ?
+  AND i.indisunique
+  AND NOT i.indisprimary
+  AND i.indnkeyatts = 1
+LIMIT 1
+;
+`,
+          [table.name, column_row.column_name],
+        )
+        unique_row = result.rows[0]
+      }
 
       /* check index */
       result = await knex.raw(
