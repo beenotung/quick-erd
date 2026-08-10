@@ -653,6 +653,72 @@ CREATE INDEX \`post_keyword_combined\` on \`post_keyword\` (\`post_id\`, \`statu
     expect(parseTableSchema(rows)).to.deep.equals(table_list)
   })
 
+  it('should parse inline UNIQUE(a,b) table constraint', () => {
+    const rows: SchemaRow[] = [
+      {
+        type: 'table',
+        name: 'like',
+        sql: /* sql */ `
+CREATE TABLE \`like\` (
+  \`id\` integer not null primary key autoincrement
+, \`user_id\` integer not null
+, \`post_id\` integer not null
+, UNIQUE(\`user_id\`, \`post_id\`)
+)
+`,
+      },
+    ]
+    const table_list: Table[] = [
+      {
+        name: 'like',
+        unique_field_lists: [['user_id', 'post_id']],
+        index_field_lists: [],
+        field_list: [
+          {
+            name: 'id',
+            type: 'integer',
+            is_null: false,
+            is_primary_key: true,
+            is_unique: false,
+            is_index: false,
+            is_unsigned: false,
+            is_zerofill: false,
+            default_value: undefined,
+            references: undefined,
+            collate: undefined,
+          },
+          {
+            name: 'user_id',
+            type: 'integer',
+            is_null: false,
+            is_primary_key: false,
+            is_unique: false,
+            is_index: false,
+            is_unsigned: false,
+            is_zerofill: false,
+            default_value: undefined,
+            references: undefined,
+            collate: undefined,
+          },
+          {
+            name: 'post_id',
+            type: 'integer',
+            is_null: false,
+            is_primary_key: false,
+            is_unique: false,
+            is_index: false,
+            is_unsigned: false,
+            is_zerofill: false,
+            default_value: undefined,
+            references: undefined,
+            collate: undefined,
+          },
+        ],
+      },
+    ]
+    expect(parseTableSchema(rows)).to.deep.equals(table_list)
+  })
+
   it('should parse enum', () => {
     const rows: SchemaRow[] = [
       {

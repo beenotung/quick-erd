@@ -54,6 +54,7 @@ export function parseTableSchema(rows: SchemaRow[]): Table[] {
     if (is_virtual) {
       table.is_virtual = true
     }
+    parseInlineTableConstraints(row.sql, table)
     table_list.push(table)
   })
 
@@ -103,6 +104,10 @@ export function parseCreateTable(sql: string): Field[] | null {
       if (field) {
         field.is_primary_key = true
       }
+      return
+    }
+    if (lower.startsWith('unique')) {
+      // table-level UNIQUE(a,b) constraint; handled by parseInlineTableConstraints
       return
     }
     if (lower.startsWith('foreign key')) {
@@ -262,6 +267,7 @@ type Index = {
   field: string
   fields: string[]
 }
+
 function parseCreateIndex(sql: string): Index | null {
   // example: CREATE [UNIQUE] INDEX `user_username_unique` on `user` (`username`)
   let match = sql.match(
@@ -280,6 +286,45 @@ function parseCreateIndex(sql: string): Index | null {
   const fields = fieldsStr.split(',').map(name => name.trim()).filter(name => name)
   if (fields.length === 0) return null
   return { table, field: fields[0], fields, is_unique }
+}
+
+function parseInlineTableConstraints(sql: string, table: Table) {
+  // example: CREATE TABLE t (a int, b int, UNIQUE(a,b))
+  // sqlite stores the autoindex with sql = NULL, so parse the inline constraint from the table DDL
+  const body = sql.substring(sql.indexOf('(') + 1, sql.lastIndexOf(')'))
+  for (const part of parseCreateColumns(body)) {
+    const lower = part.trim().toLowerCase()
+    if (lower.startsWith('unique')) {
+      const fields = parseNamesInBracket(part.trim())
+      if (fields.length > 1) {
+        table.unique_field_lists.push(fields)
+      } else if (fields.length === 1) {
+        const field = table.field_list.find(field => field.name === fields[0])
+        if (field) {
+          field.is_unique = true
+        }
+      }
+    } else if (lower.startsWith('primary key')) {
+      const fields = parseNamesInBracket(part.trim())
+      for (const name of fields) {
+        const field = table.field_list.find(field => field.name === name)
+        if (field) {
+          field.is_primary_key = true
+        }
+      }
+    }
+  }
+}
+
+function parseNamesInBracket(sql: string): string[] {
+  const start = sql.indexOf('(')
+  const end = sql.lastIndexOf(')')
+  if (start === -1 || end === -1) return []
+  const middle = sql.substring(start + 1, end)
+  return middle
+    .split(',')
+    .map(name => name.trim().replace(/^["`]|["`]$/g, ''))
+    .filter(name => name)
 }
 
 function parseDefaultValue(sql: string) {
