@@ -57,7 +57,7 @@ async function main() {
     default: {
       db_client = 'better-sqlite3'
       dbFile = dbFile_or_client
-      setupSqlite({ srcDir, dbFile })
+      setupSqlite({ srcDir, dbFile: dbFile_or_client })
     }
   }
   setupNpmScripts({ srcDir, db_client, dbFile })
