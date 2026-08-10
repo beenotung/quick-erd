@@ -174,6 +174,95 @@ where con.is_disabled = 0
         collate: undefined,
       })
     }
+
+    /* check multi-column unique constraints */
+    result = await knex.raw(
+      /* sql */ `
+select
+  i.name as index_name,
+  i.index_id,
+  (
+    select col.[name] + ', '
+    from sys.index_columns ic
+    inner join sys.columns col
+       on ic.object_id = col.object_id
+      and ic.column_id = col.column_id
+    where ic.object_id = t.object_id
+      and ic.index_id = i.index_id
+      and ic.is_included_column = 0
+    order by key_ordinal
+    for xml path('')
+  ) as column_names
+from sys.objects t
+inner join sys.indexes i on t.object_id = i.object_id
+where t.is_ms_shipped <> 1
+  and t.type = 'U'
+  and i.is_unique = 1
+  and i.is_primary_key = 0
+  and t.name = ?
+order by i.index_id
+`,
+      [table.name],
+    )
+    for (const row of result) {
+      const columnNames = row.column_names
+        .replace(/<[^>]*>/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .split(',')
+        .map((name: string) => name.trim())
+        .filter((name: string) => name)
+      if (columnNames.length > 1) {
+        table.unique_field_lists.push(columnNames)
+      }
+    }
+
+    /* check multi-column indexes */
+    result = await knex.raw(
+      /* sql */ `
+select
+  i.name as index_name,
+  i.index_id,
+  (
+    select col.[name] + ', '
+    from sys.index_columns ic
+    inner join sys.columns col
+       on ic.object_id = col.object_id
+      and ic.column_id = col.column_id
+    where ic.object_id = t.object_id
+      and ic.index_id = i.index_id
+      and ic.is_included_column = 0
+    order by key_ordinal
+    for xml path('')
+  ) as column_names
+from sys.objects t
+inner join sys.indexes i on t.object_id = i.object_id
+where t.is_ms_shipped <> 1
+  and t.type = 'U'
+  and i.is_unique = 0
+  and t.name = ?
+order by i.index_id
+`,
+      [table.name],
+    )
+    for (const row of result) {
+      const columnNames = row.column_names
+        .replace(/<[^>]*>/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .split(',')
+        .map((name: string) => name.trim())
+        .filter((name: string) => name)
+      if (columnNames.length > 1) {
+        table.index_field_lists.push(columnNames)
+      }
+    }
   }
 
   return table_list
