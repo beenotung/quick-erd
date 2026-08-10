@@ -106,7 +106,7 @@ export function parseCreateTable(sql: string): Field[] | null {
       }
       return
     }
-    if (lower.startsWith('unique')) {
+    if (/^unique\s*\(/i.test(lower)) {
       // table-level UNIQUE(a,b) constraint; handled by parseInlineTableConstraints
       return
     }
@@ -294,7 +294,7 @@ function parseInlineTableConstraints(sql: string, table: Table) {
   const body = sql.substring(sql.indexOf('(') + 1, sql.lastIndexOf(')'))
   for (const part of parseCreateColumns(body)) {
     const lower = part.trim().toLowerCase()
-    if (lower.startsWith('unique')) {
+    if (/^unique\s*\(/i.test(lower)) {
       const fields = parseNamesInBracket(part.trim())
       if (fields.length > 1) {
         table.unique_field_lists.push(fields)
