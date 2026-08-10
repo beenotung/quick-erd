@@ -263,6 +263,34 @@ CREATE TABLE \`post\` (
     const user_id = field_list.find(field => field.name === 'user_id')
     expect(user_id!.is_index).to.be.true
   })
+
+  it('should parse UNIQUE KEY with USING BTREE index type', () => {
+    const sql = `
+CREATE TABLE \`post\` (
+  \`id\` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  \`user_id\` int(10) unsigned NOT NULL,
+  PRIMARY KEY (\`id\`),
+  UNIQUE KEY \`post_user_id\` USING BTREE (\`user_id\`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`
+    const field_list = parseCreateTable(sql).field_list
+    const user_id = field_list.find(field => field.name === 'user_id')
+    expect(user_id!.is_unique).to.be.true
+  })
+
+  it('should parse FULLTEXT KEY', () => {
+    const sql = `
+CREATE TABLE \`post\` (
+  \`id\` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  \`title\` text NOT NULL,
+  PRIMARY KEY (\`id\`),
+  FULLTEXT KEY \`post_title\` (\`title\`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+`
+    const field_list = parseCreateTable(sql).field_list
+    const title = field_list.find(field => field.name === 'title')
+    expect(title!.is_index).to.be.true
+  })
 })
 
 describe('mysql-parser collate TestSuit', () => {

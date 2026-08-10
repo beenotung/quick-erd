@@ -184,8 +184,12 @@ function parseStatement(sql: string): Statement {
     return parseUniqueKeyStatement(sql)
   }
 
-  /* parse index */
-  const is_index = sql.startsWith('INDEX') || sql.startsWith('KEY ')
+  /* parse index (incl. FULLTEXT KEY / SPATIAL KEY / KEY) */
+  const is_index =
+    sql.startsWith('INDEX') ||
+    sql.startsWith('KEY ') ||
+    sql.startsWith('FULLTEXT KEY') ||
+    sql.startsWith('SPATIAL KEY')
   if (is_index) {
     return parseIndexStatement(sql)
   }
@@ -312,13 +316,19 @@ function parsePrimaryKeyStatement(sql: string): Statement {
 function parseUniqueKeyStatement(sql: string): Statement {
   sql = sql.slice('UNIQUE KEY'.length).trim()
 
-  /* parse unique key name */
-  let result = parseName(sql)
-  sql = result.rest.trim()
+  /* parse unique key name (optional) */
+  if (!sql.startsWith('(')) {
+    const nameResult = parseName(sql)
+    sql = nameResult.rest.trim()
+  }
+
+  /* strip index type before column list, e.g. UNIQUE KEY `uq` USING BTREE (`a`) */
+  sql = sql.replace(/^using (btree|hash)/i, '').trim()
 
   /* parse column names */
   let namesResult = parseNamesInBracket(sql, 'UNIQUE KEY')
-  sql = namesResult.rest.replace(/using hash/i, '').trim()
+  /* strip index type after column list, e.g. UNIQUE KEY `uq` (`a`) USING BTREE */
+  sql = namesResult.rest.replace(/using (btree|hash)/i, '').trim()
   if (sql && !sql.startsWith(',')) {
     throw new Error(`unknown tokens after UNIQUE KEY: ${JSON.stringify(sql)}`)
   }
@@ -332,7 +342,7 @@ function parseUniqueKeyStatement(sql: string): Statement {
   }
 }
 function parseIndexStatement(sql: string): Statement {
-  sql = sql.replace(/^(INDEX|KEY)/, '').trim()
+  sql = sql.replace(/^(FULLTEXT KEY|SPATIAL KEY|INDEX|KEY)/, '').trim()
 
   /* parse index key name (optional, e.g. `KEY (a)` has no name) */
   if (!sql.startsWith('(')) {
