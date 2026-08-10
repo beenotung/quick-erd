@@ -553,6 +553,105 @@ CREATE UNIQUE INDEX "user_email_unique" on "user" (
     ]
     expect(parseTableSchema(rows)).to.deep.equals(table_list)
   })
+  it('should parse composite unique and composite index', () => {
+    const rows: SchemaRow[] = [
+      {
+        type: 'table',
+        name: 'post_keyword',
+        sql: /* sql */ `
+CREATE TABLE \`post_keyword\` (
+  \`id\` integer not null primary key autoincrement
+, \`post_id\` integer not null
+, \`keyword_id\` integer not null
+, \`status\` text not null
+)
+`,
+      },
+      {
+        type: 'index',
+        name: '',
+        sql: /* sql */ `
+CREATE UNIQUE INDEX \`post_keyword_unique\` on \`post_keyword\` (\`post_id\`, \`keyword_id\`)
+`,
+      },
+      {
+        type: 'index',
+        name: '',
+        sql: /* sql */ `
+CREATE INDEX \`post_keyword_status\` on \`post_keyword\` (\`status\`)
+`,
+      },
+      {
+        type: 'index',
+        name: '',
+        sql: /* sql */ `
+CREATE INDEX \`post_keyword_combined\` on \`post_keyword\` (\`post_id\`, \`status\`)
+`,
+      },
+    ]
+    const table_list: Table[] = [
+      {
+        name: 'post_keyword',
+        unique_field_lists: [['post_id', 'keyword_id']],
+        index_field_lists: [['post_id', 'status']],
+        field_list: [
+          {
+            name: 'id',
+            type: 'integer',
+            is_null: false,
+            is_primary_key: true,
+            is_unique: false,
+            is_index: false,
+            is_unsigned: false,
+            is_zerofill: false,
+            default_value: undefined,
+            references: undefined,
+            collate: undefined,
+          },
+          {
+            name: 'post_id',
+            type: 'integer',
+            is_null: false,
+            is_primary_key: false,
+            is_unique: false,
+            is_index: false,
+            is_unsigned: false,
+            is_zerofill: false,
+            default_value: undefined,
+            references: undefined,
+            collate: undefined,
+          },
+          {
+            name: 'keyword_id',
+            type: 'integer',
+            is_null: false,
+            is_primary_key: false,
+            is_unique: false,
+            is_index: false,
+            is_unsigned: false,
+            is_zerofill: false,
+            default_value: undefined,
+            references: undefined,
+            collate: undefined,
+          },
+          {
+            name: 'status',
+            type: 'text',
+            is_null: false,
+            is_primary_key: false,
+            is_unique: false,
+            is_index: true,
+            is_unsigned: false,
+            is_zerofill: false,
+            default_value: undefined,
+            references: undefined,
+            collate: undefined,
+          },
+        ],
+      },
+    ]
+    expect(parseTableSchema(rows)).to.deep.equals(table_list)
+  })
 
   it('should parse enum', () => {
     const rows: SchemaRow[] = [

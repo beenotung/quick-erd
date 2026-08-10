@@ -47,7 +47,7 @@ export function parseTableSchema(rows: SchemaRow[]): Table[] {
     let is_virtual = row.sql.toLowerCase().includes('create virtual table')
     let table: Table = {
       name: row.name,
-      field_list: field_list,
+      field_list,
       unique_field_lists: [],
       index_field_lists: [],
     }
@@ -60,10 +60,27 @@ export function parseTableSchema(rows: SchemaRow[]): Table[] {
   for (const index_row of index_rows) {
     if (!index_row.sql) continue
     const index = parseCreateIndex(index_row.sql)
-    const table = table_list.find(table => table.name === index?.table)
-    const field = table?.field_list.find(field => field.name === index?.field)
-    if (index?.is_unique && field) {
-      field.is_unique = true
+    if (!index) continue
+    const table = table_list.find(table => table.name === index.table)
+    if (!table) continue
+    if (index.is_unique) {
+      if (index.fields.length === 1) {
+        const field = table.field_list.find(field => field.name === index.field)
+        if (field) {
+          field.is_unique = true
+        }
+      } else {
+        table.unique_field_lists.push(index.fields)
+      }
+    } else {
+      if (index.fields.length === 1) {
+        const field = table.field_list.find(field => field.name === index.field)
+        if (field) {
+          field.is_index = true
+        }
+      } else {
+        table.index_field_lists.push(index.fields)
+      }
     }
   }
 
@@ -213,57 +230,56 @@ function parseCreateColumns(sql: string): string[] {
   const columns: string[] = []
   let buffer = ''
   let level = 0
-  sql.split('').forEach(c => {
-    switch (c) {
+  sql.split('').forEach(char => {
+    switch (char) {
       case '(':
         level++
-        buffer += c
+        buffer += char
         break
       case ')':
         level--
-        buffer += c
+        buffer += char
         break
       case ',':
         if (level === 0) {
           columns.push(buffer)
           buffer = ''
         } else {
-          buffer += c
+          buffer += char
         }
         break
       default:
-        buffer += c
+        buffer += char
     }
   })
   columns.push(buffer)
   return columns.map(column => column.trim()).filter(column => column)
 }
 
-type UniqueIndex = {
-  is_unique: true
+type Index = {
+  is_unique: boolean
   table: string
   field: string
+  fields: string[]
 }
-function parseCreateIndex(sql: string): UniqueIndex | null {
-  // example: CREATE UNIQUE INDEX `user_username_unique` on `user` (`username`)
+function parseCreateIndex(sql: string): Index | null {
+  // example: CREATE [UNIQUE] INDEX `user_username_unique` on `user` (`username`)
   let match = sql.match(
-    /create unique index .* on \`?(.*?)\`? \(\`?(.*?)\`?\)/i,
+    /create (unique )?index .* on \`?(.*?)\`? \(\`?(.*?)\`?\)/i,
   )
-  // example: CREATE UNIQUE INDEX "user_username_unique" on "user" (\n  "username"\n)
+  // example: CREATE [UNIQUE] INDEX "user_username_unique" on "user" (\n  "username"\n)
   if (!match)
     match = sql.match(
-      /create unique index .* on "?(.*?)"? \("?([.|\s|\S]*?)"?\)/i,
+      /create (unique )?index .* on "?(.*?)"? \("?([.|\s|\S]*?)"?\)/i,
     )
   if (!match) return null
-  const table = match[1]
-  let field = match[2].trim()
-  if (field.startsWith('"') && field.endsWith('"')) {
-    field = field.slice(1, -1)
-  }
-  if (field.includes(',')) {
-    return null
-  }
-  return { table, field, is_unique: true }
+  const is_unique = !!match[1]
+  const table = match[2]
+  let fieldsStr = match[3].trim()
+  fieldsStr = fieldsStr.replace(/"/g, '').replace(/`/g, '')
+  const fields = fieldsStr.split(',').map(name => name.trim()).filter(name => name)
+  if (fields.length === 0) return null
+  return { table, field: fields[0], fields, is_unique }
 }
 
 function parseDefaultValue(sql: string) {
