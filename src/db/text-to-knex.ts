@@ -51,7 +51,7 @@ export function toKnexCreateColumnTypeCode(
     if (match) {
       length = match[1]
         .split(',')
-        .map(x => +x)
+        .map(value => +value)
         .join(', ')
     }
     type = 'decimal'

@@ -38,7 +38,9 @@ function main() {
     const refResult = parse(refText)
     sortWithRef(result.table_list, refResult.table_list)
     result.table_list.forEach(table => {
-      const refTable = refResult.table_list.find(t => t.name === table.name)
+      const refTable = refResult.table_list.find(
+        candidate => candidate.name === table.name,
+      )
       if (refTable) {
         sortWithRef(table.field_list, refTable.field_list)
       }
@@ -60,8 +62,8 @@ function main() {
 }
 
 function sortWithRef<T extends { name: string }>(list: T[], refList: T[]) {
-  const refNames = refList.map(x => x.name)
-  const listNames = list.map(x => x.name)
+  const refNames = refList.map(item => item.name)
+  const listNames = list.map(item => item.name)
 
   const newItems: T[] = []
   const oldItems: T[] = []
