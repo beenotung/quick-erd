@@ -283,7 +283,10 @@ function parseCreateIndex(sql: string): Index | null {
   const table = match[2]
   let fieldsStr = match[3].trim()
   fieldsStr = fieldsStr.replace(/"/g, '').replace(/`/g, '')
-  const fields = fieldsStr.split(',').map(name => name.trim()).filter(name => name)
+  const fields = fieldsStr
+    .split(',')
+    .map(name => name.trim())
+    .filter(name => name)
   if (fields.length === 0) return null
   return { table, field: fields[0], fields, is_unique }
 }

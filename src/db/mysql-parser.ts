@@ -89,8 +89,12 @@ export function parseCreateTable(sql: string): ParseCreateTableResult {
   }
   return {
     field_list,
-    unique_field_lists: Array.from(unique_key_set).filter(fields => fields.length > 1),
-    index_field_lists: Array.from(index_key_set).filter(fields => fields.length > 1),
+    unique_field_lists: Array.from(unique_key_set).filter(
+      fields => fields.length > 1,
+    ),
+    index_field_lists: Array.from(index_key_set).filter(
+      fields => fields.length > 1,
+    ),
   }
 }
 
@@ -347,7 +351,10 @@ function parseUniqueKeyStatement(sql: string): Statement {
 }
 function parseIndexStatement(sql: string): Statement {
   sql = sql
-    .replace(/^(FULLTEXT INDEX|SPATIAL INDEX|FULLTEXT KEY|SPATIAL KEY|INDEX|KEY)/, '')
+    .replace(
+      /^(FULLTEXT INDEX|SPATIAL INDEX|FULLTEXT KEY|SPATIAL KEY|INDEX|KEY)/,
+      '',
+    )
     .trim()
 
   /* parse index key name (optional, e.g. `KEY (a)` has no name) */
@@ -406,7 +413,10 @@ function parseConstraintStatement(sql: string): Statement {
   sql = result.rest.trim()
 
   /* parse reference field name(s) */
-  const refFieldsResult = parseNamesInBracket(sql, 'FOREIGN KEY reference field name')
+  const refFieldsResult = parseNamesInBracket(
+    sql,
+    'FOREIGN KEY reference field name',
+  )
   sql = refFieldsResult.rest.trim()
 
   /* strip trailing ON DELETE / ON UPDATE clauses */
@@ -474,7 +484,10 @@ function parseNameInBracket(sql: string, context: string) {
   return { name: result.name, rest: sql }
 }
 
-function parseNamesInBracket(sql: string, context: string): { names: string[]; rest: string } {
+function parseNamesInBracket(
+  sql: string,
+  context: string,
+): { names: string[]; rest: string } {
   if (!sql.startsWith('(')) {
     throw new Error(`missing '(' for ${context}`)
   }
