@@ -46,11 +46,11 @@ export function setupSqlite(options: { dbFile: string; srcDir: string }) {
   if (existsSync(dbTsFile)) {
     return
   }
-  addDependencies('@types/better-sqlite3', '^7.6.13', 'dev')
+  addDependencies('@types/better-sqlite3', '^9.6.0', 'dev')
   addDependencies('@types/integer', '^4.0.3', 'dev')
-  addDependencies('better-sqlite3', '^12.11.1')
-  addDependencies('better-sqlite3-schema', '^3.1.10')
-  addDependencies('better-sqlite3-proxy', '^2.11.5')
+  addDependencies('better-sqlite3', '^13.0.3')
+  addDependencies('better-sqlite3-schema', '^3.1.11')
+  addDependencies('better-sqlite3-proxy', '^2.11.6')
   const code = `
 import { toSafeMode, newDB, DBInstance } from 'better-sqlite3-schema'
 import { basename, join } from 'path'
