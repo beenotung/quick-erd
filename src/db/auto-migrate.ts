@@ -50,7 +50,7 @@ export function setupSqlite(options: { dbFile: string; srcDir: string }) {
   addDependencies('@types/integer', '^4.0.3', 'dev')
   addDependencies('better-sqlite3', '^12.11.1')
   addDependencies('better-sqlite3-schema', '^3.1.10')
-  addDependencies('better-sqlite3-proxy', '^2.11.4')
+  addDependencies('better-sqlite3-proxy', '^2.11.5')
   const code = `
 import { toSafeMode, newDB, DBInstance } from 'better-sqlite3-schema'
 import { basename, join } from 'path'
@@ -75,7 +75,7 @@ toSafeMode(db)
 export function setupTypescript() {
   addDependencies('typescript', '^6.0.3', 'dev')
   addDependencies('ts-node', '^10.9.2', 'dev')
-  addDependencies('@types/node', '^24.13.3', 'dev')
+  addDependencies('@types/node', '^24.19.1', 'dev')
   setupTsConfigFile()
 }
 
